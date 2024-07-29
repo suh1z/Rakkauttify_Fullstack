@@ -1,27 +1,35 @@
-import players from '../mockData/players.json'
+import axios from 'axios'
+
+const baseURL = '/api/inhouse'
 
 const getAll = async () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(players)
-    }, 1000)
-  })
+  try {
+    const response = await axios.get(baseURL)
+    return response.data
+  } catch (error) {
+    console.error('Error fetching the queue:', error)
+    throw error
+  }
 }
 
-const create = async (players) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ ...players, id: Date.now() })
-    }, 1000)
-  })
+const create = async (username) => {
+  try {
+    const response = await axios.post(baseURL, { username })
+    return response.data
+  } catch (error) {
+    console.error('Error adding to the queue:', error)
+    throw error
+  }
 }
 
-const remove = async (id) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(id)
-    }, 1000)
-  })
+const remove = async (username) => {
+  try {
+    await axios.delete(`${baseURL}/${username}`)
+    return username
+  } catch (error) {
+    console.error('Error removing from the queue:', error)
+    throw error
+  }
 }
 
 export default { getAll, create, remove }

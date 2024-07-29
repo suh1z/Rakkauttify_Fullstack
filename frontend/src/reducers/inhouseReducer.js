@@ -13,7 +13,7 @@ const inhouseSlice = createSlice({
     },
     deletePlayer(state, action) {
       console.log(action.payload)
-      return state.filter((players) => players.id !== action.payload.id)
+      return state.filter((players) => players.username !== action.payload)
     },
   },
 })
@@ -34,10 +34,10 @@ export const createInhouse = (content) => {
   }
 }
 
-export const removeInhouse = (id) => {
+export const removeInhouse = (name) => {
   return async (dispatch) => {
-    await inhouseService.remove(id)
-    dispatch(deletePlayer(id))
+    await inhouseService.remove(name)
+    dispatch(deletePlayer(name))
   }
 }
 

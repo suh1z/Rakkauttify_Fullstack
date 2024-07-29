@@ -15,7 +15,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu'
 import { Link } from 'react-router-dom'
 
-const Navbar = () => {
+const Navbar = ({ user }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -28,13 +28,15 @@ const Navbar = () => {
     setAnchorEl(null)
   }
 
+  console.log('User in Navbar:', user) // Debugging line
+
   return (
     <AppBar position="static" sx={{ mb: 4, backgroundColor: '#333' }}>
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           <Link to="/" style={{ textDecoration: 'none', color: '#FFC107' }}>
             Rakkautify
-          </Link>{' '}
+          </Link>
         </Typography>
 
         {isMobile ? (
@@ -45,7 +47,7 @@ const Navbar = () => {
               aria-label="menu"
               onClick={handleMenuClick}
             >
-              <MenuIcon sx={{ color: '#FFC107' }} />{' '}
+              <MenuIcon sx={{ color: '#FFC107' }} />
             </IconButton>
             <Menu
               anchorEl={anchorEl}
@@ -80,7 +82,7 @@ const Navbar = () => {
             </Menu>
           </>
         ) : (
-          <Box sx={{ flexGrow: 1 }}>
+          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
             <Button color="inherit" sx={{ color: '#FFC107' }}>
               <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
                 Home
