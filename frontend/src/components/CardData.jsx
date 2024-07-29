@@ -1,15 +1,10 @@
 /* eslint-disable react/prop-types */
-import {
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  Link,
-  Box,
-} from '@mui/material'
+import { Button, Card, CardContent, Typography, Link, Box } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 
 const DataCard = (props) => {
   const { id, title, data, played, leetify_url, onCardClick } = props
+  const theme = useTheme()
 
   const handleClick = () => {
     onCardClick({ id, title, data, played, leetify_url })
@@ -27,12 +22,11 @@ const DataCard = (props) => {
   }
 
   const textData = [
-    { text: `${played}`, variant: 'body4', component: 'div' },
-    { text: `ID ${title}`, variant: 'body4', component: 'div' },
+    { text: `${played}`, variant: 'body2', component: 'div' },
+    { text: `ID ${title}`, variant: 'body2', component: 'div' },
   ]
 
   const imageUrl = `../public/images/${data}.jpg`
-  console.log(imageUrl)
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', margin: '20px' }}>
@@ -43,7 +37,7 @@ const DataCard = (props) => {
           backgroundImage: `url(${imageUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          color: '#fff',
+          color: theme.palette.text.primary,
           cursor: 'pointer',
           position: 'relative',
           overflow: 'hidden',
@@ -53,7 +47,7 @@ const DataCard = (props) => {
           transition: 'transform 0.3s, box-shadow 0.3s',
           '&:hover': {
             transform: 'scale(1.02)',
-            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.5)',
+            boxShadow: theme.shadows[4],
           },
           '&:hover .card-actions': {
             opacity: 1,
@@ -74,8 +68,8 @@ const DataCard = (props) => {
                 marginRight: index < textData.length - 1 ? '100px' : '0',
                 marginBottom: '5px',
                 borderRadius: '4px',
-                fontFamily: 'Arial, sans-serif',
-                fontSize: '14px',
+                fontFamily: theme.typography.fontFamily,
+                fontSize: theme.typography.body2.fontSize,
                 display: 'inline-block',
               }}
             >
@@ -84,7 +78,7 @@ const DataCard = (props) => {
                   href={item.url}
                   target="_blank"
                   rel="noopener"
-                  sx={{ color: '#fff' }}
+                  sx={{ color: theme.palette.text.primary }}
                 >
                   {item.text}
                 </Link>
@@ -112,9 +106,9 @@ const DataCard = (props) => {
           <Button
             size="small"
             sx={{
-              color: '#fff',
+              color: theme.palette.text.primary,
               backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              borderColor: '#fff',
+              borderColor: theme.palette.text.primary,
             }}
             onClick={handleLikeClick}
           >
@@ -123,9 +117,9 @@ const DataCard = (props) => {
           <Button
             size="small"
             sx={{
-              color: '#fff',
+              color: theme.palette.text.primary,
               backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              borderColor: '#fff',
+              borderColor: theme.palette.text.primary,
             }}
             onClick={handleLeetifyClick}
           >

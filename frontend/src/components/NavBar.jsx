@@ -69,6 +69,14 @@ const Navbar = () => {
                   Matches
                 </Link>
               </MenuItem>
+              <MenuItem onClick={handleMenuClose} sx={{ color: '#FFC107' }}>
+                <Link
+                  to="/inhouse"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  Inhouse
+                </Link>
+              </MenuItem>
             </Menu>
           </>
         ) : (
@@ -84,6 +92,14 @@ const Navbar = () => {
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >
                 Matches
+              </Link>
+            </Button>
+            <Button color="inherit" sx={{ color: '#FFC107' }}>
+              <Link
+                to="/inhouse"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                Inhouse
               </Link>
             </Button>
           </Box>

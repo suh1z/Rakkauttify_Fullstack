@@ -11,13 +11,17 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 
 const DataTable = ({ data }) => {
+  const theme = useTheme()
   const [sortConfig, setSortConfig] = useState(null)
   const [filterText, setFilterText] = useState('')
 
-  if (!data || data.length === 0)
+  if (!data || data.length === 0) {
     return <Typography>No data available</Typography>
+  }
+
   const filteredMetrics = [
     'kills',
     'deaths',
@@ -68,27 +72,40 @@ const DataTable = ({ data }) => {
   return (
     <TableContainer
       component={Paper}
-      sx={{ backgroundColor: '#1e1e1e', padding: '10px', borderRadius: '8px' }}
+      sx={{
+        backgroundColor: theme.palette.background.paper,
+        padding: theme.spacing(2),
+        borderRadius: theme.shape.borderRadius,
+      }}
     >
       <TextField
         variant="outlined"
         placeholder="Search by player name"
         value={filterText}
         onChange={(e) => setFilterText(e.target.value)}
-        sx={{ marginBottom: '10px', width: '20%' }}
-        InputProps={{
-          sx: { color: '#fff', backgroundColor: '#333' },
+        sx={{
+          marginBottom: theme.spacing(2),
+          width: '20%',
+          '& .MuiInputBase-input': { color: theme.palette.text.primary },
+          '& .MuiOutlinedInput-root': {
+            backgroundColor: theme.palette.grey[800],
+          },
         }}
-        InputLabelProps={{ sx: { color: '#fff' } }}
+        InputLabelProps={{ sx: { color: theme.palette.text.primary } }}
       />
-      <Table sx={{ minWidth: 650, backgroundColor: '#2c2c2c' }}>
+      <Table
+        sx={{
+          minWidth: 650,
+          backgroundColor: theme.palette.background.default,
+        }}
+      >
         <TableHead>
           <TableRow>
             <TableCell
               sx={{
                 cursor: 'pointer',
-                backgroundColor: '#333',
-                color: '#fff',
+                backgroundColor: theme.palette.grey[700],
+                color: theme.palette.text.primary,
               }}
               onClick={() => handleSort('name')}
             >
@@ -99,8 +116,8 @@ const DataTable = ({ data }) => {
                 key={metric}
                 sx={{
                   cursor: 'pointer',
-                  backgroundColor: '#333',
-                  color: '#fff',
+                  backgroundColor: theme.palette.grey[700],
+                  color: theme.palette.text.primary,
                 }}
                 onClick={() => handleSort(metric)}
               >
@@ -114,13 +131,18 @@ const DataTable = ({ data }) => {
             <TableRow
               key={player.name}
               sx={{
-                backgroundColor: '#2c2c2c',
-                '&:hover': { backgroundColor: '#444' },
+                backgroundColor: theme.palette.background.paper,
+                '&:hover': { backgroundColor: theme.palette.grey[600] },
               }}
             >
-              <TableCell sx={{ color: '#fff' }}>{player.name}</TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary }}>
+                {player.name}
+              </TableCell>
               {metrics.map((metric) => (
-                <TableCell key={metric} sx={{ color: '#fff' }}>
+                <TableCell
+                  key={metric}
+                  sx={{ color: theme.palette.text.primary }}
+                >
                   {player[metric]}
                 </TableCell>
               ))}

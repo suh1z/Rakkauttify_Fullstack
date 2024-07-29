@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { useTheme } from '@mui/material/styles'
 import {
   Table,
   TableBody,
@@ -11,6 +12,8 @@ import {
 } from '@mui/material'
 
 const SimpleTable = ({ data }) => {
+  const theme = useTheme()
+
   if (!data || data.length === 0) {
     return <Typography>No data available</Typography>
   }
@@ -23,8 +26,8 @@ const SimpleTable = ({ data }) => {
       sx={{
         maxWidth: '100%',
         margin: '20px auto',
-        padding: '10px',
-        backgroundColor: '#333',
+        padding: theme.spacing(2),
+        backgroundColor: theme.palette.background.paper,
       }}
     >
       <Table>
@@ -35,8 +38,8 @@ const SimpleTable = ({ data }) => {
                 key={header}
                 sx={{
                   fontWeight: 'bold',
-                  backgroundColor: '#555',
-                  color: '#FFC107',
+                  backgroundColor: theme.palette.grey[700],
+                  color: theme.palette.text.secondary,
                 }}
               >
                 {header.charAt(0).toUpperCase() + header.slice(1)}
@@ -46,9 +49,18 @@ const SimpleTable = ({ data }) => {
         </TableHead>
         <TableBody>
           {data.map((row, index) => (
-            <TableRow key={index} sx={{ backgroundColor: '#333' }}>
+            <TableRow
+              key={index}
+              sx={{
+                backgroundColor: theme.palette.background.default,
+                '&:hover': { backgroundColor: theme.palette.grey[600] },
+              }}
+            >
               {headers.map((header) => (
-                <TableCell key={header} sx={{ color: '#FFC107' }}>
+                <TableCell
+                  key={header}
+                  sx={{ color: theme.palette.text.secondary }}
+                >
                   {row[header]}
                 </TableCell>
               ))}

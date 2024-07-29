@@ -7,6 +7,7 @@ import { Routes, Route } from 'react-router-dom'
 import CardCarousel from './components/CarouselCards'
 import Navbar from './components/NavBar'
 import Matches from './components/Matches'
+import Inhouse from './components/Inhouse'
 
 import './App.css'
 
@@ -24,6 +25,7 @@ function App() {
       <Routes>
         <Route path="/" element={<CardCarousel cardsData={cards} />} />
         <Route path="/matches" element={<Matches data={cards} />} />
+        <Route path="/inhouse" element={<Inhouse />} />
       </Routes>
     </Container>
   )

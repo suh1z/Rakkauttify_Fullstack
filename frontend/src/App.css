@@ -1,43 +1,38 @@
 body {
-  background-color: #121212; 
-  color: #e0e0e0; 
+  background-color: #121212;
+  color: #e0e0e0;
 }
 
 .Container {
   display: flex;
-  height: 100vh; 
+  height: 100vh;
 }
 
 .Box {
-  overflow-y: auto; 
+  overflow-y: auto;
 }
 
 .InfiniteScroll {
-  padding: 20px; 
+  padding: 20px;
 }
 
 .Card {
-  margin-bottom: 20px; 
-  background-color: #1e1e1e; 
-  color: #ffffff; 
+  margin-bottom: 20px;
+  background-color: #1e1e1e;
+  color: #ffffff;
 }
 
 .CardContent {
-  background-color: rgba(
-    0,
-    0,
-    0,
-    0.6
-  ); 
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 .table-container {
-  overflow-x: auto; 
+  overflow-x: auto;
 }
 
 .table {
-  min-width: 100%; 
-  border-collapse: collapse; 
+  min-width: 100%;
+  border-collapse: collapse;
 }
 
 th,
