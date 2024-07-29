@@ -9,7 +9,12 @@ const requestLogger = (request, response, next) => {
 };
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: "unknown endpoint" });
+  logger.error(`404 - Not Found: ${request.method} ${request.originalUrl}`);
+  response.status(404).send({ 
+    error: "unknown endpoint", 
+    method: request.method, 
+    path: request.originalUrl 
+  });
 };
 
 const tokenExtractor = (request, response, next) => {
