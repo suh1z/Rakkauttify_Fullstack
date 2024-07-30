@@ -1,7 +1,6 @@
 const config = require("./utils/config");
 const express = require("express");
 const app = express();
-const path = require('path');
 require("express-async-errors");
 const cors = require("cors");
 const usersRouter = require("./controllers/users");
@@ -26,9 +25,9 @@ mongoose
   });
 
 app.use(cors());
+app.use(express.static("dist"));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'dist')))
-app.use(middleware.requestLogger)
+app.use(middleware.requestLogger);
 
 app.use("/api/login", loginRouter);
 app.use("/api/users", usersRouter);
@@ -37,17 +36,6 @@ app.use("/api/inhouse", inhouseRouter);
 if (process.env.NODE_ENV === "test") {
   app.use("/api/testing", testingRouter);
 }
-
-app.get("*", (req, res) => {
-  // Ensure 'dist/index.html' exists
-  const indexPath = path.join(__dirname, "dist", "index.html");
-  res.sendFile(indexPath, (err) => {
-    if (err) {
-      logger.error("Error serving index.html:", err);
-      res.status(500).send("Server error");
-    }
-  });
-});
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
