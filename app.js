@@ -28,7 +28,9 @@ app.use(cors());
 app.use(express.static("dist"));
 app.use(express.json());
 app.use(middleware.requestLogger);
-
+app.get("/", (req, res) => {
+  res.send("Welcome to the backend server");
+});
 app.use("/api/login", loginRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/inhouse", inhouseRouter);
