@@ -10,7 +10,7 @@
     "test": "cross-env  NODE_ENV=test node --test",
     "lint": "eslint .",
     "start:test": "NODE_ENV=test node index.js",
-    "build:ui": "rm -rf dist && cd ../frontend && npm run build && cp -r dist ../",
+    "build:ui": "@powershell Remove-Item -Recurse -Force dist && cd ../frontend && npm run build && @powershell Copy-Item dist -Recurse ../",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push"
   },
   "author": "",
