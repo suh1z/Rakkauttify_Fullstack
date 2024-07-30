@@ -6,8 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 const Stats = (props) => {
   const dispatch = useDispatch()
-  const statsData = useSelector((state) => state.stats)
-  console.log(statsData)
+  const statsData = useSelector((state) => state.stats.stats)
 
   useEffect(() => {
     dispatch(initializeStats(props.id))

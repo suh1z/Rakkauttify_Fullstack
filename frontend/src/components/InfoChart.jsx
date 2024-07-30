@@ -12,12 +12,13 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import LineChart from './PlayerChart'
 
 const DataTable = ({ data }) => {
   const theme = useTheme()
   const [sortConfig, setSortConfig] = useState(null)
   const [filterText, setFilterText] = useState('')
-
+  const [selectedPlayer, setSelectedPlayer] = useState(null)
   if (!data || data.length === 0) {
     return <Typography>No data available</Typography>
   }
@@ -70,87 +71,98 @@ const DataTable = ({ data }) => {
   )
 
   return (
-    <TableContainer
-      component={Paper}
-      sx={{
-        backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(2),
-        borderRadius: theme.shape.borderRadius,
-      }}
-    >
-      <TextField
-        variant="outlined"
-        placeholder="Search by player name"
-        value={filterText}
-        onChange={(e) => setFilterText(e.target.value)}
+    <div>
+      <TableContainer
+        component={Paper}
         sx={{
-          marginBottom: theme.spacing(2),
-          width: '20%',
-          '& .MuiInputBase-input': { color: theme.palette.text.primary },
-          '& .MuiOutlinedInput-root': {
-            backgroundColor: theme.palette.grey[800],
-          },
-        }}
-        InputLabelProps={{ sx: { color: theme.palette.text.primary } }}
-      />
-      <Table
-        sx={{
-          minWidth: 650,
-          backgroundColor: theme.palette.background.default,
+          backgroundColor: theme.palette.background.paper,
+          padding: theme.spacing(2),
+          borderRadius: theme.shape.borderRadius,
         }}
       >
-        <TableHead>
-          <TableRow>
-            <TableCell
-              sx={{
-                cursor: 'pointer',
-                backgroundColor: theme.palette.grey[700],
-                color: theme.palette.text.primary,
-              }}
-              onClick={() => handleSort('name')}
-            >
-              Player Name
-            </TableCell>
-            {metrics.map((metric) => (
+        <TextField
+          variant="outlined"
+          placeholder="Search by player name"
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+          sx={{
+            marginBottom: theme.spacing(2),
+            width: '20%',
+            '& .MuiInputBase-input': { color: theme.palette.text.primary },
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: theme.palette.grey[800],
+            },
+          }}
+          InputLabelProps={{ sx: { color: theme.palette.text.primary } }}
+        />
+        <Table
+          sx={{
+            minWidth: 650,
+            backgroundColor: theme.palette.background.default,
+          }}
+        >
+          <TableHead>
+            <TableRow>
               <TableCell
-                key={metric}
                 sx={{
                   cursor: 'pointer',
                   backgroundColor: theme.palette.grey[700],
                   color: theme.palette.text.primary,
                 }}
-                onClick={() => handleSort(metric)}
+                onClick={() => handleSort('name')}
               >
-                {metric.charAt(0).toUpperCase() + metric.slice(1)}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredData.map((player) => (
-            <TableRow
-              key={player.name}
-              sx={{
-                backgroundColor: theme.palette.background.paper,
-                '&:hover': { backgroundColor: theme.palette.grey[600] },
-              }}
-            >
-              <TableCell sx={{ color: theme.palette.text.primary }}>
-                {player.name}
+                Player Name
               </TableCell>
               {metrics.map((metric) => (
                 <TableCell
                   key={metric}
-                  sx={{ color: theme.palette.text.primary }}
+                  sx={{
+                    cursor: 'pointer',
+                    backgroundColor: theme.palette.grey[700],
+                    color: theme.palette.text.primary,
+                  }}
+                  onClick={() => handleSort(metric)}
                 >
-                  {player[metric]}
+                  {metric.charAt(0).toUpperCase() + metric.slice(1)}
                 </TableCell>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {filteredData.map((player) => (
+              <TableRow
+                key={player.name}
+                sx={{
+                  backgroundColor: theme.palette.background.paper,
+                  '&:hover': { backgroundColor: theme.palette.grey[600] },
+                }}
+                onClick={() => setSelectedPlayer(player.name)}
+              >
+                <TableCell sx={{ color: theme.palette.text.primary }}>
+                  {player.name}
+                </TableCell>
+                {metrics.map((metric) => (
+                  <TableCell
+                    key={metric}
+                    sx={{ color: theme.palette.text.primary }}
+                  >
+                    {player[metric]}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      {selectedPlayer && (
+        <div style={{ marginTop: '20px' }}>
+          <Typography variant="h6">
+            Recent 10 Games of {selectedPlayer}
+          </Typography>
+          <LineChart playerName={selectedPlayer} />
+        </div>
+      )}
+    </div>
   )
 }
 

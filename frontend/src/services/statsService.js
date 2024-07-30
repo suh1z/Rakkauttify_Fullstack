@@ -17,4 +17,19 @@ const getById = async (id) => {
   })
 }
 
-export default { getById }
+const getByPlayerName = async (playerName) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const normalizedPlayerName = typeof playerName === 'string' ? playerName.trim().toLowerCase() : '';
+      const filteredStats = stats.filter(item => {
+        const nameInItem = typeof item.name === 'string' ? item.name.trim().toLowerCase() : '';
+        return nameInItem === normalizedPlayerName;
+      })
+      filteredStats.sort((a1,a2) => a1.matchid - a2.matchid)
+      const recentTen = filteredStats.slice(-10);
+      resolve(recentTen);
+    }, 100)
+  })
+}
+
+export default { getById, getByPlayerName }

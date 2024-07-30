@@ -1,19 +1,26 @@
 const logger = require("./logger");
 
 const requestLogger = (request, response, next) => {
+  const sanitizeRequestBody = (body) => {
+    const { password, ...sanitizedBody } = body;
+    return sanitizedBody;
+  };
+
+  const sanitizedBody = sanitizeRequestBody(request.body);
+
   logger.info("Method:", request.method);
   logger.info("Path:  ", request.path);
-  logger.info("Body:  ", request.body);
+  logger.info("Body:  ", sanitizedBody);
   logger.info("---");
   next();
 };
 
 const unknownEndpoint = (request, response) => {
   logger.error(`404 - Not Found: ${request.method} ${request.originalUrl}`);
-  response.status(404).send({ 
-    error: "unknown endpoint", 
-    method: request.method, 
-    path: request.originalUrl 
+  response.status(404).send({
+    error: "unknown endpoint",
+    method: request.method,
+    path: request.originalUrl,
   });
 };
 

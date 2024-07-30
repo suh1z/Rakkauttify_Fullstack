@@ -26,7 +26,7 @@ const DataCard = (props) => {
     { text: `ID ${title}`, variant: 'body2', component: 'div' },
   ]
 
-  const imageUrl = `../public/images/${data}.jpg`
+  const imageUrl = `../images/${data}.jpg`
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', margin: '20px' }}>

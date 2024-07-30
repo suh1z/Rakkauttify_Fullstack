@@ -1,0 +1,16 @@
+
+.axis text {
+    font-size: 12px;
+    fill: white; 
+}
+
+.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 2px;
+}
+
+.dot {
+    stroke: #fff;
+    stroke-width: 2px;
+}
