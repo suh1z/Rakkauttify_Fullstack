@@ -1,6 +1,7 @@
 const config = require("./utils/config");
 const express = require("express");
 const app = express();
+const path = require("path");
 require("express-async-errors");
 const cors = require("cors");
 const usersRouter = require("./controllers/users");
