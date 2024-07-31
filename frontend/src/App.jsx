@@ -4,12 +4,13 @@ import { Container } from '@mui/material'
 import { initializeCards } from './reducers/cardReducer'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
-
+import { Typography, Box } from '@mui/material'
 import CardCarousel from './components/CarouselCards'
 import Navbar from './components/NavBar'
 import Matches from './components/Matches'
 import Inhouse from './components/Inhouse'
 import LoginForm from './components/LoginForm'
+import Statistics from './components/Statistics'
 import { initializeUser } from './reducers/userReducer'
 
 function App() {
@@ -26,12 +27,25 @@ function App() {
     <Container>
       <Navbar user={user.user} />
       <Routes>
-        {/* Protected Routes */}
         <Route
           path="/"
           element={
             user.user ? (
-              <CardCarousel cardsData={cards} />
+              <>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    width: '100%',
+                  }}
+                >
+                  <Typography variant="h6" align="center">
+                    Most recent games
+                  </Typography>
+                </Box>
+
+                <CardCarousel cardsData={cards} />
+              </>
             ) : (
               <Navigate to="/login" />
             )
@@ -44,12 +58,15 @@ function App() {
           }
         />
         <Route
+          path="/statistics"
+          element={user.user ? <Statistics /> : <Navigate to="/statistics" />}
+        />
+        <Route
           path="/inhouse"
           element={
             user.user ? <Inhouse user={user} /> : <Navigate to="/login" />
           }
         />
-        {/* Public Route */}
         <Route
           path="/login"
           element={!user.user ? <LoginForm /> : <Navigate to="/" />}

@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 
 const SimpleTable = ({ data }) => {
+  // eslint-disable-next-line no-unused-vars
   const theme = useTheme()
 
   if (!data || data.length === 0) {
@@ -21,27 +22,12 @@ const SimpleTable = ({ data }) => {
   const headers = Object.keys(data[0])
 
   return (
-    <TableContainer
-      component={Paper}
-      sx={{
-        maxWidth: '100%',
-        margin: '20px auto',
-        padding: theme.spacing(2),
-        backgroundColor: theme.palette.background.paper,
-      }}
-    >
+    <TableContainer component={Paper}>
       <Table>
         <TableHead>
           <TableRow>
             {headers.map((header) => (
-              <TableCell
-                key={header}
-                sx={{
-                  fontWeight: 'bold',
-                  backgroundColor: theme.palette.grey[700],
-                  color: theme.palette.text.secondary,
-                }}
-              >
+              <TableCell key={header}>
                 {header.charAt(0).toUpperCase() + header.slice(1)}
               </TableCell>
             ))}
@@ -49,20 +35,9 @@ const SimpleTable = ({ data }) => {
         </TableHead>
         <TableBody>
           {data.map((row, index) => (
-            <TableRow
-              key={index}
-              sx={{
-                backgroundColor: theme.palette.background.default,
-                '&:hover': { backgroundColor: theme.palette.grey[600] },
-              }}
-            >
+            <TableRow key={index}>
               {headers.map((header) => (
-                <TableCell
-                  key={header}
-                  sx={{ color: theme.palette.text.secondary }}
-                >
-                  {row[header]}
-                </TableCell>
+                <TableCell key={header}>{row[header]}</TableCell>
               ))}
             </TableRow>
           ))}

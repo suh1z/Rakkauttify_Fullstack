@@ -1,15 +1,11 @@
-body {
-  background-color: #121212;
-  color: #e0e0e0;
+.link {
+  color: #ffc107;
+  text-decoration: none;
+  padding: 10px;
 }
 
-.Container {
-  display: flex;
-  height: 100vh;
-}
-
-.Box {
-  overflow-y: auto;
+.link:hover {
+  color: #ff9800;
 }
 
 .InfiniteScroll {
@@ -24,20 +20,4 @@ body {
 
 .CardContent {
   background-color: rgba(0, 0, 0, 0.6);
-}
-
-.table-container {
-  overflow-x: auto;
-}
-
-.table {
-  min-width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 8px;
-  text-align: left;
-  border: 1px solid #444;
 }

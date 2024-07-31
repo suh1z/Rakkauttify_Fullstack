@@ -4,8 +4,6 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Typography,
-  Button,
   Menu,
   MenuItem,
   Box,
@@ -14,8 +12,9 @@ import {
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import { Link } from 'react-router-dom'
+import '../App.css'
 
-const Navbar = ({ user }) => {
+const Navbar = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -28,87 +27,82 @@ const Navbar = ({ user }) => {
     setAnchorEl(null)
   }
 
-  console.log('User in Navbar:', user) // Debugging line
-
   return (
-    <AppBar position="static" sx={{ mb: 4, backgroundColor: '#333' }}>
+    <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          <Link to="/" style={{ textDecoration: 'none', color: '#FFC107' }}>
-            Rakkautify
-          </Link>
-        </Typography>
-
         {isMobile ? (
           <>
             <IconButton
               edge="start"
-              color="inherit"
               aria-label="menu"
               onClick={handleMenuClick}
             >
-              <MenuIcon sx={{ color: '#FFC107' }} />
+              <MenuIcon />
             </IconButton>
             <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
-              sx={{ '& .MuiMenu-paper': { backgroundColor: '#333' } }}
             >
-              <MenuItem onClick={handleMenuClose} sx={{ color: '#FFC107' }}>
-                <Link
-                  to="/"
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
-                  Home
+              <MenuItem onClick={handleMenuClose}>
+                <Link to="/">
+                  <a href="#" className="link">
+                    Home
+                  </a>
                 </Link>
               </MenuItem>
-              <MenuItem onClick={handleMenuClose} sx={{ color: '#FFC107' }}>
-                <Link
-                  to="/matches"
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
-                  Matches
+              <MenuItem onClick={handleMenuClose}>
+                <Link to="/statistics">
+                  <a href="#" className="link">
+                    Statistics
+                  </a>
                 </Link>
               </MenuItem>
-              <MenuItem onClick={handleMenuClose} sx={{ color: '#FFC107' }}>
-                <Link
-                  to="/inhouse"
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
-                  Inhouse
+              <MenuItem onClick={handleMenuClose}>
+                <Link to="/matches">
+                  <a href="#" className="link">
+                    Matches
+                  </a>
+                </Link>
+              </MenuItem>
+              <MenuItem onClick={handleMenuClose}>
+                <Link to="/inhouse">
+                  <a href="#" className="link">
+                    Inhouse
+                  </a>
                 </Link>
               </MenuItem>
             </Menu>
           </>
         ) : (
-          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-            <Button color="inherit" sx={{ color: '#FFC107' }}>
-              <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                Home
+          <>
+            <Box sx={{ display: 'flex', ml: 'auto' }}>
+              <Link to="/">
+                <a href="#" className="link">
+                  Rakkauttify
+                </a>
               </Link>
-            </Button>
-            <Button color="inherit" sx={{ color: '#FFC107' }}>
-              <Link
-                to="/matches"
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                Matches
+              <Link to="/statistics">
+                <a href="#" className="link">
+                  Statistics
+                </a>
               </Link>
-            </Button>
-            <Button color="inherit" sx={{ color: '#FFC107' }}>
-              <Link
-                to="/inhouse"
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                Inhouse
+              <Link to="/matches">
+                <a href="#" className="link">
+                  Matches
+                </a>
               </Link>
-            </Button>
-          </Box>
+              <Link to="/inhouse">
+                <a href="#" className="link">
+                  Inhouse
+                </a>
+              </Link>
+            </Box>
+            <Box sx={{ display: 'flex', flexGrow: 8 }}></Box>
+          </>
         )}
       </Toolbar>
     </AppBar>
   )
 }
-
 export default Navbar

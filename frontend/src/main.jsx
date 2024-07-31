@@ -5,13 +5,15 @@ import store from './store'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { ThemeProvider } from '@mui/material/styles'
 import theme from './theme'
+import CssBaseline from '@mui/material/CssBaseline'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
-    <Router>
-      <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <Router>
+        <CssBaseline />
         <App />
-      </ThemeProvider>
-    </Router>
+      </Router>
+    </ThemeProvider>
   </Provider>
 )

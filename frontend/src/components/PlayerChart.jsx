@@ -56,13 +56,7 @@ const LineChart = ({ playerName }) => {
 
     const g = svg.select('g')
 
-    g.append('path')
-      .data([formattedData])
-      .attr('class', 'line')
-      .attr('d', line)
-      .style('fill', 'none')
-      .style('stroke', 'steelblue')
-      .style('stroke-width', '2px')
+    g.append('path').data([formattedData]).attr('class', 'line').attr('d', line)
 
     g.append('g')
       .attr('class', 'x axis')
@@ -71,14 +65,14 @@ const LineChart = ({ playerName }) => {
 
     g.append('text')
       .attr('transform', `translate(${width / 2}, ${height + margin.bottom})`)
-      .style('text-anchor', 'middle')
       .style('fill', 'white')
       .text('Match ID')
+
     g.append('g')
       .attr('class', 'y axis')
       .call(d3.axisLeft(yScale))
       .selectAll('text')
-      .style('fill', 'white')
+
     g.append('text')
       .attr('transform', 'rotate(-90)')
       .attr('y', 0 - margin.left)
@@ -96,11 +90,6 @@ const LineChart = ({ playerName }) => {
       .attr('r', 5)
       .attr('cx', (d) => xScale(d.matchid))
       .attr('cy', (d) => yScale(d.kills))
-      .style('fill', 'steelblue')
-      .style('stroke', '#fff')
-      .style('stroke-width', '2px')
-      .on('mouseover', (event, d) => {})
-      .on('mouseout', () => {})
   }, [data])
 
   return (
