@@ -12,7 +12,7 @@ import {
   TableSortLabel,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import Bars from './BarChart'
+import Graph from './Graphs'
 
 const DataTable = ({ data }) => {
   // eslint-disable-next-line no-unused-vars
@@ -37,20 +37,30 @@ const DataTable = ({ data }) => {
     'enemy2ks',
   ]
 
-  const metrics = Object.keys(data[0]).filter((key) =>
-    filteredMetrics.includes(key)
-  )
+  const metrics = filteredMetrics.filter((metric) => metric in data[0])
+
   const sortData = (data) => {
-    if (sortColumn) {
-      return [...data].sort((a, b) => {
-        const aValue = a[sortColumn]
-        const bValue = b[sortColumn]
-        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
-        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
-        return 0
-      })
-    }
-    return data
+    if (!sortColumn) return data;
+
+    return [...data].sort((a, b) => {
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
+
+      const aNumeric = isNaN(Number(aValue)) ? aValue : Number(aValue);
+      const bNumeric = isNaN(Number(bValue)) ? bValue : Number(bValue);
+
+      if (typeof aNumeric === 'string' && typeof bNumeric === 'string') {
+        return sortDirection === 'asc'
+          ? aNumeric.localeCompare(bNumeric)
+          : bNumeric.localeCompare(aNumeric);
+      }
+
+      if (typeof aNumeric === 'number' && typeof bNumeric === 'number') {
+        return sortDirection === 'asc' ? aNumeric - bNumeric : bNumeric - aNumeric;
+      }
+
+      return 0;
+    })
   }
 
   const sortedData = sortData(data)
@@ -74,7 +84,7 @@ const DataTable = ({ data }) => {
                     direction={sortColumn === metric ? sortDirection : 'asc'}
                     onClick={() => handleRequestSort(metric)}
                   >
-                    {metric}
+                    {metric.charAt(0).toUpperCase() + metric.slice(1)}
                   </TableSortLabel>
                 </TableCell>
               ))}
@@ -85,6 +95,7 @@ const DataTable = ({ data }) => {
               <TableRow
                 key={player.name}
                 onClick={() => setSelectedPlayer(player.name)}
+                style={{ cursor: 'pointer' }}
               >
                 {metrics.map((metric) => (
                   <TableCell key={metric}>{player[metric]}</TableCell>
@@ -95,11 +106,8 @@ const DataTable = ({ data }) => {
         </Table>
       </TableContainer>
       {selectedPlayer && (
-        <div>
-          <Typography variant="h6">
-            Recent 10 Games of {selectedPlayer}
-          </Typography>
-          <Bars playerName={selectedPlayer} />
+        <div style={{ padding: '20px', backgroundColor: '#1e1e1e' }}>
+          <Graph playerName={selectedPlayer} />
         </div>
       )}
     </div>

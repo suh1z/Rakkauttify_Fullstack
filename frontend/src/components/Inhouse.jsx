@@ -28,7 +28,6 @@ const Inhouse = ({ user }) => {
   const currentUser = user.user.username
   const index = users.findIndex((user) => user.username === currentUser)
 
-  console.log(index)
 
   const joinMatch = () => {
     if (isQueueFull) {
@@ -45,7 +44,6 @@ const Inhouse = ({ user }) => {
   }
 
   const handleDeleteQue = (username) => () => {
-    console.log(username)
     dispatch(removeInhouse(username))
   }
 

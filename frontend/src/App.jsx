@@ -9,6 +9,7 @@ import Matches from './components/Matches'
 import Inhouse from './components/Inhouse'
 import LoginForm from './components/LoginForm'
 import Statistics from './components/Statistics'
+import Graph from './components/Graphs'
 import { initializeUser } from './reducers/userReducer'
 import { initializeStats } from './reducers/statsReducer'
 
@@ -35,14 +36,15 @@ function App() {
                     display: 'flex',
                     justifyContent: 'center',
                     width: '100%',
+                    mb: '20px'
                   }}
                 >
                   <Typography variant="h6" align="Left">
-                    Rakkauden kanaali games
-                    <Matches />
-
+                    Rakkauden Kanaali Games
                   </Typography>
+                  
                 </Box>
+                <Matches />
               </>
             ) : (
               <Navigate to="/login" />
@@ -52,6 +54,10 @@ function App() {
         <Route
           path="/statistics"
           element={user.user ? <Statistics /> : <Navigate to="/statistics" />}
+        />
+        <Route
+          path="/graphs"
+          element={user.user ? <Graph /> : <Navigate to="/graphs" />}
         />
         <Route
           path="/inhouse"

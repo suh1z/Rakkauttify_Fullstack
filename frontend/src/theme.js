@@ -29,6 +29,24 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiDataGrid: {
+      styleOverrides: {
+        root: {
+          
+          '& .MuiDataGrid-cell': {
+            fontSize: '0.875rem',
+            padding: '4px',
+          },
+          '& .MuiDataGrid-columnHeader': {
+            fontSize: '1rem',
+            padding: '4px',
+          },
+          '& .MuiDataGrid-row': {
+            borderBottom: '1px solid rgba(224, 224, 224, 1)',
+          },
+        },
+      },
+    },
     MuiTableContainer: {
       styleOverrides: {
         root: {
