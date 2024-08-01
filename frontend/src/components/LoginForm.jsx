@@ -43,7 +43,6 @@ const LoginForm = () => {
         flexDirection="column"
         alignItems="center"
         justifyContent="center"
-        height="100vh"
       >
         {user ? (
           <Typography variant="h4" color="primary" gutterBottom>
