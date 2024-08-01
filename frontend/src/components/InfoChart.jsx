@@ -8,24 +8,25 @@ import {
   TableHead,
   TableRow,
   Paper,
-  TextField,
   Typography,
+  TableSortLabel,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import LineChart from './PlayerChart'
+import Bars from './BarChart'
 
 const DataTable = ({ data }) => {
   // eslint-disable-next-line no-unused-vars
   const theme = useTheme()
-  const [sortConfig, setSortConfig] = useState(null)
-  const [filterText, setFilterText] = useState('')
   const [selectedPlayer, setSelectedPlayer] = useState(null)
+  const [sortDirection, setSortDirection] = useState('asc')
+  const [sortColumn, setSortColumn] = useState('')
 
   if (!data || data.length === 0) {
     return <Typography>No data available</Typography>
   }
 
   const filteredMetrics = [
+    'name',
     'kills',
     'deaths',
     'damage',
@@ -39,68 +40,52 @@ const DataTable = ({ data }) => {
   const metrics = Object.keys(data[0]).filter((key) =>
     filteredMetrics.includes(key)
   )
-
-  const getSortedData = () => {
-    let sortableData = [...data]
-    if (sortConfig !== null) {
-      sortableData.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? -1 : 1
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? 1 : -1
-        }
+  const sortData = (data) => {
+    if (sortColumn) {
+      return [...data].sort((a, b) => {
+        const aValue = a[sortColumn]
+        const bValue = b[sortColumn]
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
         return 0
       })
     }
-    return sortableData
+    return data
   }
 
-  const handleSort = (key) => {
-    let direction = 'ascending'
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === 'ascending'
-    ) {
-      direction = 'descending'
-    }
-    setSortConfig({ key, direction })
-  }
+  const sortedData = sortData(data)
 
-  const filteredData = getSortedData().filter((player) =>
-    player.name.toLowerCase().includes(filterText.toLowerCase())
-  )
+  const handleRequestSort = (column) => {
+    const isAsc = sortColumn === column && sortDirection === 'asc'
+    setSortDirection(isAsc ? 'desc' : 'asc')
+    setSortColumn(column)
+  }
 
   return (
     <div>
       <TableContainer component={Paper}>
-        <TextField
-          variant="outlined"
-          placeholder="Search by player name"
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-        />
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell onClick={() => handleSort('name')}>
-                Player Name
-              </TableCell>
               {metrics.map((metric) => (
-                <TableCell key={metric} onClick={() => handleSort(metric)}>
-                  {metric.charAt(0).toUpperCase() + metric.slice(1)}
+                <TableCell key={metric}>
+                  <TableSortLabel
+                    active={sortColumn === metric}
+                    direction={sortColumn === metric ? sortDirection : 'asc'}
+                    onClick={() => handleRequestSort(metric)}
+                  >
+                    {metric}
+                  </TableSortLabel>
                 </TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredData.map((player) => (
+            {sortedData.map((player) => (
               <TableRow
                 key={player.name}
                 onClick={() => setSelectedPlayer(player.name)}
               >
-                <TableCell>{player.name}</TableCell>
                 {metrics.map((metric) => (
                   <TableCell key={metric}>{player[metric]}</TableCell>
                 ))}
@@ -114,7 +99,7 @@ const DataTable = ({ data }) => {
           <Typography variant="h6">
             Recent 10 Games of {selectedPlayer}
           </Typography>
-          <LineChart playerName={selectedPlayer} />
+          <Bars playerName={selectedPlayer} />
         </div>
       )}
     </div>

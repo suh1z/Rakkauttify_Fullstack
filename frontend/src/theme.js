@@ -35,6 +35,8 @@ const theme = createTheme({
           backgroundColor: '#1e1e1e',
           padding: '8px',
           borderRadius: '4px',
+          width: '100%',
+          overflowX: 'auto',
         },
       },
     },
@@ -61,13 +63,14 @@ const theme = createTheme({
           minWidth: 650,
           backgroundColor: '#121212',
           width: '100%',
+          tableLayout: 'auto',
         },
       },
     },
     MuiTableCell: {
       styleOverrides: {
         root: {
-          padding: '4px 8px',
+          padding: '4px 6px',
           borderBottom: `1px solid ${grey[600]}`,
         },
         head: {
@@ -85,6 +88,7 @@ const theme = createTheme({
         root: {
           backgroundColor: '#1e1e1e',
           '&:hover': { backgroundColor: grey[600] },
+          width: '100%',
         },
       },
     },
@@ -94,6 +98,8 @@ const theme = createTheme({
           marginBottom: '16px',
           backgroundColor: '#333',
           width: '100%',
+          borderRadius: '0 0 16px 16px',
+          overflowX: 'auto',
         },
         link: {
           main: orange[100],

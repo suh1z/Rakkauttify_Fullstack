@@ -1,46 +1,55 @@
 /* eslint-disable react/prop-types */
-// /components/BarChart.jsx
+import { BarChart } from '@mui/x-charts/BarChart'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { playerSetStats } from '../reducers/statsReducer'
 
-const barWidth = 60
+const filteredMetrics = [
+  'kills',
+  'deaths',
+  'assists',
+  'enemy5ks',
+  'enemy4ks',
+  'enemy3ks',
+  'enemy2ks',
+]
 
-const BarChart = ({ width, height, data }) => {
-  const valuedata = data.flatMap((data) => data)
-  const maxValue = valuedata.map((d) => d.value)
-  const scaler = (height - 20) / Math.max(...maxValue)
+const Bars = (props) => {
+  const { playerName } = props
+
+  const dispatch = useDispatch()
+
+  const playerStats = useSelector((state) => state.stats.playerStats)
+
+  useEffect(() => {
+    if (playerName) {
+      dispatch(playerSetStats(playerName))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerName])
+
+  const sumObj = (stats, properties) => {
+    return properties.reduce((sums, property) => {
+      sums[property] = stats.reduce(
+        (acc, item) => acc + (parseInt(item[property]) || 0),
+        0
+      )
+      return sums
+    }, {})
+  }
+
+  const sums = sumObj(playerStats, filteredMetrics)
+  const keys = Object.keys(sums)
+  const values = Object.values(sums)
 
   return (
-    <div className="container">
-      <svg
-        className="viz"
-        width={width}
-        height={height}
-        viewBox={`0 0 ${width} ${height}`}
-      >
-        <g className="bars">
-          {valuedata.map((d, i) => (
-            <g key={i}>
-              <rect
-                width={barWidth}
-                height={height - scaler}
-                x={i * (barWidth + 5)}
-                y={height - d.value * scaler}
-                fill="#6baed6"
-              />
-              <text
-                x={i * (barWidth + 5) + barWidth / 2}
-                y={height - d.value * scaler - 5}
-                textAnchor="middle"
-                fill="#000"
-                fontSize="12"
-              >
-                {d.name}
-              </text>
-            </g>
-          ))}
-        </g>
-      </svg>
-    </div>
+    <BarChart
+      xAxis={[{ scaleType: 'band', data: keys }]}
+      series={[{ data: values }]}
+      width={500}
+      height={300}
+    />
   )
 }
 
-export default BarChart
+export default Bars

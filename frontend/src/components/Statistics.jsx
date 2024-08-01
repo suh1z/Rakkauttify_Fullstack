@@ -71,7 +71,7 @@ const Statistics = () => {
         onChange={(e) => setRecentGamesCount(parseInt(e.target.value, 10))}
         style={{ marginBottom: '20px' }}
       />
-      <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
+      <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>

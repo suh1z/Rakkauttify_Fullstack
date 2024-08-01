@@ -26,7 +26,6 @@ const getSum = async (recentGamesCount) => {
       const totalGames = stats.length
       const start = Math.max(0, totalGames - recentGamesCount * 10)
       const recentStats = stats.slice(start)
-      console.log(recentStats)
       const result = recentStats.reduce((acc, stat) => {
         const key = stat.steamid64
 

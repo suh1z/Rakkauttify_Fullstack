@@ -32,8 +32,8 @@ const DataCard = (props) => {
     <Box sx={{ display: 'flex', justifyContent: 'center', margin: '20px' }}>
       <Card
         sx={{
-          width: 220,
-          height: 300,
+          width: 150,
+          height: 200,
           backgroundImage: `url(${imageUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',

@@ -15,7 +15,14 @@ const chunkArray = (array, chunkSize) => {
 
 const CardCarousel = ({ cardsData }) => {
   const [selectedCard, setSelectedCard] = useState(null)
-  const cardGroups = chunkArray(cardsData, 3)
+
+  const sortedData = [...cardsData].sort((a, b) => {
+    const dateA = new Date(a['played'])
+    const dateB = new Date(b['played'])
+    return dateB - dateA
+  })
+
+  const cardGroups = chunkArray(sortedData, 5)
 
   const handleCardClick = (card) => {
     setSelectedCard(card)
