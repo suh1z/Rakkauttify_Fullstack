@@ -59,13 +59,6 @@ const Navbar = () => {
                 </Link>
               </MenuItem>
               <MenuItem onClick={handleMenuClose}>
-                <Link to="/matches">
-                  <a href="#" className="link">
-                    Matches
-                  </a>
-                </Link>
-              </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
                 <Link to="/inhouse">
                   <a href="#" className="link">
                     Inhouse
@@ -85,11 +78,6 @@ const Navbar = () => {
               <Link to="/statistics">
                 <a href="#" className="link">
                   Statistics
-                </a>
-              </Link>
-              <Link to="/matches">
-                <a href="#" className="link">
-                  Matches
                 </a>
               </Link>
               <Link to="/inhouse">

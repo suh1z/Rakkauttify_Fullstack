@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTheme } from '@mui/material/styles'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   Table,
   TableBody,
@@ -12,24 +13,24 @@ import {
   Typography,
 } from '@mui/material'
 import Stats from './Stats'
+import { initializeMatches } from '../reducers/statsReducer'
 
-const SimpleTable = (props) => {
+const SimpleTable = () => {
   // eslint-disable-next-line no-unused-vars
   const theme = useTheme()
-  const { data } = props
   const [selectedRowIndex, setSelectedRowIndex] = useState(null)
+  const dispatch = useDispatch()
+  const data = useSelector((state) => state.stats.matches)
+
+  useEffect(() => {
+    dispatch(initializeMatches())
+  }, [])
 
   if (!data || data.length === 0) {
     return <Typography>No data available</Typography>
   }
-  const sortedData = [...data].sort((a, b) => {
-    const dateA = new Date(a['played'])
-    const dateB = new Date(b['played'])
-    return dateB - dateA
-  })
 
   const headers = Object.keys(data[0])
-
   const handleRowClick = (index) => {
     setSelectedRowIndex(index === selectedRowIndex ? null : index)
   }
@@ -47,7 +48,7 @@ const SimpleTable = (props) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedData.map((row, index) => (
+          {data.map((row, index) => (
             <React.Fragment key={index}>
               <TableRow
                 onClick={() => handleRowClick(index)}

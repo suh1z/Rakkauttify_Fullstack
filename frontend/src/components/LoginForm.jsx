@@ -35,7 +35,6 @@ const LoginForm = () => {
       console.error('Login error:', error)
     }
   }
-  console.log(user)
 
   return (
     <Container maxWidth="sm">

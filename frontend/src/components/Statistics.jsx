@@ -18,13 +18,11 @@ const Statistics = () => {
   const dispatch = useDispatch()
   const data = useSelector((state) => state.stats.statistics)
   const [filterText, setFilterText] = useState('')
-  const [sortDirection, setSortDirection] = useState('asc')
-  const [sortColumn, setSortColumn] = useState('')
   const [recentGamesCount, setRecentGamesCount] = useState(30)
 
   useEffect(() => {
     dispatch(initializeStatistics(recentGamesCount))
-  }, [dispatch, recentGamesCount])
+  }, [recentGamesCount])
 
   if (!data) {
     return <div>Loading...</div>
@@ -37,22 +35,6 @@ const Statistics = () => {
   const filteredRows = rows.filter((row) =>
     row[0].toLowerCase().includes(filterText.toLowerCase())
   )
-
-  if (sortColumn) {
-    filteredRows.sort((a, b) => {
-      const aValue = a[columns.indexOf(sortColumn)]
-      const bValue = b[columns.indexOf(sortColumn)]
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
-      return 0
-    })
-  }
-
-  const handleRequestSort = (column) => {
-    const isAsc = sortColumn === column && sortDirection === 'asc'
-    setSortDirection(isAsc ? 'desc' : 'asc')
-    setSortColumn(column)
-  }
 
   return (
     <div>
@@ -78,9 +60,6 @@ const Statistics = () => {
               {columns.map((col, index) => (
                 <TableCell key={index}>
                   <TableSortLabel
-                    active={sortColumn === col}
-                    direction={sortColumn === col ? sortDirection : 'asc'}
-                    onClick={() => handleRequestSort(col)}
                   >
                     {col}
                   </TableSortLabel>
