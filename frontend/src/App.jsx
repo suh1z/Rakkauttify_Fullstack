@@ -36,13 +36,12 @@ function App() {
                     display: 'flex',
                     justifyContent: 'center',
                     width: '100%',
-                    mb: '20px'
+                    mb: '20px',
                   }}
                 >
                   <Typography variant="h6" align="Left">
                     Rakkauden Kanaali Games
                   </Typography>
-                  
                 </Box>
                 <Matches />
               </>

@@ -32,7 +32,6 @@ const theme = createTheme({
     MuiDataGrid: {
       styleOverrides: {
         root: {
-          
           '& .MuiDataGrid-cell': {
             fontSize: '0.875rem',
             padding: '4px',

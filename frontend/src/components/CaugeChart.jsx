@@ -1,4 +1,4 @@
-import { Gauge } from '@mui/x-charts/Gauge';
+import { Gauge } from '@mui/x-charts/Gauge'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { playerSetStats } from '../reducers/statsReducer'
@@ -7,6 +7,11 @@ const filteredMetrics = [
   'kills',
   'deaths',
   'assists',
+  'head_shot_kills',
+  'entry_count',
+  'entry_wins',
+  'shots_fired_total',
+  'shots_on_target_total',
 ]
 
 const Cauge = (props) => {
@@ -36,40 +41,50 @@ const Cauge = (props) => {
 
   const sums = sumObj(playerStats, filteredMetrics)
   const values = Object.values(sums)
-  const kda = ((values[0]+values[2])/values[1])
-
+  const hsper = (values[3] / values[0]) * 100
+  const entryper = (values[5] / values[4]) * 100
+  const shots = (values[7] / values[6]) * 100
 
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <div style={{ textAlign: 'center' }}>
-        <p>Noob Meter</p>
+        <p>HS %</p>
         <Gauge
-          value={values[0]}
+          value={hsper}
           startAngle={0}
           endAngle={360}
-          width={200}
-          height={200}
+          width={150}
+          height={150}
           innerRadius="80%"
           outerRadius="100%"
         />
       </div>
       <div style={{ textAlign: 'center' }}>
-        <p>KDA</p>
+        <p>Accuracy %</p>
         <Gauge
-          value={kda}
-          valueMax={3}
-          startAngle={-90}
-          endAngle={90}
-          width={200}
-          height={200}
+          value={shots}
+          startAngle={0}
+          endAngle={360}
+          width={150}
+          height={150}
+          innerRadius="80%"
+          outerRadius="100%"
+        />
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <p>Entry Wins %</p>
+        <Gauge
+          value={entryper}
+          startAngle={0}
+          endAngle={360}
+          width={150}
+          height={150}
           innerRadius="80%"
           outerRadius="100%"
         />
       </div>
     </div>
-  );
-};
-
+  )
+}
 
 export default Cauge
-

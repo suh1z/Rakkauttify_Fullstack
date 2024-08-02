@@ -40,26 +40,28 @@ const DataTable = ({ data }) => {
   const metrics = filteredMetrics.filter((metric) => metric in data[0])
 
   const sortData = (data) => {
-    if (!sortColumn) return data;
+    if (!sortColumn) return data
 
     return [...data].sort((a, b) => {
-      const aValue = a[sortColumn];
-      const bValue = b[sortColumn];
+      const aValue = a[sortColumn]
+      const bValue = b[sortColumn]
 
-      const aNumeric = isNaN(Number(aValue)) ? aValue : Number(aValue);
-      const bNumeric = isNaN(Number(bValue)) ? bValue : Number(bValue);
+      const aNumeric = isNaN(Number(aValue)) ? aValue : Number(aValue)
+      const bNumeric = isNaN(Number(bValue)) ? bValue : Number(bValue)
 
       if (typeof aNumeric === 'string' && typeof bNumeric === 'string') {
         return sortDirection === 'asc'
           ? aNumeric.localeCompare(bNumeric)
-          : bNumeric.localeCompare(aNumeric);
+          : bNumeric.localeCompare(aNumeric)
       }
 
       if (typeof aNumeric === 'number' && typeof bNumeric === 'number') {
-        return sortDirection === 'asc' ? aNumeric - bNumeric : bNumeric - aNumeric;
+        return sortDirection === 'asc'
+          ? aNumeric - bNumeric
+          : bNumeric - aNumeric
       }
 
-      return 0;
+      return 0
     })
   }
 

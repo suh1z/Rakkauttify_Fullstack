@@ -1,13 +1,9 @@
-import { PieChart } from '@mui/x-charts/PieChart';
+import { PieChart } from '@mui/x-charts/PieChart'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { playerSetStats } from '../reducers/statsReducer'
 
-const filteredMetrics = [
-  'kills',
-  'deaths',
-  'assists',
-]
+const filteredMetrics = ['cash_earned', 'kill_reward', 'equipment_value']
 
 const Pie = (props) => {
   // eslint-disable-next-line react/prop-types
@@ -38,21 +34,22 @@ const Pie = (props) => {
   const keys = Object.keys(sums)
   const values = Object.values(sums)
 
-
   return (
-<PieChart
-  series={[
-    {
-      data: [
-        { value: values[0], label: keys[0] },
-        { value: values[1], label: keys[1] },
-        { value: values[2], label: keys[2] },
-      ],
-    },
-  ]}
-  width={400}
-  height={200}
-/>
-)}
+    <PieChart
+      series={[
+        {
+          data: [
+            { value: values[0], label: keys[0] },
+            { value: values[1], label: keys[1] },
+            { value: values[2], label: keys[2] },
+          ],
+        },
+      ]}
+      width={500}
+      height={200}
+      paddingAngle={200}
+    />
+  )
+}
 
 export default Pie

@@ -12,7 +12,7 @@ import {
   Paper,
   Link,
   Typography,
-  TextField
+  TextField,
 } from '@mui/material'
 import Stats from './Stats'
 import { initializeMatches } from '../reducers/statsReducer'
@@ -21,7 +21,7 @@ const SimpleTable = () => {
   // eslint-disable-next-line no-unused-vars
   const theme = useTheme()
   const [selectedRowIndex, setSelectedRowIndex] = useState(null)
-  const [filterText, setFilterText] = useState('');
+  const [filterText, setFilterText] = useState('')
 
   const dispatch = useDispatch()
   const data = useSelector((state) => state.stats.matches)
@@ -41,23 +41,23 @@ const SimpleTable = () => {
   }
 
   const handleLinkClick = (e) => {
-    e.stopPropagation() 
+    e.stopPropagation()
   }
 
   const filteredRows = data.filter((row) =>
     Object.values(row).some((value) =>
       String(value).toLowerCase().includes(filterText.toLowerCase())
     )
-  );
+  )
 
   return (
     <TableContainer component={Paper}>
       <TextField
-          variant="outlined"
-          placeholder="Search for a game..."
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-        />
+        variant="outlined"
+        placeholder="Search for a game..."
+        value={filterText}
+        onChange={(e) => setFilterText(e.target.value)}
+      />
       <Table>
         <TableHead>
           <TableRow>
@@ -76,16 +76,16 @@ const SimpleTable = () => {
                 style={{ cursor: 'pointer' }}
               >
                 {headers.map((header) => (
-                  <TableCell key={header} >
+                  <TableCell key={header}>
                     {row[header] !== null && row[header].includes('leetify') ? (
-                      <Link 
-                      href={row[header]}
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      onClick={() => handleLinkClick()}
-                    >
-                      Leetify
-                    </Link>
+                      <Link
+                        href={row[header]}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => handleLinkClick()}
+                      >
+                        Leetify
+                      </Link>
                     ) : (
                       row[header]
                     )}

@@ -28,7 +28,6 @@ const Inhouse = ({ user }) => {
   const currentUser = user.user.username
   const index = users.findIndex((user) => user.username === currentUser)
 
-
   const joinMatch = () => {
     if (isQueueFull) {
       alert('Queue is already full. you are in reserve')

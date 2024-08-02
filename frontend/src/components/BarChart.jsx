@@ -8,10 +8,17 @@ const filteredMetrics = [
   'kills',
   'deaths',
   'assists',
-  'enemy5ks',
-  'enemy4ks',
-  'enemy3ks',
   'enemy2ks',
+  'enemy3ks',
+  'enemy4ks',
+  'enemy5ks',
+  'enemies_flashed',
+  'utility_count',
+  'utility_damage',
+  'utility_successes',
+  'utility_enemies',
+  'flash_count',
+  'flash_successes',
 ]
 
 const Bars = (props) => {
@@ -39,16 +46,25 @@ const Bars = (props) => {
   }
 
   const sums = sumObj(playerStats, filteredMetrics)
+
   const keys = Object.keys(sums)
   const values = Object.values(sums)
 
   return (
-    <BarChart
-      xAxis={[{ scaleType: 'band', data: keys }]}
-      series={[{ data: values }]}
-      width={500}
-      height={300}
-    />
+    <>
+      <BarChart
+        xAxis={[{ scaleType: 'band', data: keys.slice(0, 7) }]}
+        series={[{ data: values.slice(0, 7) }]}
+        width={500}
+        height={300}
+      />
+      <BarChart
+        xAxis={[{ scaleType: 'band', data: keys.slice(7, 16) }]}
+        series={[{ data: values.slice(0, 7) }]}
+        width={500}
+        height={300}
+      />
+    </>
   )
 }
 

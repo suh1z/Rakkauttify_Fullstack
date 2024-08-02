@@ -6,7 +6,6 @@ import { Grid, Typography } from '@mui/material'
 import Bars from './BarChart'
 import Pie from './PieChart'
 import Cauge from './CaugeChart'
-import Scatter from './ScatterChart'
 
 const Graph = (props) => {
   const dispatch = useDispatch()
@@ -26,30 +25,34 @@ const Graph = (props) => {
   }
 
   try {
-    {playerStats[0]['name']}
+    {
+      playerStats[0]['name']
+    }
   } catch (error) {
     return <div>Select a player from matches...</div>
   }
-  
 
   return (
-    <><Typography variant="h6">
-          Recent 10 Games of {playerStats[0]['name']}
-      </Typography><Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                  <Bars data={playerStats} />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                  <Cauge />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                  <Scatter data={playerStats} />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                  <Pie data={playerStats} />
-              </Grid>
-          </Grid></>
-  );
+    <>
+      <Typography variant="h6">
+        Recent 10 Games of {playerStats[0]?.name}
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Bars data={playerStats} />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Grid container spacing={15} direction="column">
+            <Grid item xs={12}>
+              <Cauge />
+            </Grid>
+            <Grid item xs={12}>
+              <Pie data={playerStats} />
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
+    </>
+  )
 }
-
 export default Graph

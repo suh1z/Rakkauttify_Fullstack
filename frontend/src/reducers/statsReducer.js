@@ -11,22 +11,22 @@ const cardSlice = createSlice({
     statistics: {},
     playerStats: [],
     matches: [],
-    match: []
-    },
+    match: [],
+  },
   reducers: {
     setStats(state, action) {
       state.stats = action.payload
     },
     setMatches(state, action) {
       const sortThis = action.payload
-      const sortedByDate = sortThis.sort(function(a,b) { 
-        return b.matchid- a.matchid
+      const sortedByDate = sortThis.sort(function (a, b) {
+        return b.matchid - a.matchid
       })
       state.matches = sortedByDate
     },
     setMatch(state, action) {
       const { matchId } = action.payload
-      state.match = state.stats.filter(item => item.matchid === matchId)
+      state.match = state.stats.filter((item) => item.matchid === matchId)
     },
     setStatistics(state, action) {
       const { recentGamesCount } = action.payload
@@ -65,9 +65,11 @@ const cardSlice = createSlice({
     },
     setPlayerStats(state, action) {
       const { playerName } = action.payload
-      const normalizedPlayerName = typeof playerName === 'string' ? playerName.trim().toLowerCase() : ''
+      const normalizedPlayerName =
+        typeof playerName === 'string' ? playerName.trim().toLowerCase() : ''
       const filteredStats = state.stats.filter((item) => {
-        const nameInItem = typeof item.name === 'string' ? item.name.trim().toLowerCase() : ''
+        const nameInItem =
+          typeof item.name === 'string' ? item.name.trim().toLowerCase() : ''
         return nameInItem === normalizedPlayerName
       })
       filteredStats.sort((a1, a2) => a1.matchid - a2.matchid)
@@ -76,7 +78,8 @@ const cardSlice = createSlice({
   },
 })
 
-export const { setStats, setStatistics, setPlayerStats, setMatches, setMatch } = cardSlice.actions
+export const { setStats, setStatistics, setPlayerStats, setMatches, setMatch } =
+  cardSlice.actions
 
 export const initializeStats = () => async (dispatch) => {
   try {
@@ -119,7 +122,5 @@ export const playerSetStats = (playerName) => (dispatch) => {
     console.error('Error filtering player stats:', error)
   }
 }
-
-
 
 export default cardSlice.reducer
