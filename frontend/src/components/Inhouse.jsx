@@ -25,16 +25,16 @@ const Inhouse = ({ user }) => {
 
   const isQueueFull = users.length >= 10
 
-  const currentUser = user.user.username
-  const index = users.findIndex((user) => user.username === currentUser)
+  const currentUser = user.user
+  const index = users.findIndex((user) => user.user === currentUser)
 
   const joinMatch = () => {
     if (isQueueFull) {
       alert('Queue is already full. you are in reserve')
-      dispatch(createInhouse(user.user.username))
+      dispatch(createInhouse(currentUser))
     }
 
-    dispatch(createInhouse(user.user.username))
+    dispatch(createInhouse(currentUser))
     alert('Joined queue!')
   }
 

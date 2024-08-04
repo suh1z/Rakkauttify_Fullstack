@@ -1,39 +1,89 @@
 /* eslint-disable react/prop-types */
-import {
-  TextField,
-  Button,
-  Typography,
-  Container,
-  Box,
-  Alert,
-} from '@mui/material'
+import { Button, Typography, Container, Box, Alert } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { useState, useEffect } from 'react'
-import { loginUser, initializeUser } from '../reducers/userReducer'
+import { useEffect, useState } from 'react'
+import { getDiscord, setUser } from '../reducers/userReducer'
+
+function generateRandomString() {
+  let randomString = ''
+  const randomNumber = Math.floor(Math.random() * 10)
+
+  for (let i = 0; i < 20 + randomNumber; i++) {
+    randomString += String.fromCharCode(33 + Math.floor(Math.random() * 94))
+  }
+
+  return randomString
+}
+
+const generateLoginUrl = () => {
+  const randomString = generateRandomString()
+  localStorage.setItem('oauth-state', randomString)
+  const linker =
+    'https://discord.com/oauth2/authorize?client_id=1269431235101327482&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3004%2Fapi%2Flogin&scope=identify'
+  return `${linker}&state=${btoa(randomString)}`
+}
 
 const LoginForm = () => {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-
   const dispatch = useDispatch()
   const user = useSelector((state) => state.user.user)
 
   useEffect(() => {
-    dispatch(initializeUser())
+    const params = new URLSearchParams(window.location.search)
+    const accessToken = params.get('access_token')
+    const tokenType = params.get('token_type')
+    const state = params.get('state')
+    const storedState = localStorage.getItem('oauth-state')
+
+    try {
+      if (
+        storedState &&
+        state &&
+        storedState !== atob(decodeURIComponent(state))
+      ) {
+        setError(
+          'State parameter mismatch reload the page and retry. Possible CSRF attack.'
+        )
+        return
+      }
+
+      if (accessToken && tokenType) {
+        fetch('https://discord.com/api/v10/users/@me', {
+          headers: {
+            Authorization: `${tokenType} ${accessToken}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((userData) => {
+            const loggedDiscordUser = {
+              user: userData.username,
+              id: userData.id,
+              token: `${tokenType} ${accessToken}`,
+            }
+            localStorage.setItem(
+              'loggedDiscordUser',
+              JSON.stringify(loggedDiscordUser)
+            )
+            dispatch(setUser(loggedDiscordUser))
+            dispatch(getDiscord(loggedDiscordUser))
+            localStorage.removeItem('oauth-state')
+          })
+          .catch((err) => {
+            console.error('Error fetching user data:', err)
+            setError('Failed to fetch user data.')
+          })
+      } else {
+        setError('Access token missing please authenticate')
+      }
+    } catch {
+      window.location.reload()
+    }
   }, [dispatch])
 
-  const handleLogin = async (event) => {
+  const handleClick = (event) => {
     event.preventDefault()
-    try {
-      await dispatch(loginUser({ username, password }))
-      setUsername('')
-      setPassword('')
-      setError('')
-    } catch (error) {
-      setError('Invalid username or password')
-      console.error('Login error:', error)
-    }
+    const loginUrl = generateLoginUrl()
+    window.location.href = loginUrl
   }
 
   return (
@@ -50,51 +100,27 @@ const LoginForm = () => {
           </Typography>
         ) : (
           <>
-            <Typography variant="h4" color="primary" gutterBottom>
-              Log in to Rakkautify
-            </Typography>
-            {error && (
-              <Alert
-                severity="error"
-                sx={{ width: '100%', marginBottom: '16px' }}
-              >
-                {error}
-              </Alert>
-            )}
-            <form onSubmit={handleLogin} style={{ width: '100%' }}>
-              <div style={{ marginBottom: '16px' }}>
-                <TextField
-                  data-testid="username"
-                  label="Username"
-                  type="text"
-                  value={username}
-                  name="Username"
-                  onChange={({ target }) => setUsername(target.value)}
-                  fullWidth
-                  required
-                />
-              </div>
-              <div style={{ marginBottom: '16px' }}>
-                <TextField
-                  data-testid="password"
-                  label="Password"
-                  type="password"
-                  value={password}
-                  name="Password"
-                  onChange={({ target }) => setPassword(target.value)}
-                  fullWidth
-                  required
-                />
-              </div>
+            <>
+              <Typography variant="h4" color="primary" gutterBottom>
+                Log in to Rakkautify
+              </Typography>
+              {error && (
+                <Alert
+                  severity="error"
+                  sx={{ width: '100%', marginBottom: '16px' }}
+                >
+                  {error}
+                </Alert>
+              )}
               <Button
                 variant="contained"
                 color="primary"
                 type="submit"
-                fullWidth
+                onClick={handleClick}
               >
-                Login
+                Login with Discord
               </Button>
-            </form>
+            </>
           </>
         )}
       </Box>

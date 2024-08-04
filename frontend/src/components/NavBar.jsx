@@ -13,11 +13,14 @@ import {
 import MenuIcon from '@mui/icons-material/Menu'
 import { Link } from 'react-router-dom'
 import '../App.css'
+import { logoutUser } from '../reducers/userReducer'
+import { useDispatch } from 'react-redux'
 
-const Navbar = () => {
+const Navbar = (props) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [anchorEl, setAnchorEl] = React.useState(null)
+  const dispatch = useDispatch()
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget)
@@ -25,6 +28,10 @@ const Navbar = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null)
+  }
+
+  const handleLogout = () => {
+    dispatch(logoutUser())
   }
 
   return (
@@ -45,58 +52,54 @@ const Navbar = () => {
               onClose={handleMenuClose}
             >
               <MenuItem onClick={handleMenuClose}>
-                <Link to="/">
-                  <a href="#" className="link">
-                    Home
-                  </a>
+                <Link to="/" className="link">
+                  Home
                 </Link>
               </MenuItem>
               <MenuItem onClick={handleMenuClose}>
-                <Link to="/statistics">
-                  <a href="#" className="link">
-                    Statistics
-                  </a>
+                <Link to="/statistics" className="link">
+                  Statistics
                 </Link>
               </MenuItem>
               <MenuItem onClick={handleMenuClose}>
-                <Link to="/graphs">
-                  <a href="#" className="link">
-                    Graphs
-                  </a>
+                <Link to="/summarize" className="link">
+                  Summarize
                 </Link>
               </MenuItem>
               <MenuItem onClick={handleMenuClose}>
-                <Link to="/inhouse">
-                  <a href="#" className="link">
-                    Inhouse
-                  </a>
+                <Link to="/inhouse" className="link">
+                  Inhouse
                 </Link>
               </MenuItem>
+              {props.user && (
+                <MenuItem onClick={handleLogout}>
+                  <Link to="/" className="link">
+                    Logout
+                  </Link>
+                </MenuItem>
+              )}
             </Menu>
           </>
         ) : (
           <>
             <Box sx={{ display: 'flex', ml: 'auto' }}>
-              <Link to="/">
-                <a href="#" className="link">
-                  Rakkauttify
-                </a>
+              <Link to="/" className="link">
+                Rakkauttify
               </Link>
-              <Link to="/statistics">
-                <a href="#" className="link">
-                  Statistics
-                </a>
+              <Link to="/statistics" className="link">
+                Statistics
               </Link>
-              <Link to="/graphs">
-                <a href="#" className="link">
-                  Graphs
-                </a>
+              <Link to="/summarize" className="link">
+                Summarize
               </Link>
-              <Link to="/inhouse">
-                <a href="#" className="link">
-                  Inhouse
-                </a>
+              <Link to="/inhouse" className="link">
+                Inhouse
               </Link>
+              {props.user && (
+                <Link to="/" onClick={handleLogout} className="link">
+                  Logout
+                </Link>
+              )}
             </Box>
             <Box sx={{ display: 'flex', flexGrow: 8 }}></Box>
           </>

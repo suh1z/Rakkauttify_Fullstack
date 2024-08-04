@@ -6,4 +6,9 @@ const getAllUsers = async () => {
   return request.then((response) => response.data)
 }
 
-export default { getAllUsers }
+const createUser = async (user) => {
+  const request = axios.post(baseUrl, user)
+  return request.then((response) => response.data)
+}
+
+export default { getAllUsers, createUser }

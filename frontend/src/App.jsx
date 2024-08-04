@@ -9,7 +9,7 @@ import Matches from './components/Matches'
 import Inhouse from './components/Inhouse'
 import LoginForm from './components/LoginForm'
 import Statistics from './components/Statistics'
-import Graph from './components/Graphs'
+import AiGenerator from './components/AiGenerator'
 import { initializeUser } from './reducers/userReducer'
 import { initializeStats } from './reducers/statsReducer'
 
@@ -39,7 +39,7 @@ function App() {
                     mb: '20px',
                   }}
                 >
-                  <Typography variant="h6" align="Left">
+                  <Typography variant="h6" align="left">
                     Rakkauden Kanaali Games
                   </Typography>
                 </Box>
@@ -52,11 +52,11 @@ function App() {
         />
         <Route
           path="/statistics"
-          element={user.user ? <Statistics /> : <Navigate to="/statistics" />}
+          element={user.user ? <Statistics /> : <Navigate to="/" />}
         />
         <Route
-          path="/graphs"
-          element={user.user ? <Graph /> : <Navigate to="/graphs" />}
+          path="/summarize"
+          element={user.user ? <AiGenerator /> : <Navigate to="/" />}
         />
         <Route
           path="/inhouse"

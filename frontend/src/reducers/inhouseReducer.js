@@ -13,7 +13,7 @@ const inhouseSlice = createSlice({
     },
     deletePlayer(state, action) {
       console.log(action.payload)
-      return state.filter((players) => players.username !== action.payload)
+      return state.filter((players) => players.user !== action.payload)
     },
   },
 })

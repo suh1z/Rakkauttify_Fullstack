@@ -13,7 +13,8 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser(state, action) {
-      ;(state.user = action.payload.user), (state.token = action.payload.token)
+      state.user = action.payload.user
+      state.token = action.payload.token
     },
     setUsers(state, action) {
       state.users = action.payload
@@ -25,7 +26,7 @@ const userSlice = createSlice({
   },
 })
 
-export const { setUser, clearUser, setUsers } = userSlice.actions
+export const { setUser, clearUser, setUsers, setDiscord } = userSlice.actions
 
 export const allUsers = () => {
   return async (dispatch) => {
@@ -34,27 +35,35 @@ export const allUsers = () => {
   }
 }
 
+export const getDiscord = (code) => {
+  return async (dispatch) => {
+    const users = await userService.createUser(code)
+    dispatch(setDiscord(users))
+  }
+}
+
 export const loginUser = (credentials) => {
   return async (dispatch) => {
     const user = await loginService.login(credentials)
-    window.localStorage.setItem(
-      'loggedUser',
-      JSON.stringify({
-        user: user,
-        token: user.token,
-      })
-    )
     dispatch(setUser({ user: user, token: user.token }))
   }
 }
 
 export const initializeUser = () => {
   return (dispatch) => {
-    const loggedUserJSON = window.localStorage.getItem('loggedUser')
+    const loggedUserJSON = window.localStorage.getItem('loggedDiscordUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       dispatch(setUser(user))
     }
   }
 }
+
+export const logoutUser = () => {
+  return async (dispatch) => {
+    await loginService.removeToken()
+    dispatch(clearUser())
+  }
+}
+
 export default userSlice.reducer
