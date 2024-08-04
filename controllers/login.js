@@ -27,7 +27,7 @@ loginRouter.get("/", async (req, res) => {
       if (tokenResponse.statusCode === 200) {
         const tokenData = await tokenResponse.body.json();
         res.redirect(
-          `http://localhost:${process.env.PORT}/login?access_token=${tokenData.access_token}&token_type=${tokenData.token_type}&state=${encodeURIComponent(state)}`,
+          `http://localhost:5173/login?access_token=${tokenData.access_token}&token_type=${tokenData.token_type}&state=${encodeURIComponent(state)}`,
         );
       } else {
         const errorData = await tokenResponse.body.json();
