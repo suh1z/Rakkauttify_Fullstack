@@ -5,21 +5,18 @@ let queue = [];
 
 inhouseRouter.get("/", (req, res) => {
   res.json(queue);
+  console.log(queue);
 });
 
 inhouseRouter.post("/", (req, res) => {
   const { username } = req.body;
-
-  if (!username || username.length < 1) {
-    return res.status(400).json({
-      error: "Username needs to be at least 1 character long",
-    });
+  console.log(req.body);
+  if (!username) {
+    return res.status(400).json({ error: "Username is required" });
   }
 
   if (queue.find((user) => user.username === username)) {
-    return res.status(400).json({
-      error: "User is already in the queue",
-    });
+    return res.status(400).json({ error: "User is already in the queue" });
   }
 
   queue.push({ username });
