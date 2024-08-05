@@ -1,7 +1,7 @@
 const loginRouter = require("express").Router();
 const { request } = require("undici");
 
-const REDIRECT_URI = `http://localhost:${process.env.PORT}/api/login`;
+const REDIRECT_URI = process.env.REDIRECT_URI || `http://localhost:${process.env.PORT}/api/login`;
 
 loginRouter.get("/", async (req, res) => {
   const { code, state } = req.query;

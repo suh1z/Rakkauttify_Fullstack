@@ -20,7 +20,7 @@ const generateLoginUrl = () => {
   const randomString = generateRandomString()
   localStorage.setItem('oauth-state', randomString)
   const linker =
-    'https://discord.com/oauth2/authorize?client_id=1269431235101327482&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3004%2Fapi%2Flogin&scope=identify'
+    'https://discord.com/oauth2/authorize?client_id=1269431235101327482&response_type=code&redirect_uri=https%3A%2F%2Frakkauttify-fullstack.onrender.com%2Fapi%2Flogin&scope=identify'
   return `${linker}&state=${btoa(randomString)}`
 }
 
