@@ -46,7 +46,7 @@ function App() {
                 <Matches />
               </>
             ) : (
-              <Navigate to="/login" />
+              <LoginForm />
             )
           }
         />
@@ -63,10 +63,6 @@ function App() {
           element={
             user.user ? <Inhouse user={user} /> : <Navigate to="/login" />
           }
-        />
-        <Route
-          path="/login"
-          element={!user.user ? <LoginForm /> : <Navigate to="/" />}
         />
       </Routes>
     </Container>

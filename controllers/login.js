@@ -1,6 +1,8 @@
 const loginRouter = require("express").Router();
 const { request } = require("undici");
 
+const REDIRECT_URI = `http://localhost:${process.env.PORT}/api/login`;
+
 loginRouter.get("/", async (req, res) => {
   const { code, state } = req.query;
 
@@ -15,7 +17,7 @@ loginRouter.get("/", async (req, res) => {
             client_secret: process.env.CLIENT_SECRET,
             code,
             grant_type: "authorization_code",
-            redirect_uri: process.env.REDIRECT_URI,
+            redirect_uri: REDIRECT_URI,
             scope: "identify",
           }).toString(),
           headers: {
@@ -26,9 +28,28 @@ loginRouter.get("/", async (req, res) => {
 
       if (tokenResponse.statusCode === 200) {
         const tokenData = await tokenResponse.body.json();
-        res.redirect(
-          `/login?access_token=${tokenData.access_token}&token_type=${tokenData.token_type}&state=${encodeURIComponent(state)}`,
+        const userResponse = await request(
+          "https://discord.com/api/v10/users/@me",
+          {
+            headers: {
+              Authorization: `${tokenData.token_type} ${tokenData.access_token}`,
+            },
+          },
         );
+
+        if (userResponse.statusCode === 200) {
+          console.log(userResponse);
+          const userData = await userResponse.body.json();
+          res.redirect(
+            `/?username=${encodeURIComponent(userData.username)}&id=${userData.id}&token=${encodeURIComponent(tokenData.access_token)}`,
+          );
+        } else {
+          const errorData = await userResponse.body.json();
+          console.error("Error fetching user data:", errorData);
+          res
+            .status(userResponse.statusCode)
+            .json({ error: "Failed to fetch user data" });
+        }
       } else {
         const errorData = await tokenResponse.body.json();
         console.error("Error fetching token:", errorData);

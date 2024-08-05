@@ -3,6 +3,7 @@ import { Button, Typography, Container, Box, Alert } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 import { getDiscord, setUser } from '../reducers/userReducer'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 function generateRandomString() {
   let randomString = ''
@@ -27,58 +28,36 @@ const LoginForm = () => {
   const [error, setError] = useState('')
   const dispatch = useDispatch()
   const user = useSelector((state) => state.user.user)
+  const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const accessToken = params.get('access_token')
-    const tokenType = params.get('token_type')
-    const state = params.get('state')
-    const storedState = localStorage.getItem('oauth-state')
+    const params = new URLSearchParams(location.search)
 
-    try {
-      if (
-        storedState &&
-        state &&
-        storedState !== atob(decodeURIComponent(state))
-      ) {
-        setError(
-          'State parameter mismatch reload the page and retry. Possible CSRF attack.'
-        )
-        return
-      }
+    const accessToken = params.get('token')
+    const username = params.get('username')
+    const id = params.get('id')
+    console.log(params)
+    console.log(accessToken)
 
-      if (accessToken && tokenType) {
-        fetch('https://discord.com/api/v10/users/@me', {
-          headers: {
-            Authorization: `${tokenType} ${accessToken}`,
-          },
-        })
-          .then((response) => response.json())
-          .then((userData) => {
-            const loggedDiscordUser = {
-              user: userData.username,
-              id: userData.id,
-              token: `${tokenType} ${accessToken}`,
-            }
-            localStorage.setItem(
-              'loggedDiscordUser',
-              JSON.stringify(loggedDiscordUser)
-            )
-            dispatch(setUser(loggedDiscordUser))
-            dispatch(getDiscord(loggedDiscordUser))
-            localStorage.removeItem('oauth-state')
-          })
-          .catch((err) => {
-            console.error('Error fetching user data:', err)
-            setError('Failed to fetch user data.')
-          })
-      } else {
-        setError('Access token missing please authenticate')
+    if (accessToken && username && id) {
+      const loggedDiscordUser = {
+        user: username,
+        id,
+        token: accessToken,
       }
-    } catch {
-      window.location.reload()
+      localStorage.setItem(
+        'loggedDiscordUser',
+        JSON.stringify(loggedDiscordUser)
+      )
+      dispatch(setUser(loggedDiscordUser))
+      dispatch(getDiscord(loggedDiscordUser))
+      localStorage.removeItem('oauth-state')
+      navigate('/', { replace: true })
+    } else {
+      setError('Access token or user data missing.')
     }
-  }, [dispatch])
+  }, [dispatch, location])
 
   const handleClick = (event) => {
     event.preventDefault()
