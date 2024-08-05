@@ -1,7 +1,8 @@
 const loginRouter = require("express").Router();
 const { request } = require("undici");
 
-const REDIRECT_URI = process.env.REDIRECT_URI || `http://localhost:${process.env.PORT}/api/login`;
+const REDIRECT_URI =
+  process.env.REDIRECT_URI || `http://localhost:${process.env.PORT}/api/login`;
 
 loginRouter.get("/", async (req, res) => {
   const { code, state } = req.query;
@@ -26,36 +27,14 @@ loginRouter.get("/", async (req, res) => {
         },
       );
 
-      if (tokenResponse.statusCode === 200) {
-        const tokenData = await tokenResponse.body.json();
-        const userResponse = await request(
-          "https://discord.com/api/v10/users/@me",
-          {
-            headers: {
-              Authorization: `${tokenData.token_type} ${tokenData.access_token}`,
-            },
-          },
-        );
+      const tokenData = await tokenResponse.body.json();
 
-        if (userResponse.statusCode === 200) {
-          console.log(userResponse);
-          const userData = await userResponse.body.json();
-          res.redirect(
-            `/?username=${encodeURIComponent(userData.username)}&id=${userData.id}&token=${encodeURIComponent(tokenData.access_token)}`,
-          );
-        } else {
-          const errorData = await userResponse.body.json();
-          console.error("Error fetching user data:", errorData);
-          res
-            .status(userResponse.statusCode)
-            .json({ error: "Failed to fetch user data" });
-        }
+      if (tokenResponse.statusCode === 200) {
+        res.redirect(
+          `/?accessToken=${encodeURIComponent(tokenData.access_token)}&tokenType=${encodeURIComponent(tokenData.token_type)}&state=${encodeURIComponent(state)}`,
+        );
       } else {
-        const errorData = await tokenResponse.body.json();
-        console.error("Error fetching token:", errorData);
-        res
-          .status(tokenResponse.statusCode)
-          .json({ error: "Failed to exchange code for token" });
+        res.status(500).json({ error: "Failed to fetch user data." });
       }
     } catch (error) {
       console.error("Error during token exchange:", error);
