@@ -37,8 +37,6 @@ const LoginForm = () => {
     const accessToken = params.get('token')
     const username = params.get('username')
     const id = params.get('id')
-    console.log(params)
-    console.log(accessToken)
 
     if (accessToken && username && id) {
       const loggedDiscordUser = {
