@@ -1,9 +1,9 @@
-/* eslint-disable react/prop-types */
 import { Button, Typography, Container, Box, Alert } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
+import axios from 'axios'
 import { getDiscord, setUser } from '../reducers/userReducer'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 function generateRandomString() {
   let randomString = ''
@@ -28,34 +28,57 @@ const LoginForm = () => {
   const [error, setError] = useState('')
   const dispatch = useDispatch()
   const user = useSelector((state) => state.user.user)
-  const location = useLocation()
   const navigate = useNavigate()
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
+    const urlParams = new URLSearchParams(window.location.search)
+    const state = urlParams.get('state')
+    const accessToken = urlParams.get('accessToken')
+    const tokenType = urlParams.get('tokenType')
 
-    const accessToken = params.get('token')
-    const username = params.get('username')
-    const id = params.get('id')
-
-    if (accessToken && username && id) {
-      const loggedDiscordUser = {
-        user: username,
-        id,
-        token: accessToken,
+    if (accessToken && tokenType && state) {
+      const storedState = localStorage.getItem('oauth-state')
+      if (state !== btoa(storedState)) {
+        setError('Invalid state parameter.')
+        return
       }
-      localStorage.setItem(
-        'loggedDiscordUser',
-        JSON.stringify(loggedDiscordUser)
-      )
-      dispatch(setUser(loggedDiscordUser))
-      dispatch(getDiscord(loggedDiscordUser))
-      localStorage.removeItem('oauth-state')
-      navigate('/', { replace: true })
+
+      axios
+        .get('https://discord.com/api/v10/users/@me', {
+          headers: {
+            authorization: `${tokenType} ${accessToken}`,
+          },
+        })
+        .then((response) => {
+          const { username, id } = response.data
+
+          if (username && id) {
+            const loggedDiscordUser = {
+              user: username,
+              id,
+              token: accessToken,
+            }
+
+            localStorage.setItem(
+              'loggedDiscordUser',
+              JSON.stringify(loggedDiscordUser)
+            )
+            dispatch(setUser(loggedDiscordUser))
+            dispatch(getDiscord(loggedDiscordUser))
+            localStorage.removeItem('oauth-state')
+            navigate('/', { replace: true })
+          } else {
+            setError('User data is missing.')
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching user data:', error)
+          setError('Failed to fetch user data.')
+        })
     } else {
-      setError('Access token or user data missing.')
+      setError('Access token, token type, or state parameter is missing.')
     }
-  }, [dispatch, location])
+  }, [dispatch, navigate])
 
   const handleClick = (event) => {
     event.preventDefault()
@@ -77,27 +100,25 @@ const LoginForm = () => {
           </Typography>
         ) : (
           <>
-            <>
-              <Typography variant="h4" color="primary" gutterBottom>
-                Log in to Rakkautify
-              </Typography>
-              {error && (
-                <Alert
-                  severity="error"
-                  sx={{ width: '100%', marginBottom: '16px' }}
-                >
-                  {error}
-                </Alert>
-              )}
-              <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-                onClick={handleClick}
+            <Typography variant="h4" color="primary" gutterBottom>
+              Log in to Rakkautify
+            </Typography>
+            {error && (
+              <Alert
+                severity="error"
+                sx={{ width: '100%', marginBottom: '16px' }}
               >
-                Login with Discord
-              </Button>
-            </>
+                {error}
+              </Alert>
+            )}
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              onClick={handleClick}
+            >
+              Login with Discord
+            </Button>
           </>
         )}
       </Box>
