@@ -66,6 +66,7 @@ const LoginForm = () => {
             dispatch(getDiscord(loggedDiscordUser))
             localStorage.removeItem('oauth-state')
             navigate('/', { replace: true })
+            window.location.reload()
           } else {
             setError('User data is missing.')
           }
