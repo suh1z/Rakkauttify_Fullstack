@@ -15,7 +15,7 @@ const Ai = () => {
     return <div>Loading...</div>
   }
 
-  return <div>hello</div>
+  return <div>WORK IN PROGRESS</div>
 }
 
 export default Ai

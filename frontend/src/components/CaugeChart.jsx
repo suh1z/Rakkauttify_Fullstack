@@ -41,9 +41,9 @@ const Cauge = (props) => {
 
   const sums = sumObj(playerStats, filteredMetrics)
   const values = Object.values(sums)
-  const hsper = (values[3] / values[0]) * 100
-  const entryper = (values[5] / values[4]) * 100
-  const shots = (values[7] / values[6]) * 100
+  const hsper = Math.round((values[3] / values[0]) * 100)
+  const entryper = Math.round((values[5] / values[4]) * 100)
+  const shots = Math.round((values[7] / values[6]) * 100)
 
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>

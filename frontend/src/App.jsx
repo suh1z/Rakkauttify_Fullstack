@@ -29,7 +29,6 @@ function App() {
         <Route
           path="/"
           element={
-            user.user ? (
               <>
                 <Box
                   sx={{
@@ -45,24 +44,19 @@ function App() {
                 </Box>
                 <Matches />
               </>
-            ) : (
-              <LoginForm />
-            )
           }
         />
         <Route
           path="/statistics"
-          element={user.user ? <Statistics /> : <Navigate to="/" />}
+          element={ <Statistics /> }
         />
         <Route
           path="/summarize"
-          element={user.user ? <AiGenerator /> : <Navigate to="/" />}
+          element={ <AiGenerator /> }
         />
         <Route
           path="/inhouse"
-          element={
-            user.user ? <Inhouse user={user} /> : <Navigate to="/login" />
-          }
+          element={ user.user ? <Inhouse user={user} /> : <LoginForm /> }
         />
       </Routes>
     </Container>
