@@ -1,6 +1,7 @@
 const config = require("./utils/config");
 const express = require("express");
 const app = express();
+const path = require('path');
 require("express-async-errors");
 const cors = require("cors");
 const usersRouter = require("./controllers/users");
@@ -32,6 +33,10 @@ app.use(middleware.requestLogger);
 app.use("/api/login", loginRouter);
 app.use("/api/users", usersRouter );
 app.use("/api/inhouse", inhouseRouter);
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
 if (process.env.NODE_ENV === "test") {
   app.use("/api/testing", testingRouter);
