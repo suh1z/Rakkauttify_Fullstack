@@ -3,9 +3,7 @@ import loginService from '../services/loginService'
 import userService from '../services/userService'
 
 const initialState = {
-  users: [],
   user: null,
-  token: null,
 }
 
 const userSlice = createSlice({
@@ -13,11 +11,7 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser(state, action) {
-      state.user = action.payload.user
-      state.token = action.payload.token
-    },
-    setUsers(state, action) {
-      state.users = action.payload
+      state.user = action.payload
     },
     clearUser(state) {
       state.user = null
@@ -28,15 +22,9 @@ const userSlice = createSlice({
 
 export const { setUser, clearUser, setUsers, setDiscord } = userSlice.actions
 
-export const allUsers = () => {
-  return async (dispatch) => {
-    const users = await userService.getAllUsers()
-    dispatch(setUsers(users))
-  }
-}
-
 export const getDiscord = (code) => {
   return async (dispatch) => {
+    console.log(code)
     const users = await userService.createUser(code)
     dispatch(setDiscord(users))
   }
@@ -61,7 +49,7 @@ export const initializeUser = () => {
 
 export const logoutUser = () => {
   return async (dispatch) => {
-    await loginService.removeToken()
+    loginService.removeToken()
     dispatch(clearUser())
   }
 }

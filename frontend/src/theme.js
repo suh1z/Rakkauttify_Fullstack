@@ -29,6 +29,15 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiBar: {
+      styleOverrides: {
+        root: {
+          '& .MuiBarChart-bar': {
+            fill: orange[500],
+          },
+        },
+      },
+    },
     MuiDataGrid: {
       styleOverrides: {
         root: {

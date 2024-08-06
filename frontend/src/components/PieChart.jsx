@@ -33,9 +33,11 @@ const Pie = (props) => {
   const sums = sumObj(playerStats, filteredMetrics)
   const keys = Object.keys(sums)
   const values = Object.values(sums)
+  const palette = ['orange', 'lightYellow', 'grey']
 
   return (
     <PieChart
+      colors={palette}
       series={[
         {
           data: [

@@ -30,7 +30,7 @@ app.use(express.json());
 app.use(middleware.requestLogger);
 
 app.use("/api/login", loginRouter);
-app.use("/api/users", usersRouter);
+app.use("/api/users", usersRouter );
 app.use("/api/inhouse", inhouseRouter);
 
 if (process.env.NODE_ENV === "test") {

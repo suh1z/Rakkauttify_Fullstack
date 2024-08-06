@@ -29,6 +29,7 @@ export const initializeInhouse = () => {
 
 export const createInhouse = (content) => {
   return async (dispatch) => {
+    console.log(content)
     const newCard = await inhouseService.create(content)
     dispatch(appendPlayer(newCard))
   }

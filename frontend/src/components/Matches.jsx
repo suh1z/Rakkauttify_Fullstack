@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react'
-import { useTheme } from '@mui/material/styles'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   Table,
@@ -19,7 +18,6 @@ import { initializeMatches } from '../reducers/statsReducer'
 
 const SimpleTable = () => {
   // eslint-disable-next-line no-unused-vars
-  const theme = useTheme()
   const [selectedRowIndex, setSelectedRowIndex] = useState(null)
   const [filterText, setFilterText] = useState('')
 

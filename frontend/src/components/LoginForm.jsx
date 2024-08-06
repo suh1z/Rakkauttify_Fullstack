@@ -2,7 +2,7 @@ import { Button, Typography, Container, Box, Alert } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { getDiscord, setUser } from '../reducers/userReducer'
+import { getDiscord } from '../reducers/userReducer'
 import { useNavigate } from 'react-router-dom'
 
 function generateRandomString() {
@@ -63,7 +63,6 @@ const LoginForm = () => {
               'loggedDiscordUser',
               JSON.stringify(loggedDiscordUser)
             )
-            dispatch(setUser(loggedDiscordUser))
             dispatch(getDiscord(loggedDiscordUser))
             localStorage.removeItem('oauth-state')
             navigate('/', { replace: true })

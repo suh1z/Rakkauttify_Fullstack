@@ -24,17 +24,6 @@ const unknownEndpoint = (request, response) => {
   });
 };
 
-const tokenExtractor = (request, response, next) => {
-  const authorization = request.get("authorization");
-
-  if (authorization && authorization.startsWith("Bearer ")) {
-    request.token = authorization.replace("Bearer ", "");
-  } else {
-    request.token = null;
-  }
-
-  next();
-};
 
 const errorHandler = (error, request, response, next) => {
   logger.error(error.message);
@@ -62,5 +51,4 @@ module.exports = {
   requestLogger,
   unknownEndpoint,
   errorHandler,
-  tokenExtractor,
 };

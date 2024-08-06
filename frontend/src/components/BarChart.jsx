@@ -54,13 +54,13 @@ const Bars = (props) => {
     <>
       <BarChart
         xAxis={[{ scaleType: 'band', data: keys.slice(0, 7) }]}
-        series={[{ data: values.slice(0, 7) }]}
+        series={[{ data: values.slice(0, 7), color: '#fdb462' }]}
         width={500}
         height={300}
       />
       <BarChart
         xAxis={[{ scaleType: 'band', data: keys.slice(7, 16) }]}
-        series={[{ data: values.slice(0, 7) }]}
+        series={[{ data: values.slice(0, 7), color: '#fdb462' }]}
         width={500}
         height={300}
       />

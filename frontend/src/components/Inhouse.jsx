@@ -14,6 +14,8 @@ const Inhouse = ({ user }) => {
   const users = useSelector((state) => state.inhouse)
   const dispatch = useDispatch()
 
+  const currentUser = { username: user.user.user, discordId: user.user.id }
+
   useEffect(() => {
     dispatch(initializeInhouse())
     const intervalId = setInterval(() => {
@@ -24,9 +26,6 @@ const Inhouse = ({ user }) => {
   }, [dispatch])
 
   const isQueueFull = users.length >= 10
-
-  const currentUser = user.user
-  const index = users.findIndex((user) => user.user === currentUser)
 
   const joinMatch = () => {
     if (isQueueFull) {
@@ -42,8 +41,8 @@ const Inhouse = ({ user }) => {
     window.open(serverIp, '_blank')
   }
 
-  const handleDeleteQue = (username) => () => {
-    dispatch(removeInhouse(username))
+  const handleDeleteQue = (id) => {
+    dispatch(removeInhouse(id))
   }
 
   const plusyks = 10 - users.length
@@ -61,18 +60,15 @@ const Inhouse = ({ user }) => {
         {users.map((user, index) => (
           <ListItem key={index}>
             {user.username} {index >= 10 && <strong>** ON RESERVE **</strong>}
-            <Button onClick={handleDeleteQue(user.username)}>Delete</Button>
+            {user.username === currentUser.username ? (
+              <Button onClick={() => handleDeleteQue(user)}>Delete</Button>
+            ) : null}
           </ListItem>
         ))}
       </List>
 
-      {isQueueFull && index < 10 && (
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleStartMatch}
-          fullWidth
-        >
+      {isQueueFull && (
+        <Button onClick={handleStartMatch} fullWidth>
           Start Match
         </Button>
       )}

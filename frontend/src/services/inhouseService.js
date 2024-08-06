@@ -14,7 +14,7 @@ const getAll = async () => {
 
 const create = async (username) => {
   try {
-    const response = await axios.post(baseURL, { username })
+    const response = await axios.post(baseURL, username)
     return response.data
   } catch (error) {
     console.error('Error adding to the queue:', error)
@@ -24,8 +24,7 @@ const create = async (username) => {
 
 const remove = async (username) => {
   try {
-    await axios.delete(`${baseURL}/${username}`)
-    return username
+    await axios.delete(`${baseURL}/${username.discordId}`)
   } catch (error) {
     console.error('Error removing from the queue:', error)
     throw error
