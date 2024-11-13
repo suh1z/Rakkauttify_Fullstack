@@ -11,82 +11,83 @@ import {
   Typography,
   TableSortLabel,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
-import Graph from './Graphs'
 
 const DataTable = ({ data }) => {
-  // eslint-disable-next-line no-unused-vars
-  const theme = useTheme()
-  const [selectedPlayer, setSelectedPlayer] = useState(null)
-  const [sortDirection, setSortDirection] = useState('asc')
-  const [sortColumn, setSortColumn] = useState('')
 
-  if (!data || data.length === 0) {
-    return <Typography>No data available</Typography>
+  // Always call hooks at the top level
+  const [order, setOrder] = useState('asc'); // Ascending or descending
+  const [orderBy, setOrderBy] = useState('kills'); // Default column to sort by
+
+  // If no data, return early to display "No data available" message
+  if (!data || !data.matchData || data.matchData.player_scores.length === 0) {
+    return <Typography>No data available</Typography>;
   }
 
-  const filteredMetrics = [
-    'name',
+  // Define the columns you want to display in the table
+  const columns = [
+    'nickname',
     'kills',
-    'deaths',
-    'damage',
     'assists',
-    'enemy5ks',
-    'enemy4ks',
-    'enemy3ks',
-    'enemy2ks',
+    'deaths',
+    'damage_done',
+    'adr',
+    'enemy_2k',
+    'enemy_3k',
+    'team_rounds',
+    'team'
   ]
 
-  const metrics = filteredMetrics.filter((metric) => metric in data[0])
-
-  const sortData = (data) => {
-    if (!sortColumn) return data
-
-    return [...data].sort((a, b) => {
-      const aValue = a[sortColumn]
-      const bValue = b[sortColumn]
-
-      const aNumeric = isNaN(Number(aValue)) ? aValue : Number(aValue)
-      const bNumeric = isNaN(Number(bValue)) ? bValue : Number(bValue)
-
-      if (typeof aNumeric === 'string' && typeof bNumeric === 'string') {
-        return sortDirection === 'asc'
-          ? aNumeric.localeCompare(bNumeric)
-          : bNumeric.localeCompare(aNumeric)
-      }
-
-      if (typeof aNumeric === 'number' && typeof bNumeric === 'number') {
-        return sortDirection === 'asc'
-          ? aNumeric - bNumeric
-          : bNumeric - aNumeric
-      }
-
-      return 0
-    })
+  // Function to round numeric values
+  const roundValue = (value) => {
+    if (typeof value === 'number') {
+      return Math.round(value); // Round to nearest integer
+    }
+    return value; // Leave non-numeric values unchanged
   }
 
-  const sortedData = sortData(data)
+  // Function to handle sorting
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
 
-  const handleRequestSort = (column) => {
-    const isAsc = sortColumn === column && sortDirection === 'asc'
-    setSortDirection(isAsc ? 'desc' : 'asc')
-    setSortColumn(column)
-  }
+  // Function to sort data
+  const stableSort = (array, comparator) => {
+    const stabilizedThis = array.map((el, index) => [el, index]);
+    stabilizedThis.sort((a, b) => {
+      const order = comparator(a[0], b[0]);
+      if (order !== 0) return order;
+      return a[1] - b[1];
+    });
+    return stabilizedThis.map((el) => el[0]);
+  };
+
+  // Comparator function for sorting
+  const getComparator = (order, orderBy) => {
+    return order === 'desc'
+      ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
+      : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
+  };
+
+  // Sort the player scores based on the current sorting state
+  const sortedData = stableSort(data.matchData.player_scores, getComparator(order, orderBy));
 
   return (
     <div>
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              {metrics.map((metric) => (
-                <TableCell key={metric}>
+              {columns.map((column) => (
+                <TableCell key={column} sortDirection={orderBy === column ? order : false}>
                   <TableSortLabel
-                    active={sortColumn === metric}
-                    direction={sortColumn === metric ? sortDirection : 'asc'}
-                    onClick={() => handleRequestSort(metric)}
+                    active={orderBy === column}
+                    direction={orderBy === column ? order : 'asc'}
+                    onClick={() => handleRequestSort(column)}
                   >
-                    {metric.charAt(0).toUpperCase() + metric.slice(1)}
+                    {column.charAt(0).toUpperCase() + column.slice(1)}
                   </TableSortLabel>
                 </TableCell>
               ))}
@@ -94,26 +95,19 @@ const DataTable = ({ data }) => {
           </TableHead>
           <TableBody>
             {sortedData.map((player) => (
-              <TableRow
-                key={player.name}
-                onClick={() => setSelectedPlayer(player.name)}
-                style={{ cursor: 'pointer' }}
-              >
-                {metrics.map((metric) => (
-                  <TableCell key={metric}>{player[metric]}</TableCell>
+              <TableRow key={player.steam_id}>
+                {columns.map((column) => (
+                  <TableCell key={column}>
+                    {roundValue(player[column])}
+                  </TableCell>
                 ))}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      {selectedPlayer && (
-        <div style={{ padding: '20px', backgroundColor: '#1e1e1e' }}>
-          <Graph playerName={selectedPlayer} />
-        </div>
-      )}
     </div>
-  )
-}
+  );
+};
 
-export default DataTable
+export default DataTable;

@@ -1,6 +1,5 @@
-/* eslint-disable react/prop-types */
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
   TableBody,
@@ -9,44 +8,50 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Link,
   Typography,
   TextField,
-} from '@mui/material'
-import Stats from './Stats'
-import { initializeMatches } from '../reducers/statsReducer'
+} from '@mui/material';
+import Stats from './Stats';
+import { initializeMatches, initializeMatch } from '../reducers/statsReducer';
 
 const SimpleTable = () => {
-  // eslint-disable-next-line no-unused-vars
-  const [selectedRowIndex, setSelectedRowIndex] = useState(null)
-  const [filterText, setFilterText] = useState('')
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
+  const [filterText, setFilterText] = useState('');
 
-  const dispatch = useDispatch()
-  const data = useSelector((state) => state.stats.matches)
+  const dispatch = useDispatch();
+  const data = useSelector((state) => state.stats.matches);
+  const selectedMatch = useSelector((state) => state.stats.match); // Access selected match from state
 
   useEffect(() => {
-    dispatch(initializeMatches())
-  }, [])
+    dispatch(initializeMatches());
+  }, [dispatch]);
 
   if (!data || data.length === 0) {
-    return <Typography>No data available</Typography>
+    return <Typography>No data available</Typography>;
   }
 
-  const headers = Object.keys(data[0])
+  const headers = Object.keys(data[0]);
 
-  const handleRowClick = (index) => {
-    setSelectedRowIndex(index === selectedRowIndex ? null : index)
-  }
-
-  const handleLinkClick = (e) => {
-    e.stopPropagation()
-  }
-
+  const handleRowClick = (index, match) => {
+    setSelectedRowIndex(index === selectedRowIndex ? null : index);
+  
+    // Ensure match object is passed with matchid and url
+    if (match && match.url) {
+      dispatch(initializeMatch(match.matchid, match.url));  // Dispatch with matchid and url
+    } else {
+      console.error(`Match with ID ${match.matchid} has no URL.`);
+    }
+  };
+  
   const filteredRows = data.filter((row) =>
     Object.values(row).some((value) =>
       String(value).toLowerCase().includes(filterText.toLowerCase())
     )
-  )
+  );
+
+
+  
+  const displayHeaders = headers.filter(header => header !== 'matchid');
 
   return (
     <TableContainer component={Paper}>
@@ -59,7 +64,7 @@ const SimpleTable = () => {
       <Table>
         <TableHead>
           <TableRow>
-            {headers.map((header) => (
+            {displayHeaders.map((header) => (
               <TableCell key={header}>
                 {header.charAt(0).toUpperCase() + header.slice(1)}
               </TableCell>
@@ -70,30 +75,24 @@ const SimpleTable = () => {
           {filteredRows.map((row, index) => (
             <React.Fragment key={index}>
               <TableRow
-                onClick={() => handleRowClick(index)}
+                onClick={() => handleRowClick(index, row)}  // Pass the entire row (match object)
                 style={{ cursor: 'pointer' }}
               >
-                {headers.map((header) => (
+                {displayHeaders.map((header) => (
                   <TableCell key={header}>
-                    {row[header] !== null && row[header].includes('leetify') ? (
-                      <Link
-                        href={row[header]}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => handleLinkClick()}
-                      >
-                        Leetify
-                      </Link>
+                    {header === 'url' ? (
+                      row[header].split('/').pop().split('.dem_scoreboard')[0]
                     ) : (
-                      row[header]
+                      row[header] !== null ? row[header] : 'N/A'
                     )}
                   </TableCell>
                 ))}
               </TableRow>
               {selectedRowIndex === index && (
                 <TableRow>
-                  <TableCell colSpan={headers.length}>
-                    <Stats id={row[headers[0]]} />
+                  <TableCell colSpan={displayHeaders.length}>
+                    {/* Pass selected match to Stats component */}
+                    {selectedMatch && <Stats match={selectedMatch} />}
                   </TableCell>
                 </TableRow>
               )}
@@ -102,7 +101,7 @@ const SimpleTable = () => {
         </TableBody>
       </Table>
     </TableContainer>
-  )
-}
+  );
+};
 
-export default SimpleTable
+export default SimpleTable;

@@ -5,24 +5,26 @@ import { initializeMatch } from '../reducers/statsReducer'
 import { useDispatch, useSelector } from 'react-redux'
 
 const Stats = (props) => {
-  const dispatch = useDispatch()
-  const matchData = useSelector((state) => state.stats.match)
+  const dispatch = useDispatch();
+  const matchData = useSelector((state) => state.stats.match);
 
   useEffect(() => {
     if (props.id) {
-      dispatch(initializeMatch(props.id))
+      dispatch(initializeMatch(props.id, props.url)); 
     }
-  }, [props.id])
+  }, [props.id, props.url, dispatch]);
 
-  if (!matchData) {
-    return <div>Loading...</div>
+  if (!matchData || matchData.length === 0) {
+    return <div>Loading...</div>;
   }
 
   return (
     <div>
       <InfoChart data={matchData} />
     </div>
-  )
-}
+  );
+};
+
+
 
 export default Stats

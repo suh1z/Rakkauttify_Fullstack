@@ -11,6 +11,7 @@ const logger = require("./utils/logger");
 const mongoose = require("mongoose");
 const loginRouter = require("./controllers/login");
 const testingRouter = require("./controllers/testing");
+const leagueRouter = require("./controllers/leagueStats");
 
 mongoose.set("strictQuery", false);
 
@@ -33,7 +34,9 @@ app.use(middleware.requestLogger);
 app.use("/api/login", loginRouter);
 app.use("/api/users", usersRouter );
 app.use("/api/inhouse", inhouseRouter);
-
+app.use("/api/matches", leagueRouter);
+app.use("/api/months", leagueRouter);
+app.use("/api/fetch-match-data", leagueRouter);
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
