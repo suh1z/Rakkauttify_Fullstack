@@ -1,71 +1,87 @@
-/* eslint-disable react/prop-types */
-import { useEffect, useState } from 'react'
-import { initializeStatistics } from '../reducers/statsReducer'
-import { useDispatch, useSelector } from 'react-redux'
-import { DataGrid } from '@mui/x-data-grid'
-import { TextField } from '@mui/material'
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { DataGrid } from '@mui/x-data-grid';
+import { initializePlayerStats } from '../reducers/statsReducer';
+import PlayerSelector from './PlayerSelector'; 
 
 const Statistics = () => {
-  const dispatch = useDispatch()
-  const data = useSelector((state) => state.stats.statistics)
-  const [filterText, setFilterText] = useState('')
-  const [recentGamesCount, setRecentGamesCount] = useState(30)
+  const dispatch = useDispatch();
+  const data = useSelector((state) => state.stats.playerStats); 
+  const players = useSelector((state) => state.stats.players); 
+  const [filterText] = useState('');
+  const [selectedPlayer, setSelectedPlayer] = useState('Kuskinen'); 
 
   useEffect(() => {
-    dispatch(initializeStatistics(recentGamesCount))
-  }, [recentGamesCount, dispatch])
+    dispatch(initializePlayerStats(selectedPlayer));
+  }, [dispatch, selectedPlayer]);
 
-  if (!data) {
-    return <div>Loading...</div>
+
+  const playerDetails = data?.details || {};  
+
+  const matches = Array.isArray(playerDetails.matches) ? playerDetails.matches : [];
+
+  if (matches.length === 0) {
+    return <div>Loading or No Matches Available...</div>;
   }
 
-  const columns = Object.keys(Object.values(data)[0] || {}).map((key) => ({
-    field: key,
-    headerName: key.charAt(0).toUpperCase() + key.slice(1),
-    width: 90,
-  }))
-
-  const rows = Object.keys(data).map((key, index) => ({
-    id: index,
-    ...Object.values(data[key]).reduce((acc, value, idx) => {
-      acc[columns[idx].field] = value
-      return acc
-    }, {}),
-  }))
-
-  const filteredRows = rows.filter((row) =>
-    Object.values(row).some((value) =>
-      String(value).toLowerCase().includes(filterText.toLowerCase())
-    )
-  )
+  const matchColumns = [
+    { field: 'date', headerName: 'Match Date', width: 150 },
+    { field: 'map', headerName: 'Map', width: 100 },
+    { field: 'win', headerName: 'Win', width: 80 },
+    { field: 'score', headerName: 'Score', width: 80 },
+    { field: 'kills', headerName: 'Kills', width: 80 },
+    { field: 'deaths', headerName: 'Deaths', width: 80 },
+    { field: 'assists', headerName: 'Assists', width: 80 },
+    { field: 'adr', headerName: 'ADR', width: 100 },
+    { field: 'damage_done', headerName: 'Damage Done', width: 120 },
+    { field: 'damage_received', headerName: 'Damage Received', width: 130 },
+    { field: 'clutches', headerName: 'Clutches', width: 100 },
+    { field: 'mvps', headerName: 'MVPs', width: 80 },
+    { field: 'team', headerName: 'Team', width: 120 },
+  ];
+  
+  const rows = matches.map((match, index) => {
+    return {
+      id: index,
+      date: match.date,
+      map: match.map,
+      win: match.win ? 'Win' : 'Loss', 
+      score: match.score,
+      kills: match.kills,
+      deaths: match.deaths,
+      assists: match.assists,
+      adr: match.adr.toFixed(2), 
+      damage_done: match.damage_done,
+      damage_received: match.damage_received,
+      clutches: match.clutch_v1_wins + match.clutch_v2_wins + match.clutch_v3_wins + match.clutch_v4_wins + match.clutch_v5_wins,
+      mvps: match.mvps,
+      team: match.team,
+    };
+  });
+  
+  
+  const filteredPlayers = players.filter((player) =>
+    player.nickname.toLowerCase().includes(filterText.toLowerCase())
+  );
 
   return (
     <div>
-      <div>
-        <TextField
-          variant="outlined"
-          placeholder="Search by player name"
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-        />
-        <TextField
-          variant="outlined"
-          type="number"
-          label="Number of Recent Games"
-          value={recentGamesCount}
-          onChange={(e) => setRecentGamesCount(parseInt(e.target.value, 10))}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+        <PlayerSelector
+          players={filteredPlayers}
+          onPlayerSelect={setSelectedPlayer}
         />
       </div>
       <div style={{ height: '500px', width: '100%' }}>
         <DataGrid
-          rows={filteredRows}
-          columns={columns}
+          rows={rows}
+          columns={matchColumns}
           pageSize={10}
           rowsPerPageOptions={[10]}
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Statistics
+export default Statistics;

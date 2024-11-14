@@ -57,13 +57,13 @@ const Navbar = (props) => {
                 </Link>
               </MenuItem>
               <MenuItem onClick={handleMenuClose}>
-                <Link to="/statistics" className="link">
-                  Statistics
+                <Link to="/monthdata" className="link">
+                  Month Data
                 </Link>
               </MenuItem>
               <MenuItem onClick={handleMenuClose}>
-                <Link to="/summarize" className="link">
-                  Summarize
+                <Link to="/playerdata" className="link">
+                  Player Data
                 </Link>
               </MenuItem>
               <MenuItem onClick={handleMenuClose}>
@@ -86,11 +86,11 @@ const Navbar = (props) => {
               <Link to="/" className="link">
                 Rakkauttify
               </Link>
-              <Link to="/statistics" className="link">
-                Statistics
+              <Link to="/playerdata" className="link">
+                Player Data
               </Link>
-              <Link to="/summarize" className="link">
-                Summarize
+              <Link to="/monthdata" className="link">
+                Month Data
               </Link>
               <Link to="/inhouse" className="link">
                 Inhouse

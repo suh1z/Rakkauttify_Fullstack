@@ -12,19 +12,18 @@ const cardSlice = createSlice({
     playerStats: [],
     matches: [],
     match: [],
+    players: [],
+    months: []
   },
   reducers: {
     setStats(state, action) {
       state.stats = action.payload;
     },
     setMatches(state, action) {
-      const sortThis = action.payload;
-      const sortedByDate = sortThis.sort(function (a, b) {
-        return b.matchid - a.matchid;
-      });
+      const sortedByDate = action.payload.sort((a, b) => b.matchid - a.matchid);
       state.matches = sortedByDate;
 
-      state.matches.forEach(match => {
+      state.matches.forEach((match) => {
         if (!match.url) {
           console.error(`Match with ID ${match.matchid} has no URL.`);
         }
@@ -34,11 +33,7 @@ const cardSlice = createSlice({
       const { matchId, matchData } = action.payload;
       const match = state.matches.find((item) => item.matchid === matchId);
 
-      if (match) {
-        state.match = { ...match, matchData };
-      } else {
-        state.match = null;
-      }
+      state.match = match ? { ...match, matchData } : null;
     },
     setStatistics(state, action) {
       const { recentGamesCount } = action.payload;
@@ -49,9 +44,7 @@ const cardSlice = createSlice({
         const key = stat.steamid64;
 
         if (!acc[key]) {
-          acc[key] = {
-            name: stat.name,
-          };
+          acc[key] = { name: stat.name };
         }
 
         Object.entries(stat).forEach(([statKey, value]) => {
@@ -60,10 +53,7 @@ const cardSlice = createSlice({
               acc[key][statKey] = 0;
             }
             if (summedKey.includes(statKey)) {
-              const maxValue = acc[key][statKey];
-              if (value > maxValue) {
-                acc[key][statKey] = value;
-              }
+              acc[key][statKey] = Math.max(acc[key][statKey], value);
             } else {
               acc[key][statKey] += parseInt(value, 10);
             }
@@ -76,21 +66,29 @@ const cardSlice = createSlice({
       state.statistics = result;
     },
     setPlayerStats(state, action) {
-      const { playerName } = action.payload;
-      const normalizedPlayerName =
-        typeof playerName === 'string' ? playerName.trim().toLowerCase() : '';
-      const filteredStats = state.stats.filter((item) => {
-        const nameInItem =
-          typeof item.name === 'string' ? item.name.trim().toLowerCase() : '';
-        return nameInItem === normalizedPlayerName;
-      });
-      filteredStats.sort((a1, a2) => a1.matchid - a2.matchid);
-      state.playerStats = filteredStats.slice(-10);
+      const { playerName, playerData } = action.payload;
+      if (playerData) {
+        state.playerStats = playerData;
+      } else {
+        const normalizedPlayerName = typeof playerName === 'string' ? playerName.trim().toLowerCase() : '';
+        const filteredStats = state.stats.filter((item) => {
+          const nameInItem = typeof item.name === 'string' ? item.name.trim().toLowerCase() : '';
+          return nameInItem === normalizedPlayerName;
+        });
+        filteredStats.sort((a1, a2) => a1.matchid - a2.matchid);
+        state.playerStats = filteredStats.slice(-10);
+      }
+    },
+    setPlayers(state, action) {
+      state.players = action.payload.sort((a, b) => a.nickname.localeCompare(b.nickname));
+    },
+    setMonths(state, action) {
+      state.months = action.payload
     },
   },
 });
 
-export const { setStats, setStatistics, setPlayerStats, setMatches, setMatch } = cardSlice.actions;
+export const { setStats, setStatistics, setPlayerStats, setMatches, setMatch, setPlayers, setMonths } = cardSlice.actions;
 
 export const initializeStats = () => async (dispatch) => {
   try {
@@ -131,12 +129,30 @@ export const initializeStatistics = (recentGamesCount) => (dispatch) => {
   }
 };
 
-export const playerSetStats = (playerName) => (dispatch) => {
+export const initializePlayerStats = (nickname) => async (dispatch) => {
   try {
-    dispatch(setPlayerStats({ playerName }));
+    const playerData = await statsService.fetchPlayerData(nickname);
+    dispatch(setPlayerStats({ playerName: nickname, playerData }));
   } catch (error) {
-    console.error('Error filtering player stats:', error);
+    console.error('Error fetching player stats:', error);
   }
 };
 
+export const initializePlayers = () => async (dispatch) => {
+  try {
+    const players = await statsService.fetchAllPlayers();
+    dispatch(setPlayers(players));
+  } catch (error) {
+    console.error('Error fetching players:', error);
+  }
+};
+
+export const initializeMonths = () => async (dispatch) => {
+  try {
+    const months = await statsService.getStats();
+    dispatch(setMonths(months));
+  } catch (error) {
+    console.error('Error fetching months:', error);
+  }
+};
 export default cardSlice.reducer;

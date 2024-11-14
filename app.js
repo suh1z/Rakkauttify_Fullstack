@@ -37,6 +37,8 @@ app.use("/api/inhouse", inhouseRouter);
 app.use("/api/matches", leagueRouter);
 app.use("/api/months", leagueRouter);
 app.use("/api/fetch-match-data", leagueRouter);
+app.use("/api/players", leagueRouter);
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });

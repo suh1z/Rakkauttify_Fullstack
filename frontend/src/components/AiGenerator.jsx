@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { initializeStatistics } from '../reducers/statsReducer'
 import { useDispatch, useSelector } from 'react-redux'
 

@@ -6,12 +6,10 @@ import './App.css'
 import { Typography, Box } from '@mui/material'
 import Navbar from './components/NavBar'
 import Matches from './components/Matches'
-import Inhouse from './components/Inhouse'
-import LoginForm from './components/LoginForm'
-//import Statistics from './components/Statistics'
-import AiGenerator from './components/AiGenerator'
 import { initializeUser } from './reducers/userReducer'
 import { initializeStats } from './reducers/statsReducer'
+import Statistics from './components/Statistics'
+import StatsPage from './components/StatsPage'
 
 function App() {
   const dispatch = useDispatch()
@@ -47,16 +45,16 @@ function App() {
           }
         />
         <Route
-          path="/statistics"
-          element={<AiGenerator />} // <Statistics /> 
+          path="/playerdata"
+          element={<Statistics />}
         />
         <Route
-          path="/summarize"
-          element={ <AiGenerator /> }
+          path="/monthdata"
+          element={ <StatsPage /> }
         />
         <Route
           path="/inhouse"
-          element={ user.user ? <Inhouse user={user} /> : <LoginForm /> }
+          element={ <div>TBA</div> }
         />
       </Routes>
     </Container>
