@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useLocation } from 'react-router-dom';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Button } from '@mui/material';
 import { useState } from 'react';
@@ -5,7 +6,6 @@ import { useState } from 'react';
 const DetailedMatchPage = () => {
   const location = useLocation();
   const { data } = location.state || {}; 
-
   if (!data || !data.matchData) {
     return <Typography>No data available</Typography>;
   }
@@ -14,7 +14,16 @@ const DetailedMatchPage = () => {
   const team_2 = data.matchData.player_scores.find(record => record.team_id === 3);
 
   const columns = data.matchData.player_scores.length > 0 ? Object.keys(data.matchData.player_scores[0]) : [];
-  const filteredColumns = columns.filter((column) => column !== 'team' && column !== 'steam_id' && column !== 'team_rounds' && column !== 'team_id');
+  const filteredColumns = columns.filter((column) => {
+    const value = data.matchData.player_scores[0][column];
+    return (
+      column !== 'team' && 
+      column !== 'steam_id' && 
+      column !== 'team_rounds' && 
+      column !== 'team_id' && 
+      typeof value !== 'object'  
+    );
+  });
 
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('kills');
@@ -44,17 +53,8 @@ const DetailedMatchPage = () => {
   const sortedData = stableSort(data.matchData.player_scores, getComparator(order, orderBy));
 
   const teamColors = {
-    team_1: '#87ceeb',  // Light blue for Team 1
-    team_2: '#ffa07a'   // Light salmon for Team 2
-  };
-
-  const renderCellValue = (value) => {
-    if (typeof value === 'object' && value !== null) {
-      return Object.entries(value)
-        .map(([weapon, count]) => `${weapon}: ${count}`)
-        .join(', ');
-    }
-    return value;
+    team_1: '#87ceeb', 
+    team_2: '#ffa07a'   
   };
 
   return (
@@ -64,11 +64,11 @@ const DetailedMatchPage = () => {
       </Typography>
 
       <Typography variant="h6" sx={{ color: team_1 ? teamColors.team_1 : 'inherit' }}>
-        Team 1: {team_1 ? team_1.team : 'N/A'} ({team_1 ? team_1.team_rounds : 'N/A'} rounds)
+        {team_1 ? team_1.team : 'N/A'} {team_1 ? team_1.team_rounds : 'N/A'}
       </Typography>
 
       <Typography variant="h6" sx={{ color: team_2 ? teamColors.team_2 : 'inherit' }}>
-        Team 2: {team_2 ? team_2.team : 'N/A'} ({team_2 ? team_2.team_rounds : 'N/A'} rounds)
+        {team_2 ? team_2.team : 'N/A'} {team_2 ? team_2.team_rounds : 'N/A'}
       </Typography>
 
       <TableContainer sx={{ marginTop: 4 }}>
@@ -89,18 +89,20 @@ const DetailedMatchPage = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedData.map((player) => (
-              <TableRow key={player.steam_id}
-              style={{
-                backgroundColor: player.team_id === 2 ? '#87ceeb' : player.team_id === 3 ? '#ffa07a' : 'inherit'}}>
-                {filteredColumns.map((column) => (
-                  <TableCell key={column}>
-                    {renderCellValue(player[column])}
-                  </TableCell>
-                ))}
-              </TableRow>
+        {sortedData.map((player) => (
+            <TableRow key={player.steam_id}
+            style={{
+                backgroundColor: player.team_id === 2 ? '#87ceeb' : player.team_id === 3 ? '#ffa07a' : 'inherit'
+            }}>
+            {filteredColumns.map((column) => (
+                <TableCell key={column}>
+                {typeof player[column] === 'number' ? Math.round(player[column]) : player[column]}
+                </TableCell>
             ))}
-          </TableBody>
+            </TableRow>
+        ))}
+        </TableBody>
+
         </Table>
       </TableContainer>
 

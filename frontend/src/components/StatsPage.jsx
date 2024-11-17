@@ -35,14 +35,23 @@ const MonthSelector = () => {
       setFilteredData(monthData.data);
     }
   };
+  const calculateKDA = (kills, deaths, assists) => {
+    return deaths === 0 ? (kills + assists).toFixed(2) : ((kills + assists) / deaths).toFixed(2);
+  };
 
   const handleSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
-
+  
     const sortedData = [...filteredData].sort((a, b) => {
+      if (key === 'kda') {
+        const kdaA = calculateKDA(a.kills, a.deaths, a.assists);
+        const kdaB = calculateKDA(b.kills, b.deaths, b.assists);
+        return direction === 'asc' ? kdaA - kdaB : kdaB - kdaA;
+      }
+  
       if (a[key] < b[key]) {
         return direction === 'asc' ? -1 : 1;
       }
@@ -51,14 +60,12 @@ const MonthSelector = () => {
       }
       return 0;
     });
-
+  
     setSortConfig({ key, direction });
     setFilteredData(sortedData);
   };
+  
 
-  const calculateKDA = (kills, deaths, assists) => {
-    return deaths === 0 ? (kills + assists).toFixed(2) : ((kills + assists) / deaths).toFixed(2);
-  };
 
   const matchColumns = [
     { field: 'nickname', headerName: 'Nickname', width: 150 },

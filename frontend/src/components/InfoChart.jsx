@@ -5,21 +5,17 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import { Link } from 'react-router-dom';
 
 const DataTablePage = ({ data }) => {
-  const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('kills');
+  const [order, setOrder] = useState('asc'); 
+  const [orderBy, setOrderBy] = useState('team_id'); 
 
   if (!data || !data.matchData || data.matchData.player_scores.length === 0) {
     return <Typography>No data available</Typography>;
   }
 
-  const columns = ['nickname', 'kills', 'assists', 'deaths', 'damage_done', 'adr', 'enemy_2k', 'enemy_3k'];
+  const columns = ['nickname', 'kills', 'deaths', 'assists', 'KDA', 'HS%', 'UD' , 'ADR','damage', '2K', '3K', ];
 
-  const roundValue = (value) => {
-    if (typeof value === 'number') {
-      return Math.round(value);
-    }
-    return value;
-  };
+
+  const roundValue = (value) => (typeof value === 'number' ? Math.round(value) : value);
 
   const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -38,30 +34,56 @@ const DataTablePage = ({ data }) => {
   };
 
   const getComparator = (order, orderBy) => {
-    return order === 'asc'
-      ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
-      : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
+    return (a, b) => {
+      if (orderBy === 'team_id') {
+        const teamComparison = a.team_id - b.team_id;
+        if (teamComparison !== 0) return teamComparison;
+      }
+  
+      if (order === 'asc') {
+        return a[orderBy] < b[orderBy] ? -1 : a[orderBy] > b[orderBy] ? 1 : 0;
+      } else {
+        return a[orderBy] < b[orderBy] ? 1 : a[orderBy] > b[orderBy] ? -1 : 0;
+      }
+    };
   };
+  
 
   const sortedData = stableSort(data.matchData.player_scores, getComparator(order, orderBy));
-  const team_1 = Array.isArray(data.matchData.player_scores) ? data.matchData.player_scores.find(record => record.team_id === 2) : null;
-  const team_2 = Array.isArray(data.matchData.player_scores) ? data.matchData.player_scores.find(record => record.team_id === 3) : null;
+
+  const teamScores = Array.isArray(data.matchData.player_scores)
+    ? data.matchData.player_scores.reduce(
+        (teams, player) => {
+          teams[player.team_id].team = player.team_name || `Team ${player.team}`;
+          teams[player.team_id].rounds = player.team_rounds;
+          return teams;
+        },
+        { 2: {}, 3: {} }
+      )
+    : {};
 
   return (
     <div>
       <TableContainer component={Paper}>
-      <Typography variant="h6" sx={{ padding: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-  <div style={{ display: 'flex', alignItems: 'center' }}>
-    <div style={{ color: '#87ceeb', marginRight: '16px' }}>{team_1.team} {team_1.rounds}</div>
-    <div style={{ marginRight: '16px' }}>VS</div>
-    <div style={{ color: '#ffa07a' }}>{team_2.team} {team_2.rounds}</div>
-  </div>
-    <Link to="/detailed-match" state={{ data }}>
-    <Button variant="contained" sx={{ marginLeft: 2 }}>
-      View Detailed Match Data
-    </Button>
-  </Link>
-</Typography>
+        <Typography
+          variant="h6"
+          sx={{ padding: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ color: '#87ceeb', marginRight: '16px' }}>
+              {teamScores[2].team} {teamScores[2].rounds}
+            </div>
+            <div style={{ marginRight: '16px' }}>VS</div>
+            <div style={{ color: '#ffa07a' }}>
+              {teamScores[3].team} {teamScores[3].rounds}
+            </div>
+          </div>
+          <Link to="/detailed-match" state={{ data }}>
+            <Button variant="contained" sx={{ marginLeft: 2 }}>
+              View Detailed Match Data
+            </Button>
+          </Link>
+        </Typography>
         <Table>
           <TableHead>
             <TableRow>
@@ -99,3 +121,4 @@ const DataTablePage = ({ data }) => {
 };
 
 export default DataTablePage;
+

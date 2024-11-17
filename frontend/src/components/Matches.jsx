@@ -20,7 +20,7 @@ const SimpleTable = () => {
 
   const dispatch = useDispatch();
   const data = useSelector((state) => state.stats.matches);
-  const selectedMatch = useSelector((state) => state.stats.match); // Access selected match from state
+  const selectedMatch = useSelector((state) => state.stats.match);
 
   useEffect(() => {
     dispatch(initializeMatches());
@@ -36,7 +36,7 @@ const SimpleTable = () => {
     setSelectedRowIndex(index === selectedRowIndex ? null : index);
   
     if (match && match.url) {
-      dispatch(initializeMatch(match.matchid, match.url));  // Dispatch with matchid and url
+      dispatch(initializeMatch(match.matchid, match.url));
     } else {
       console.error(`Match with ID ${match.matchid} has no URL.`);
     }
@@ -63,24 +63,31 @@ const SimpleTable = () => {
       <Table>
         <TableHead>
           <TableRow>
-            {displayHeaders.map((header) => (
+                      {displayHeaders.map((header) => (
               <TableCell key={header}>
-                {header.charAt(0).toUpperCase() + header.slice(1)}
+                {header === 'url' ? 'Match' : header.charAt(0).toUpperCase() + header.slice(1)}
               </TableCell>
             ))}
+
           </TableRow>
         </TableHead>
         <TableBody>
           {filteredRows.map((row, index) => (
             <React.Fragment key={index}>
               <TableRow
-                onClick={() => handleRowClick(index, row)}  // Pass the entire row (match object)
+                onClick={() => handleRowClick(index, row)}
                 style={{ cursor: 'pointer' }}
               >
                 {displayHeaders.map((header) => (
                   <TableCell key={header}>
                     {header === 'url' ? (
                       row[header].split('/').pop().split('.dem_scoreboard')[0]
+                      .replace(/^.*?(\d{2}-\d{2}-\d{2})/, '')
+                      .replace(/_/g, ' ')
+                      .replace(/(\d{2}-\d{2}-\d{2}) \d+ (de)/, '$1 $2')
+                      .replace(/^.*?(\d{2}-\d{2}-\d{2})/, '$1')
+                      .replace(/ de \w+/, '')
+                      .replace(/_/g, ' ')                      
                     ) : (
                       row[header] !== null ? row[header] : 'N/A'
                     )}

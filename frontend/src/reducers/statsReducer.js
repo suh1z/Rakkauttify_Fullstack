@@ -1,8 +1,35 @@
+/* eslint-disable no-unused-vars */
 import { createSlice } from '@reduxjs/toolkit';
 import statsService from '../services/statsService';
 
 const excludedKeys = ['steamid64', 'name', 'team', 'matchid', 'mapnumber'];
 const summedKey = ['played'];
+const extendPlayerScores = (playerScores) =>
+  playerScores.map((player) => {
+    const newValues = {
+      nickname: player.nickname,
+      kills: player.adr,
+      deaths: player.deaths,
+      assists: player.assits,
+      KDA: ((player.kills + player.assists) / (player.deaths || 1)).toFixed(2),
+      'HS%': player.kills > 0 ? ((player.headshot_kills / player.kills) * 100).toFixed(1) + '%' : '0%',
+      UD: player.burn_damage_dealt + player.he_damage_dealt,
+      damage: player.damage_done,
+      '2K': player.enemy_2k,
+      '3K': player.enemy_3k,
+      '4K': player.enemy_4k,
+      '5K': player.enemy_5k,
+      ADR: player.adr
+    };
+
+    const {headshot_kills, burn_damage_dealt, he_damage_dealt, damage_done, enemy_2k, enemy_3k, enemy_4k, enemy_5k, adr, ...rest } = player;
+
+    return {
+      ...newValues,
+      ...rest
+    };
+  });
+
 
 const cardSlice = createSlice({
   name: 'stats',
@@ -33,7 +60,17 @@ const cardSlice = createSlice({
       const { matchId, matchData } = action.payload;
       const match = state.matches.find((item) => item.matchid === matchId);
 
-      state.match = match ? { ...match, matchData } : null;
+      if (match) {
+        state.match = {
+          ...match,
+          matchData: {
+            ...matchData,
+            player_scores: extendPlayerScores(matchData.player_scores),
+          },
+        };
+      } else {
+        state.match = null;
+      }
     },
     setStatistics(state, action) {
       const { recentGamesCount } = action.payload;
