@@ -12,7 +12,7 @@ const DataTablePage = ({ data }) => {
     return <Typography>No data available</Typography>;
   }
 
-  const columns = ['nickname', 'kills', 'deaths', 'assists', 'KD', 'HS%', 'UD', 'ADR','Faceit Elo'];
+  const columns = ['avatar', 'nickname', 'kills', 'deaths', 'assists', 'KD', 'HS%', 'UD', 'ADR', 'Faceit Elo'];
 
   const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -36,6 +36,26 @@ const DataTablePage = ({ data }) => {
     }
     return teams;
   }, {});
+
+  // Function to render the avatar or a black square if no avatar is available
+  const renderAvatar = (avatarUrl) => {
+    const defaultAvatarStyle = {
+      width: 40,
+      height: 40,
+      backgroundColor: 'black',
+      borderRadius: '50%',
+    };
+
+    return avatarUrl ? (
+      <img
+        src={avatarUrl}
+        alt="avatar"
+        style={{ width: 40, height: 40, borderRadius: '50%' }}
+      />
+    ) : (
+      <div style={defaultAvatarStyle}></div>
+    );
+  };
 
   return (
     <div>
@@ -63,7 +83,10 @@ const DataTablePage = ({ data }) => {
       </Typography>
 
       <CustomTable
-        data={data.matchData.player_scores}
+        data={data.matchData.player_scores.map((player) => ({
+          ...player,
+          avatar: renderAvatar(player.faceit?.avatar), // Render avatar from faceit data
+        }))}
         columns={columns}
         order={order}
         orderBy={orderBy}
