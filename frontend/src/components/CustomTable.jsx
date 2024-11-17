@@ -27,7 +27,6 @@ const CustomTable = ({ data, columns, order, orderBy, onRequestSort, rowColor })
 
   const sortedData = stableSort(data, getComparator(order, orderBy));
 
-  // Function to find the max value for each column
   const getMaxValueForColumn = (column) => {
     const values = data.map((row) => row[column]);
     return Math.max(...values);
@@ -39,7 +38,11 @@ const CustomTable = ({ data, columns, order, orderBy, onRequestSort, rowColor })
         <TableHead>
           <TableRow>
             {columns.map((column) => (
-              <TableCell key={column} sortDirection={orderBy === column ? order : false}>
+              <TableCell
+                key={column}
+                sortDirection={orderBy === column ? order : false}
+                style={{ borderBottom: 'none' }} 
+              >
                 <TableSortLabel
                   active={orderBy === column}
                   direction={orderBy === column ? order : 'asc'}
@@ -57,15 +60,18 @@ const CustomTable = ({ data, columns, order, orderBy, onRequestSort, rowColor })
               key={row.steam_id || index}
               style={{
                 backgroundColor: rowColor ? rowColor(row, index) : 'inherit',
+                borderBottom: 'none',
               }}
             >
               {columns.map((column) => {
-                const maxValue = getMaxValueForColumn(column);  // Get the max value for the column
+                const maxValue = getMaxValueForColumn(column);
                 return (
                   <TableCell
                     key={column}
                     style={{
-                      fontWeight: row[column] === maxValue ? 'bold' : 'normal',  // Apply bold to max value
+                      fontWeight: row[column] === maxValue ? 'bold' : 'normal',
+                      color: 'black',
+                      borderBottom: 'none',
                     }}
                   >
                     {typeof row[column] === 'number' ? Math.round(row[column]) : row[column]}

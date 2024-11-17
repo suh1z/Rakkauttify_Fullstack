@@ -21,11 +21,18 @@ const DataTablePage = ({ data }) => {
   };
 
   const rowColor = (row, index) => {
-    if (row.team_id === 2) return index % 2 === 0 ? '#ba68c8' : '#ab47bc';
-    if (row.team_id === 3) return index % 2 === 0 ? '#039be5' : '#0288d1';
+
+    if (row.team_id === 2) {
+      return index % 2 === 0 ? '#ffca28' : '#ffc107';
+    }
+    
+    if (row.team_id === 3) {
+      return index % 2 === 0 ? '#29b6f6' : '#03a9f4'; 
+    }
+    
     return 'inherit';
   };
-
+  
   const teamScores = data.matchData.player_scores.reduce((teams, player) => {
     const teamId = player.team_id;
     if (!teams[teamId]) {
@@ -37,7 +44,6 @@ const DataTablePage = ({ data }) => {
     return teams;
   }, {});
 
-  // Function to render the avatar or a black square if no avatar is available
   const renderAvatar = (avatarUrl) => {
     const defaultAvatarStyle = {
       width: 40,

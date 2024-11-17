@@ -22,13 +22,13 @@ const DetailedMatchPage = () => {
 
   const columns = Object.keys(data.matchData.player_scores[0]).filter(
     (column) =>
-      !['team', 'steam_id', 'team_rounds', 'team_id'].includes(column) &&
+      !['team', 'steam_id', 'team_rounds', 'team_id','avatar'].includes(column) &&
       typeof data.matchData.player_scores[0][column] !== 'object'
   );
 
   const rowColor = (row, index) => {
-    if (row.team_id === 2) return index % 2 === 0 ? '#ba68c8' : '#ab47bc';
-    if (row.team_id === 3) return index % 2 === 0 ? '#039be5' : '#0288d1';
+    if (row.team_id === 2) return index % 2 === 0 ? '#ffca28' : '#ffc107';
+    if (row.team_id === 3) return index % 2 === 0 ? '#29b6f6' : '#03a9f4';
     return 'inherit';
   };
 
