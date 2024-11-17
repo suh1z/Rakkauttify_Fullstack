@@ -1,58 +1,32 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  TableSortLabel,
-} from '@mui/material'
+// DataTablePage.js
+import { useState } from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TableSortLabel, Button } from '@mui/material';
+import { Link } from 'react-router-dom';
 
-const DataTable = ({ data }) => {
+const DataTablePage = ({ data }) => {
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('kills');
 
-  // Always call hooks at the top level
-  const [order, setOrder] = useState('asc'); // Ascending or descending
-  const [orderBy, setOrderBy] = useState('kills'); // Default column to sort by
-
-  // If no data, return early to display "No data available" message
   if (!data || !data.matchData || data.matchData.player_scores.length === 0) {
     return <Typography>No data available</Typography>;
   }
 
-  // Define the columns you want to display in the table
-  const columns = [
-    'nickname',
-    'kills',
-    'assists',
-    'deaths',
-    'damage_done',
-    'adr',
-    'enemy_2k',
-    'enemy_3k',
-    'team_rounds',
-    'team'
-  ]
+  const columns = ['nickname', 'kills', 'assists', 'deaths', 'damage_done', 'adr', 'enemy_2k', 'enemy_3k'];
 
-  // Function to round numeric values
   const roundValue = (value) => {
     if (typeof value === 'number') {
-      return Math.round(value); // Round to nearest integer
+      return Math.round(value);
     }
-    return value; // Leave non-numeric values unchanged
-  }
+    return value;
+  };
 
-  // Function to handle sorting
   const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
 
-  // Function to sort data
   const stableSort = (array, comparator) => {
     const stabilizedThis = array.map((el, index) => [el, index]);
     stabilizedThis.sort((a, b) => {
@@ -63,20 +37,31 @@ const DataTable = ({ data }) => {
     return stabilizedThis.map((el) => el[0]);
   };
 
-  // Comparator function for sorting
   const getComparator = (order, orderBy) => {
-    return order === 'desc'
+    return order === 'asc'
       ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
       : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
   };
 
-  // Sort the player scores based on the current sorting state
   const sortedData = stableSort(data.matchData.player_scores, getComparator(order, orderBy));
+  const team_1 = Array.isArray(data.matchData.player_scores) ? data.matchData.player_scores.find(record => record.team_id === 2) : null;
+  const team_2 = Array.isArray(data.matchData.player_scores) ? data.matchData.player_scores.find(record => record.team_id === 3) : null;
 
   return (
     <div>
-
       <TableContainer component={Paper}>
+      <Typography variant="h6" sx={{ padding: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <div style={{ color: '#87ceeb', marginRight: '16px' }}>{team_1.team} {team_1.rounds}</div>
+    <div style={{ marginRight: '16px' }}>VS</div>
+    <div style={{ color: '#ffa07a' }}>{team_2.team} {team_2.rounds}</div>
+  </div>
+    <Link to="/detailed-match" state={{ data }}>
+    <Button variant="contained" sx={{ marginLeft: 2 }}>
+      View Detailed Match Data
+    </Button>
+  </Link>
+</Typography>
         <Table>
           <TableHead>
             <TableRow>
@@ -95,11 +80,14 @@ const DataTable = ({ data }) => {
           </TableHead>
           <TableBody>
             {sortedData.map((player) => (
-              <TableRow key={player.steam_id}>
+              <TableRow
+                key={player.steam_id}
+                style={{
+                  backgroundColor: player.team_id === 2 ? '#87ceeb' : player.team_id === 3 ? '#ffa07a' : 'inherit',
+                }}
+              >
                 {columns.map((column) => (
-                  <TableCell key={column}>
-                    {roundValue(player[column])}
-                  </TableCell>
+                  <TableCell key={column}>{roundValue(player[column])}</TableCell>
                 ))}
               </TableRow>
             ))}
@@ -110,4 +98,4 @@ const DataTable = ({ data }) => {
   );
 };
 
-export default DataTable;
+export default DataTablePage;

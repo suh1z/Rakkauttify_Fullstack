@@ -35,7 +35,6 @@ const SimpleTable = () => {
   const handleRowClick = (index, match) => {
     setSelectedRowIndex(index === selectedRowIndex ? null : index);
   
-    // Ensure match object is passed with matchid and url
     if (match && match.url) {
       dispatch(initializeMatch(match.matchid, match.url));  // Dispatch with matchid and url
     } else {
@@ -91,7 +90,6 @@ const SimpleTable = () => {
               {selectedRowIndex === index && (
                 <TableRow>
                   <TableCell colSpan={displayHeaders.length}>
-                    {/* Pass selected match to Stats component */}
                     {selectedMatch && <Stats match={selectedMatch} />}
                   </TableCell>
                 </TableRow>

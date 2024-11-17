@@ -66,11 +66,6 @@ const Navbar = (props) => {
                   Player Data
                 </Link>
               </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
-                <Link to="/inhouse" className="link">
-                  Inhouse
-                </Link>
-              </MenuItem>
               {props.user && (
                 <MenuItem onClick={handleLogout}>
                   <Link to="/" className="link">
@@ -91,9 +86,6 @@ const Navbar = (props) => {
               </Link>
               <Link to="/monthdata" className="link">
                 Month Data
-              </Link>
-              <Link to="/inhouse" className="link">
-                Inhouse
               </Link>
               {props.user && (
                 <Link to="/" onClick={handleLogout} className="link">

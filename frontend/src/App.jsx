@@ -10,6 +10,7 @@ import { initializeUser } from './reducers/userReducer'
 import { initializeStats } from './reducers/statsReducer'
 import Statistics from './components/Statistics'
 import StatsPage from './components/StatsPage'
+import DetailedMatchPage from './components/DetailedMatchPage'
 
 function App() {
   const dispatch = useDispatch()
@@ -53,8 +54,8 @@ function App() {
           element={ <StatsPage /> }
         />
         <Route
-          path="/inhouse"
-          element={ <div>TBA</div> }
+          path="/detailed-match"
+          element={ <DetailedMatchPage/> }
         />
       </Routes>
     </Container>
