@@ -1,29 +1,15 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useLocation } from 'react-router-dom';
-import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Button } from '@mui/material';
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Typography, Button } from '@mui/material';
+import CustomTable from './CustomTable';
 
 const DetailedMatchPage = () => {
   const location = useLocation();
-  const { data } = location.state || {}; 
+  const { data } = location.state || {};
   if (!data || !data.matchData) {
     return <Typography>No data available</Typography>;
   }
-
-  const team_1 = data.matchData.player_scores.find(record => record.team_id === 2);
-  const team_2 = data.matchData.player_scores.find(record => record.team_id === 3);
-
-  const columns = data.matchData.player_scores.length > 0 ? Object.keys(data.matchData.player_scores[0]) : [];
-  const filteredColumns = columns.filter((column) => {
-    const value = data.matchData.player_scores[0][column];
-    return (
-      column !== 'team' && 
-      column !== 'steam_id' && 
-      column !== 'team_rounds' && 
-      column !== 'team_id' && 
-      typeof value !== 'object'  
-    );
-  });
 
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('kills');
@@ -34,82 +20,34 @@ const DetailedMatchPage = () => {
     setOrderBy(property);
   };
 
-  const stableSort = (array, comparator) => {
-    const stabilizedThis = array.map((el, index) => [el, index]);
-    stabilizedThis.sort((a, b) => {
-      const order = comparator(a[0], b[0]);
-      if (order !== 0) return order;
-      return a[1] - b[1];
-    });
-    return stabilizedThis.map((el) => el[0]);
+  const columns = Object.keys(data.matchData.player_scores[0]).filter(
+    (column) =>
+      !['team', 'steam_id', 'team_rounds', 'team_id'].includes(column) &&
+      typeof data.matchData.player_scores[0][column] !== 'object'
+  );
+
+  const rowColor = (row, index) => {
+    if (row.team_id === 2) return index % 2 === 0 ? '#ba68c8' : '#ab47bc';
+    if (row.team_id === 3) return index % 2 === 0 ? '#039be5' : '#0288d1';
+    return 'inherit';
   };
 
-  const getComparator = (order, orderBy) => {
-    return order === 'desc'
-      ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
-      : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
-  };
-
-  const sortedData = stableSort(data.matchData.player_scores, getComparator(order, orderBy));
-
-  const teamColors = {
-    team_1: '#87ceeb', 
-    team_2: '#ffa07a'   
-  };
 
   return (
-    <Paper sx={{ padding: 2 }}>
-      <Typography variant="h4" sx={{ marginBottom: 2 }}>
-        Detailed Match View
-      </Typography>
-
-      <Typography variant="h6" sx={{ color: team_1 ? teamColors.team_1 : 'inherit' }}>
-        {team_1 ? team_1.team : 'N/A'} {team_1 ? team_1.team_rounds : 'N/A'}
-      </Typography>
-
-      <Typography variant="h6" sx={{ color: team_2 ? teamColors.team_2 : 'inherit' }}>
-        {team_2 ? team_2.team : 'N/A'} {team_2 ? team_2.team_rounds : 'N/A'}
-      </Typography>
-
-      <TableContainer sx={{ marginTop: 4 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              {filteredColumns.map((column) => (
-                <TableCell key={column} sortDirection={orderBy === column ? order : false}>
-                  <TableSortLabel
-                    active={orderBy === column}
-                    direction={orderBy === column ? order : 'asc'}
-                    onClick={() => handleRequestSort(column)}
-                  >
-                    {column.charAt(0).toUpperCase() + column.slice(1)}
-                  </TableSortLabel>
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-        {sortedData.map((player) => (
-            <TableRow key={player.steam_id}
-            style={{
-                backgroundColor: player.team_id === 2 ? '#87ceeb' : player.team_id === 3 ? '#ffa07a' : 'inherit'
-            }}>
-            {filteredColumns.map((column) => (
-                <TableCell key={column}>
-                {typeof player[column] === 'number' ? Math.round(player[column]) : player[column]}
-                </TableCell>
-            ))}
-            </TableRow>
-        ))}
-        </TableBody>
-
-        </Table>
-      </TableContainer>
-
-      <Button variant="contained" sx={{ marginTop: 2 }} onClick={() => window.history.back()}>
+    <div>
+      <Typography variant="h4">Detailed Match View</Typography>
+      <CustomTable
+        data={data.matchData.player_scores}
+        columns={columns}
+        order={order}
+        orderBy={orderBy}
+        onRequestSort={handleRequestSort}
+        rowColor={rowColor}
+      />
+      <Button variant="contained" onClick={() => window.history.back()} sx={{ marginTop: 2 }}>
         Back to Previous Page
       </Button>
-    </Paper>
+    </div>
   );
 };
 

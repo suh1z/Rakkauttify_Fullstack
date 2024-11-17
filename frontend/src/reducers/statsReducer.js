@@ -6,20 +6,24 @@ const excludedKeys = ['steamid64', 'name', 'team', 'matchid', 'mapnumber'];
 const summedKey = ['played'];
 const extendPlayerScores = (playerScores) =>
   playerScores.map((player) => {
+    const faceitAvatar = player.faceit?.avatar || null;
+    const faceitElo = player.faceit?.elo || 0;
     const newValues = {
+      'avatar': faceitAvatar,
       nickname: player.nickname,
       kills: player.adr,
       deaths: player.deaths,
       assists: player.assits,
-      KDA: ((player.kills + player.assists) / (player.deaths || 1)).toFixed(2),
+      KD: ((player.kills) / (player.deaths || 1)).toFixed(2),
       'HS%': player.kills > 0 ? ((player.headshot_kills / player.kills) * 100).toFixed(1) + '%' : '0%',
       UD: player.burn_damage_dealt + player.he_damage_dealt,
-      damage: player.damage_done,
+      ADR: player.adr,
       '2K': player.enemy_2k,
       '3K': player.enemy_3k,
       '4K': player.enemy_4k,
       '5K': player.enemy_5k,
-      ADR: player.adr
+      damage: player.damage_done,
+      'Faceit Elo':faceitElo,
     };
 
     const {headshot_kills, burn_damage_dealt, he_damage_dealt, damage_done, enemy_2k, enemy_3k, enemy_4k, enemy_5k, adr, ...rest } = player;
@@ -59,7 +63,6 @@ const cardSlice = createSlice({
     setMatch(state, action) {
       const { matchId, matchData } = action.payload;
       const match = state.matches.find((item) => item.matchid === matchId);
-
       if (match) {
         state.match = {
           ...match,
@@ -152,7 +155,7 @@ export const initializeMatch = (matchId, url) => async (dispatch) => {
   }
   try {
     const matchData = await statsService.fetchMatchData(url);
-    dispatch(setMatch({ matchId, matchData }));
+    dispatch(setMatch({matchData, matchId }));
   } catch (error) {
     console.error('Error fetching match data:', error);
   }

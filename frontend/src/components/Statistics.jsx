@@ -33,13 +33,12 @@ const Statistics = () => {
     { field: 'deaths', headerName: 'Deaths', width: 80 },
     { field: 'assists', headerName: 'Assists', width: 80 },
     { field: 'adr', headerName: 'ADR', width: 100 },
-    { field: 'damage_done', headerName: 'Damage Done', width: 120 },
-    { field: 'damage_received', headerName: 'Damage Received', width: 130 },
+    { field: 'hsPercent', headerName: 'HS %', width: 120 },
     { field: 'clutches', headerName: 'Clutches', width: 100 },
     { field: 'mvps', headerName: 'MVPs', width: 80 },
     { field: 'team', headerName: 'Team', width: 120 },
   ];
-  
+
   const rows = matches.map((match, index) => {
     return {
       id: index,
@@ -51,8 +50,7 @@ const Statistics = () => {
       deaths: match.deaths,
       assists: match.assists,
       adr: match.adr.toFixed(2), 
-      damage_done: match.damage_done,
-      damage_received: match.damage_received,
+      hsPercent: match.kills > 0 ? Math.round((match.headshot_kills / match.kills) * 100) : 0, // Calculate HS percentage as a whole number
       clutches: match.clutch_v1_wins + match.clutch_v2_wins + match.clutch_v3_wins + match.clutch_v4_wins + match.clutch_v5_wins,
       mvps: match.mvps,
       team: match.team,

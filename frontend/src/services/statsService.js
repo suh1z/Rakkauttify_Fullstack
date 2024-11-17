@@ -25,6 +25,7 @@ const getMatches = async () => {
 const fetchMatchData = async (url) => {
   try {
     const response = await axios.get(`${baseUrl}/fetch-match-data/fetch-match-data?url=${encodeURIComponent(url)}`);
+
     return response.data;
   } catch (error) {
     console.error('Error fetching match data from URL:', error);
