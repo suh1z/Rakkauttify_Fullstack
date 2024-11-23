@@ -1,5 +1,5 @@
-import { createTheme } from '@mui/material/styles'
-import { grey, orange } from '@mui/material/colors'
+import { createTheme } from '@mui/material/styles';
+import { grey, orange } from '@mui/material/colors';
 
 const theme = createTheme({
   palette: {
@@ -48,6 +48,9 @@ const theme = createTheme({
           '& .MuiDataGrid-columnHeader': {
             fontSize: '1rem',
             padding: '4px',
+            backgroundColor: grey[700],
+            color: grey[50],
+            fontWeight: 'bold',
           },
           '& .MuiDataGrid-row': {
             borderBottom: '1px solid rgba(224, 224, 224, 1)',
@@ -74,7 +77,6 @@ const theme = createTheme({
           },
           '& .MuiOutlinedInput-root': {
             backgroundColor: grey[800],
-
             fontSize: '0.875rem',
             padding: '0 8px',
             height: '40px',
@@ -176,6 +178,6 @@ const theme = createTheme({
       },
     },
   },
-})
+});
 
-export default theme
+export default theme;
