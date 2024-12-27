@@ -48,11 +48,12 @@ const CustomTable = ({ data, columns, order, orderBy, onRequestSort, rowColor })
                   direction={orderBy === column ? order : 'asc'}
                   onClick={() => onRequestSort(column)}
                 >
-                  {column.charAt(0).toUpperCase() + column.slice(1)}
+                  {column.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())} {/* Replace underscores with spaces and capitalize the first letter */}
                 </TableSortLabel>
               </TableCell>
             ))}
           </TableRow>
+
         </TableHead>
         <TableBody>
           {sortedData.map((row, index) => (
