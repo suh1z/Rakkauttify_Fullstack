@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { initializePlayers } from '../reducers/statsReducer';
-import { MenuItem, Select, FormControl, Typography } from '@mui/material';
+import { MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 
 const PlayerSelector = ({ players, onPlayerSelect }) => {
   const dispatch = useDispatch();
@@ -11,18 +11,21 @@ const PlayerSelector = ({ players, onPlayerSelect }) => {
     dispatch(initializePlayers());
   }, [dispatch]);
 
+  const sortedPlayers = [...players].sort((a, b) => a.nickname.localeCompare(b.nickname));
+
+  const defaultValue = sortedPlayers.length > 0 ? sortedPlayers[0].nickname : '';
+
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
-      <Typography variant="h6" style={{ marginRight: '10px' }}>
-        Select Player
-      </Typography>
       {players.length === 0 ? (
         <p>No players found.</p>
       ) : (
         <FormControl>
+          <InputLabel>Player</InputLabel>
           <Select
             onChange={(e) => onPlayerSelect(e.target.value)}
-            defaultValue=""
+            defaultValue={defaultValue}
+            label="Player"
             MenuProps={{
               PaperProps: {
                 style: {
@@ -32,9 +35,6 @@ const PlayerSelector = ({ players, onPlayerSelect }) => {
               },
             }}
           >
-            <MenuItem value="" disabled style={{ color: '#999' }}>
-              Select a player
-            </MenuItem>
             {players.map((player) => (
               <MenuItem key={player.nickname} value={player.nickname}>
                 {player.nickname}

@@ -23,8 +23,8 @@ const DataTablePage = ({ data }) => {
   const rowColor = (row, index) => {
 
     if (row.team_id === 2) {
-      return index % 2 === 0 ? '#ffca28' : '#ffc107';
-    }
+      return index % 2 === 0 ? '#f4b04d' : '#ffb74d';
+    }    
     
     if (row.team_id === 3) {
       return index % 2 === 0 ? '#29b6f6' : '#03a9f4'; 
@@ -62,6 +62,7 @@ const DataTablePage = ({ data }) => {
       <div style={defaultAvatarStyle}></div>
     );
   };
+  const demoUrl = data.demo_url;
 
   return (
     <div>
@@ -83,15 +84,20 @@ const DataTablePage = ({ data }) => {
             {teamScores[3]?.team} {teamScores[3]?.rounds}
           </div>
         </div>
-        <Link to="/detailed-match" state={{ data }} style={{ textDecoration: 'none' }}>
-          <Button variant="contained">View Detailed Match Data</Button>
-        </Link>
+        <div>
+          <a href={demoUrl} download style={{ textDecoration: 'none', marginRight: '8px' }}>
+            <Button variant="contained">Download Demo</Button>
+          </a>
+          <Link to="/detailed-match" state={{ data }} style={{ textDecoration: 'none' }}>
+            <Button variant="contained">View Detailed Match Data</Button>
+          </Link>
+        </div>
       </Typography>
 
       <CustomTable
         data={data.matchData.player_scores.map((player) => ({
           ...player,
-          avatar: renderAvatar(player.faceit?.avatar), // Render avatar from faceit data
+          avatar: renderAvatar(player.faceit?.avatar),
         }))}
         columns={columns}
         order={order}

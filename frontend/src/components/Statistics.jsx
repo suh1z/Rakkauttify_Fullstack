@@ -73,18 +73,12 @@ const Statistics = () => {
   const rows = useMemo(() => {
     return matches.map((match, index) => {
       const weaponStats = allWeapons.reduce((acc, weapon) => {
-        acc[`${weapon}_kills`] = match.kills_by_weapon?.[weapon] || 0;
-        acc[`${weapon}_deaths`] = match.deaths_by_weapon?.[weapon] || 0;
+        acc[`${weapon}_kills`] = match.kills_by_weapon?.[weapon] ?? 0;
+        acc[`${weapon}_deaths`] = match.deaths_by_weapon?.[weapon] ?? 0;
         return acc;
       }, {});
-
-      const additionalStats = columns.reduce((acc, column) => {
-        const value = match[column.field] !== undefined ? match[column.field] : 0;
-        acc[column.field] = typeof value === 'number' ? Math.round(value) : value;
-        return acc;
-      }, {});
-
-      return {
+  
+      const generalStats = {
         id: index,
         date: match.date || 'N/A',
         map: match.map || 'Unknown',
@@ -95,11 +89,24 @@ const Statistics = () => {
         adr: match.adr !== undefined ? Math.round(match.adr) : 0,
         headshot_kills: match.headshot_kills || 0,
         headshot_deaths: match.headshot_deaths || 0,
+      };
+  
+      const dynamicStats = columns.reduce((acc, column) => {
+        const field = column.field;
+        if (!(field in generalStats) && !(field in weaponStats)) {
+          acc[field] = match[field] ?? 0;
+        }
+        return acc;
+      }, {});
+  
+      return {
+        ...generalStats,
         ...weaponStats,
-        ...additionalStats,
+        ...dynamicStats,
       };
     });
   }, [matches, allWeapons, columns]);
+  
 
   if (matches.length === 0) {
     return <CircularProgress />;
@@ -107,7 +114,7 @@ const Statistics = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+      <div style={{ label: 'Player', display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
         <PlayerSelector
           players={players.filter((player) =>
             player.nickname.toLowerCase().includes(filterText.toLowerCase())

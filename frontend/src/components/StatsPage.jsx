@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { initializeMonths } from '../reducers/statsReducer';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, MenuItem, Select, FormControl, InputLabel, CircularProgress, IconButton } from '@mui/material';
 import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
+import Pie from './PieChart';
 
 const MonthSelector = () => {
   const dispatch = useDispatch();
@@ -36,6 +37,30 @@ const MonthSelector = () => {
       setFilteredData(processData(monthData.data));
     }
   };
+  const aggregateMapData = (data) => {
+    const mapStats = {};
+
+    data.forEach((row) => {
+      const map = row.map_name || 'Unknown';
+      if (!mapStats[map]) {
+        mapStats[map] = { matches_played: 0, kills: 0, deaths: 0, adr: 0 };
+      }
+      mapStats[map].matches_played += row.matches_played || 0;
+      mapStats[map].kills += row.kills || 0;
+      mapStats[map].deaths += row.deaths || 0;
+      mapStats[map].adr += row.adr || 0;
+    });
+
+    Object.keys(mapStats).forEach((map) => {
+      if (mapStats[map].matches_played > 0) {
+        mapStats[map].adr = (mapStats[map].adr / mapStats[map].matches_played).toFixed(2);
+      }
+    });
+
+    return mapStats;
+  };
+
+  const mapData = aggregateMapData(filteredData);
 
   const processData = (data) => {
     return data.map((row) => {
@@ -45,7 +70,7 @@ const MonthSelector = () => {
         kda: calculateKD(row.kills, row.deaths),
         hs_percent: calculateHSPercent(row.headshot_kills, row.kills),
         kr: calculateKR(row.kills, row.rounds_played),
-        total_clutches: calculateClutches(row), // Make sure this value is correct
+        total_clutches: calculateClutches(row),
         entry_win_percent: calculateEntryWinPercent(row.entry_count, row.entry_wins),
         ud: calculateUD(row.he_damage_dealt, row.burn_damage_dealt),
         ef: calculateEF(row.enemies_full_flashed, row.enemies_half_flashed),
@@ -131,6 +156,7 @@ const MonthSelector = () => {
 
   const matchColumns = [
     { field: 'nickname', headerName: 'Nickname', width: 150 },
+    { field: 'matches_played', headerName: 'Matches Played', width: 150 },
     { field: 'match_win_percent', headerName: 'Match Win %', width: 150 },
     { field: 'kills', headerName: 'Kills', width: 80 },
     { field: 'deaths', headerName: 'Deaths', width: 80 },
@@ -149,65 +175,68 @@ const MonthSelector = () => {
   }
 
   return (
+   // <><div>
+    //  <Pie playerName={selectedMonth} mapData={mapData} />
+   // </div>
     <div>
-      <FormControl>
-        <InputLabel>Month</InputLabel>
-        <Select
-          value={selectedMonth}
-          label="Month"
-          onChange={handleMonthChange}
-          MenuProps={{
-            PaperProps: {
-              style: {
-                width: '100px',
+        <FormControl>
+          <InputLabel>Month</InputLabel>
+          <Select
+            value={selectedMonth}
+            label="Month"
+            onChange={handleMonthChange}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  width: '100px',
+                },
               },
-            },
-          }}
-        >
-          {[...months]
-            .filter(month => month.month !== 'players')
-            .sort((a, b) => new Date(b.month) - new Date(a.month))
-            .map((month) => (
-              <MenuItem key={month.month} value={month.month}>
-                {month.month}
-              </MenuItem>
-            ))}
-        </Select>
-      </FormControl>
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              {matchColumns.map((column) => (
-                <TableCell key={column.field} sortDirection={sortConfig.key === column.field ? sortConfig.direction : false}>
-                  <span>{column.headerName}</span>
-                  <IconButton onClick={() => handleSort(column.field)} size="small">
-                    {sortConfig.key === column.field && sortConfig.direction === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-                  </IconButton>
-                </TableCell>
+            }}
+          >
+            {[...months]
+              .filter(month => month.month !== 'players')
+              .sort((a, b) => new Date(b.month) - new Date(a.month))
+              .map((month) => (
+                <MenuItem key={month.month} value={month.month}>
+                  {month.month}
+                </MenuItem>
               ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredData.length === 0 ? (
+          </Select>
+        </FormControl>
+
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={matchColumns.length}>No data available for the selected month.</TableCell>
+                {matchColumns.map((column) => (
+                  <TableCell key={column.field} sortDirection={sortConfig.key === column.field ? sortConfig.direction : false}>
+                    <span>{column.headerName}</span>
+                    <IconButton onClick={() => handleSort(column.field)} size="small">
+                      {sortConfig.key === column.field && sortConfig.direction === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+                    </IconButton>
+                  </TableCell>
+                ))}
               </TableRow>
-            ) : (
-              filteredData.map((row, index) => (
-                <TableRow key={index}>
-                  {matchColumns.map((column) => {
-                    const value = row[column.field];
-                    return <TableCell key={column.field}>{value}</TableCell>;
-                  })}
+            </TableHead>
+            <TableBody>
+              {filteredData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={matchColumns.length}>No data available for the selected month.</TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+              ) : (
+                filteredData.map((row, index) => (
+                  <TableRow key={index}>
+                    {matchColumns.map((column) => {
+                      const value = row[column.field];
+                      return <TableCell key={column.field}>{value}</TableCell>;
+                    })}
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>//</>
   );
 };
 

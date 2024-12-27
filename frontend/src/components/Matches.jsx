@@ -49,8 +49,7 @@ const SimpleTable = () => {
   );
 
 
-  
-  const displayHeaders = headers.filter(header => header !== 'matchid');
+  const displayHeaders = headers.filter((header) => header !== 'demo_url' && header !== 'matchid');
 
   return (
     <TableContainer component={Paper}>

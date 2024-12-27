@@ -27,7 +27,7 @@ const DetailedMatchPage = () => {
   );
 
   const rowColor = (row, index) => {
-    if (row.team_id === 2) return index % 2 === 0 ? '#ffca28' : '#ffc107';
+    if (row.team_id === 2) return index % 2 === 0 ? '#f4b04d' : '#ffb74d';
     if (row.team_id === 3) return index % 2 === 0 ? '#29b6f6' : '#03a9f4';
     return 'inherit';
   };
