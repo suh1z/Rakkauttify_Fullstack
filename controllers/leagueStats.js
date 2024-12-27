@@ -135,29 +135,23 @@ leagueRouter.get("/fetch-match-data", async (req, res) => {
             return { steam_id: steamId, nickname: 'Unknown', elo: 0, avatar: null };
           } else {
             console.error(`Error fetching Faceit data for ${steamId}:`, error.message);
-            return { steam_id: steamId, nickname: 'Unknown', elo: 0, avatar: null }; // return empty profile on error
+            return { steam_id: steamId, nickname: 'Unknown', elo: 0, avatar: null };
           }
         }
       })
     );
 
 
-    // Combine match data with faceit profiles
     const combinedMatchData = {
       ...matchData,
       player_scores: matchData.player_scores.map(player => {
-        // Log the player to debug matching
-        console.log("Matching player:", player);
         
-        // Find the corresponding Faceit profile for each player
         const faceitProfile = faceitProfiles.find(
           profile => profile && profile.steam_id === player.steam_id
         );
 
-        // Log the profile being matched
         console.log("Found Faceit profile:", faceitProfile);
 
-        // Return the player data with the combined Faceit profile data
         return {
           ...player,
           faceit: faceitProfile || { steam_id: player.steam_id, nickname: 'Unknown', elo: 0, avatar: null }

@@ -12,7 +12,7 @@ const DataTablePage = ({ data }) => {
     return <Typography>No data available</Typography>;
   }
 
-  const columns = ['avatar', 'nickname', 'kills', 'deaths', 'assists', 'KD', 'HS%', 'UD', 'ADR', 'Faceit Elo'];
+  const columns = ['avatar', 'nickname', 'kills', 'deaths', 'assists', 'KD', 'HS%', 'UD', 'ADR', 'Faceit Elo', 'Rrating'];
 
   const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -98,7 +98,8 @@ const DataTablePage = ({ data }) => {
         data={data.matchData.player_scores.map((player) => ({
           ...player,
           avatar: renderAvatar(player.faceit?.avatar),
-        }))}
+          Rrating: (parseFloat(player.rrating) || 0).toFixed(2),
+                }))}
         columns={columns}
         order={order}
         orderBy={orderBy}

@@ -8,6 +8,8 @@ const extendPlayerScores = (playerScores) =>
   playerScores.map((player) => {
     const faceitAvatar = player.faceit?.avatar || null;
     const faceitElo = player.faceit?.elo || 0;
+    const Rrating = parseFloat(player.rrating);
+    const validRrating = isNaN(Rrating) ? 0 : Rrating.toFixed(2);
     const newValues = {
       'avatar': faceitAvatar,
       nickname: player.nickname,
@@ -24,6 +26,7 @@ const extendPlayerScores = (playerScores) =>
       '5K': player.enemy_5k,
       damage: player.damage_done,
       'Faceit Elo':faceitElo,
+      'Rrating': validRrating,
     };
 
     const {headshot_kills, burn_damage_dealt, he_damage_dealt, damage_done, enemy_2k, enemy_3k, enemy_4k, enemy_5k, adr, ...rest } = player;
@@ -69,6 +72,7 @@ const cardSlice = createSlice({
           matchData: {
             ...matchData,
             player_scores: extendPlayerScores(matchData.player_scores),
+            
           },
         };
       } else {
