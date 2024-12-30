@@ -62,6 +62,7 @@ const DataTablePage = ({ data }) => {
       <div style={defaultAvatarStyle}></div>
     );
   };
+  
   const demoUrl = data.demo_url;
 
   return (

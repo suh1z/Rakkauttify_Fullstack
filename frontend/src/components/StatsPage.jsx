@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { initializeMonths } from '../reducers/statsReducer';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, MenuItem, Select, FormControl, InputLabel, CircularProgress, TableSortLabel } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, MenuItem, Select, FormControl, InputLabel, CircularProgress, TableSortLabel, Slider } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import TopPlayers from './TopPlayers';
 
 const MonthSelector = () => {
   const dispatch = useDispatch();
@@ -10,10 +11,11 @@ const MonthSelector = () => {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedXMetric, setSelectedXMetric] = useState('kills'); 
-  const [selectedYMetric, setSelectedYMetric] = useState('match_win_percent'); 
+  const [selectedXMetric, setSelectedXMetric] = useState('kills');
+  const [selectedYMetric, setSelectedYMetric] = useState('match_win_percent');
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('nickname');
+  const [dataLimit, setDataLimit] = useState(10);
 
   useEffect(() => {
     dispatch(initializeMonths());
@@ -75,14 +77,14 @@ const MonthSelector = () => {
     return data.map((row) => {
       const updatedRow = {
         ...row,
-        match_win_percent: calculateMatchWinPercent(row.match_wins, row.matches_played),
-        kda: calculateKD(row.kills, row.deaths),
-        hs_percent: calculateHSPercent(row.headshot_kills, row.kills),
-        kr: calculateKR(row.kills, row.rounds_played),
-        total_clutches: calculateClutches(row),
-        entry_win_percent: calculateEntryWinPercent(row.entry_count, row.entry_wins),
-        ud: calculateUD(row.he_damage_dealt, row.burn_damage_dealt),
-        ef: calculateEF(row.enemies_full_flashed, row.enemies_half_flashed),
+        match_win_percent: parseFloat(calculateMatchWinPercent(row.match_wins, row.matches_played)),
+        kda: parseFloat(calculateKD(row.kills, row.deaths)),
+        hs_percent: parseFloat(calculateHSPercent(row.headshot_kills, row.kills)),
+        kr: parseFloat(calculateKR(row.kills, row.rounds_played)),
+        total_clutches: parseFloat(calculateClutches(row)),
+        entry_win_percent: parseFloat(calculateEntryWinPercent(row.entry_count, row.entry_wins)),
+        ud: parseFloat(calculateUD(row.he_damage_dealt, row.burn_damage_dealt)),
+        ef: parseFloat(calculateEF(row.enemies_full_flashed, row.enemies_half_flashed)),
       };
       return updatedRow;
     });
@@ -143,164 +145,185 @@ const MonthSelector = () => {
     return <CircularProgress />;
   }
 
+  const displayedData = filteredData.slice(0, dataLimit);
+
   return (
-    <div>
-      <FormControl>
-        <InputLabel>Month</InputLabel>
-        <Select
-          value={selectedMonth}
-          label="Month"
-          onChange={handleMonthChange}
-          MenuProps={{
-            PaperProps: {
-              style: {
-                width: 'auto', 
+    <>
+      <div>
+        <TopPlayers data={filteredData} metric="rrating" />
+      </div>
+      <div style={{ marginTop: '16px' }}>
+        <FormControl>
+          <InputLabel>Month</InputLabel>
+          <Select
+            value={selectedMonth}
+            label="Month"
+            onChange={handleMonthChange}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  width: 'auto',
+                },
               },
-            },
-          }}
-        >
-          {[...months]
-            .filter(month => month.month !== 'players')
-            .sort((a, b) => new Date(b.month) - new Date(a.month))
-            .map((month) => (
-              <MenuItem key={month.month} value={month.month}>
-                {month.month}
-              </MenuItem>
-            ))}
-        </Select>
-      </FormControl>
-
-      {/* Dropdown for X-axis Metric Selection */}
-      <FormControl>
-        <InputLabel>X Metric</InputLabel>
-        <Select
-          value={selectedXMetric}
-          label="X Metric"
-          onChange={handleXMetricChange}
-          MenuProps={{
-            PaperProps: {
-              style: {
-                width: 'auto', 
-              },
-            },
-          }}
-        >
-          <MenuItem value="kills">Kills</MenuItem>
-          <MenuItem value="match_win_percent">Match Win %</MenuItem>
-          <MenuItem value="hs_percent">HS %</MenuItem>
-          <MenuItem value="entry_win_percent">Entry Win %</MenuItem>
-          <MenuItem value="total_clutches">Clutch Win %</MenuItem>
-          <MenuItem value="kda">K/D Ratio</MenuItem>
-        </Select>
-      </FormControl>
-
-      {/* Dropdown for Y-axis Metric Selection */}
-      <FormControl>
-        <InputLabel>Y Metric</InputLabel>
-        <Select
-          value={selectedYMetric}
-          label="Y Metric"
-          onChange={handleYMetricChange}
-          MenuProps={{
-            PaperProps: {
-              style: {
-                width: 'auto', 
-              },
-            },
-          }}
-        >
-          <MenuItem value="kills">Kills</MenuItem>
-          <MenuItem value="match_win_percent">Match Win %</MenuItem>
-          <MenuItem value="hs_percent">HS %</MenuItem>
-          <MenuItem value="entry_win_percent">Entry Win %</MenuItem>
-          <MenuItem value="total_clutches">Clutch Win %</MenuItem>
-          <MenuItem value="kda">K/D Ratio</MenuItem>
-        </Select>
-      </FormControl>
-
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={filteredData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="nickname" angle={45} textAnchor="start" interval={0} />
-          <YAxis domain={['auto', 'auto']} />
-          <Tooltip 
-            content={({ payload }) => {
-              if (payload && payload.length) {
-                const { nickname, [selectedXMetric]: xValue, [selectedYMetric]: yValue } = payload[0].payload;
-                
-                const xStrokeColor = '#8884d8';  
-                const yStrokeColor = '#82ca9d'; 
-                
-                return (
-                  <div 
-                    style={{
-                      backgroundColor: '#000', 
-                      color: '#fff',          
-                      padding: '10px',
-                      borderRadius: '4px',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                    }}
-                  >
-                    <p style={{ margin: 0, fontWeight: 'bold' }}>{`Nickname: ${nickname}`}</p>
-                    <p style={{ margin: '5px 0', color: xStrokeColor }}>
-                      {`${selectedXMetric}: ${xValue}`}
-                    </p>
-                    <p style={{ margin: 0, color: yStrokeColor }}>
-                      {`${selectedYMetric}: ${yValue}`}
-                    </p>
-                  </div>
-                );
-              }
-              return null;
             }}
-          />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey={selectedXMetric}
-            stroke="#8884d8" 
-            activeDot={{ r: 8 }}
-          />
-          <Line
-            type="monotone"
-            dataKey={selectedYMetric}
-            stroke="#82ca9d"  
-            activeDot={{ r: 8 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-
-      <div style={{ margin: '60px 0' }} />
-      {/* Table with Sorting */}
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              {matchColumns.map((column) => (
-                <TableCell key={column.field}>
-                  <TableSortLabel
-                    active={orderBy === column.field}
-                    direction={orderBy === column.field ? order : 'asc'}
-                    onClick={(event) => handleRequestSort(event, column.field)}
-                  >
-                    {column.headerName}
-                  </TableSortLabel>
-                </TableCell>
+          >
+            {[...months]
+              .filter(month => month.month !== 'players')
+              .sort((a, b) => new Date(b.month) - new Date(a.month))
+              .map((month) => (
+                <MenuItem key={month.month} value={month.month}>
+                  {month.month}
+                </MenuItem>
               ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortData(filteredData, comparator).map((row, index) => (
-              <TableRow key={index}>
+          </Select>
+        </FormControl>
+
+        {/* Dropdown for X-axis Metric Selection */}
+        <FormControl>
+          <InputLabel>X Metric</InputLabel>
+          <Select
+            value={selectedXMetric}
+            label="X Metric"
+            onChange={handleXMetricChange}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  width: 'auto',
+                },
+              },
+            }}
+          >
+            <MenuItem value="kills">Kills</MenuItem>
+            <MenuItem value="match_win_percent">Match Win %</MenuItem>
+            <MenuItem value="hs_percent">HS %</MenuItem>
+            <MenuItem value="entry_win_percent">Entry Win %</MenuItem>
+            <MenuItem value="total_clutches">Clutch Win %</MenuItem>
+            <MenuItem value="kda">K/D Ratio</MenuItem>
+          </Select>
+        </FormControl>
+
+        {/* Dropdown for Y-axis Metric Selection */}
+        <FormControl>
+          <InputLabel>Y Metric</InputLabel>
+          <Select
+            value={selectedYMetric}
+            label="Y Metric"
+            onChange={handleYMetricChange}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  width: 'auto',
+                },
+              },
+            }}
+          >
+            <MenuItem value="kills">Kills</MenuItem>
+            <MenuItem value="match_win_percent">Match Win %</MenuItem>
+            <MenuItem value="hs_percent">HS %</MenuItem>
+            <MenuItem value="entry_win_percent">Entry Win %</MenuItem>
+            <MenuItem value="total_clutches">Clutch Win %</MenuItem>
+            <MenuItem value="kda">K/D Ratio</MenuItem>
+          </Select>
+        </FormControl>
+
+        {/* Slider for controlling data points */}
+        <div style={{ marginTop: '16px', width: '100%' }}>
+          <InputLabel>Number of Players to Display</InputLabel>
+          <Slider
+            value={dataLimit}
+            onChange={(e, newValue) => setDataLimit(newValue)}
+            min={5}
+            max={filteredData.length}
+            step={1}
+            valueLabelDisplay="auto"
+            valueLabelFormat={(value) => `${value} players`}
+          />
+        </div>
+
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={displayedData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="nickname" angle={45} textAnchor="start" interval={0} />
+            <YAxis domain={['auto', 'auto']} />
+            <Tooltip
+              content={({ payload }) => {
+                if (payload && payload.length) {
+                  const { nickname, [selectedXMetric]: xValue, [selectedYMetric]: yValue } = payload[0].payload;
+
+                  const xStrokeColor = '#8884d8';
+                  const yStrokeColor = '#82ca9d';
+
+                  return (
+                    <div
+                      style={{
+                        backgroundColor: '#000',
+                        color: '#fff',
+                        padding: '10px',
+                        borderRadius: '4px',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                      }}
+                    >
+                      <p style={{ margin: 0, fontWeight: 'bold' }}>{`Nickname: ${nickname}`}</p>
+                      <p style={{ margin: '5px 0', color: xStrokeColor }}>
+                        {`${selectedXMetric}: ${xValue}`}
+                      </p>
+                      <p style={{ margin: 0, color: yStrokeColor }}>
+                        {`${selectedYMetric}: ${yValue}`}
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
+            <Legend />
+            <Line
+              type="monotone"
+              dataKey={selectedXMetric}
+              stroke="#8884d8"
+              activeDot={{ r: 8 }}
+            />
+            <Line
+              type="monotone"
+              dataKey={selectedYMetric}
+              stroke="#82ca9d"
+              activeDot={{ r: 8 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+
+        <div style={{ margin: '60px 0' }} />
+        {/* Table with Sorting */}
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
                 {matchColumns.map((column) => (
-                  <TableCell key={column.field}>{row[column.field]}</TableCell>
+                  <TableCell key={column.field}>
+                    <TableSortLabel
+                      active={orderBy === column.field}
+                      direction={orderBy === column.field ? order : 'asc'}
+                      onClick={(event) => handleRequestSort(event, column.field)}
+                    >
+                      {column.headerName}
+                    </TableSortLabel>
+                  </TableCell>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+            </TableHead>
+            <TableBody>
+              {sortData(filteredData, comparator).map((row, index) => (
+                <TableRow key={index}>
+                  {matchColumns.map((column) => (
+                    <TableCell key={column.field}>{row[column.field]}</TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
+    </>
   );
 };
 

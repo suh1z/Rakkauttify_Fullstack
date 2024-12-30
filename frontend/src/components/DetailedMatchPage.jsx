@@ -26,13 +26,12 @@ const DetailedMatchPage = () => {
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
-
+  console.log(data)
   const columns = {
     performanceStats: ['kills', 'assists', 'deaths', 'kast', 'ADR','HS%', 'headshot_deaths', 'mvps', 'Faceit Elo', 'Rrating'],
     damageStats: [
       'damage', 'damage_received', 'team_damage_done', 'team_damage_received',
-      'UD', 'he_damage_received', 'team_he_damage_dealt', 'team_he_damage_received', 'he_self_damage', 'hes_thrown',
-      'burn_damage_dealt', 'burn_damage_received', 'team_burn_damage_dealt', 'team_burn_damage_received', 'burn_self_damage', 'burns_thrown'
+      'UD', 'he_damage_received', 'team_he_damage_dealt', 'team_he_damage_received', 'he_self_damage', 'hes_thrown', 'burn_damage_received', 'team_burn_damage_dealt', 'team_burn_damage_received', 'burn_self_damage', 'burns_thrown'
     ],
     flashbangSmokeStats: [
       'smoke_kills', 'smoke_deaths','enemies_full_flashed', 'full_flashes_received', 'flashes_thrown', 'smokes_thrown'
@@ -97,7 +96,7 @@ const DetailedMatchPage = () => {
   return (
     <div>
       {(() => {
-        const fixedColumns = ['avatar'];
+        const fixedColumns = ['avatar', 'nickname'];
         const tables = [];
         let index = 0;
 
