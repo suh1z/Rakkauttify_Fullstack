@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { initializeMonths } from '../reducers/statsReducer';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, MenuItem, Select, FormControl, InputLabel, CircularProgress, TableSortLabel, Slider } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, MenuItem, Select, FormControl, InputLabel, CircularProgress, TableSortLabel } from '@mui/material';
 import TopPlayers from './TopPlayers';
 
 const MonthSelector = () => {
@@ -11,11 +10,8 @@ const MonthSelector = () => {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedXMetric, setSelectedXMetric] = useState('kills');
-  const [selectedYMetric, setSelectedYMetric] = useState('match_win_percent');
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('nickname');
-  const [dataLimit, setDataLimit] = useState([0, 10]);
 
   useEffect(() => {
     dispatch(initializeMonths());
@@ -37,14 +33,6 @@ const MonthSelector = () => {
     if (monthData) {
       setFilteredData(processData(monthData.data));
     }
-  };
-
-  const handleXMetricChange = (event) => {
-    setSelectedXMetric(event.target.value);
-  };
-
-  const handleYMetricChange = (event) => {
-    setSelectedYMetric(event.target.value);
   };
 
   const handleRequestSort = (event, property) => {
@@ -147,8 +135,6 @@ const MonthSelector = () => {
     return <CircularProgress />;
   }
 
-  const displayedData = filteredData.slice(dataLimit[0], dataLimit[1]);
-
   return (
     <>
       <div>
@@ -180,123 +166,7 @@ const MonthSelector = () => {
           </Select>
         </FormControl>
 
-        {/* Dropdown for X-axis Metric Selection */}
-        <FormControl>
-          <InputLabel>X Metric</InputLabel>
-          <Select
-            value={selectedXMetric}
-            label="X Metric"
-            onChange={handleXMetricChange}
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  width: 'auto',
-                },
-              },
-            }}
-          >
-            <MenuItem value="kills">Kills</MenuItem>
-            <MenuItem value="match_win_percent">Match Win %</MenuItem>
-            <MenuItem value="hs_percent">HS %</MenuItem>
-            <MenuItem value="entry_win_percent">Entry Win %</MenuItem>
-            <MenuItem value="total_clutches">Clutch Win %</MenuItem>
-            <MenuItem value="kda">K/D Ratio</MenuItem>
-          </Select>
-        </FormControl>
-
-        {/* Dropdown for Y-axis Metric Selection */}
-        <FormControl>
-          <InputLabel>Y Metric</InputLabel>
-          <Select
-            value={selectedYMetric}
-            label="Y Metric"
-            onChange={handleYMetricChange}
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  width: 'auto',
-                },
-              },
-            }}
-          >
-            <MenuItem value="kills">Kills</MenuItem>
-            <MenuItem value="match_win_percent">Match Win %</MenuItem>
-            <MenuItem value="hs_percent">HS %</MenuItem>
-            <MenuItem value="entry_win_percent">Entry Win %</MenuItem>
-            <MenuItem value="total_clutches">Clutch Win %</MenuItem>
-            <MenuItem value="kda">K/D Ratio</MenuItem>
-          </Select>
-        </FormControl>
-
-        {/* Slider for controlling data points */}
-        <div style={{ marginTop: '16px', width: '100%' }}>
-          <InputLabel>Number of Players to Display</InputLabel>
-          <Slider
-            value={dataLimit}
-            onChange={(e, newValue) => setDataLimit(newValue)}
-            min={0}
-            max={filteredData.length}
-            step={1}
-            valueLabelDisplay="auto"
-            valueLabelFormat={(value) => `${value} players`}
-            valueLabelStyle={{ fontSize: '0.8rem' }}
-            range
-          />
-        </div>
-
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={displayedData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="nickname" angle={45} textAnchor="start" interval={0} />
-            <YAxis domain={['auto', 'auto']} />
-            <Tooltip
-              content={({ payload }) => {
-                if (payload && payload.length) {
-                  const { nickname, [selectedXMetric]: xValue, [selectedYMetric]: yValue } = payload[0].payload;
-
-                  const xStrokeColor = '#8884d8';
-                  const yStrokeColor = '#82ca9d';
-
-                  return (
-                    <div
-                      style={{
-                        backgroundColor: '#000',
-                        color: '#fff',
-                        padding: '10px',
-                        borderRadius: '4px',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                      }}
-                    >
-                      <p style={{ margin: 0, fontWeight: 'bold' }}>{`Nickname: ${nickname}`}</p>
-                      <p style={{ margin: '5px 0', color: xStrokeColor }}>
-                        {`${selectedXMetric}: ${xValue}`}
-                      </p>
-                      <p style={{ margin: 0, color: yStrokeColor }}>
-                        {`${selectedYMetric}: ${yValue}`}
-                      </p>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey={selectedXMetric}
-              stroke="#8884d8"
-              activeDot={{ r: 8 }}
-            />
-            <Line
-              type="monotone"
-              dataKey={selectedYMetric}
-              stroke="#82ca9d"
-              activeDot={{ r: 8 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-
-        <div style={{ margin: '60px 0' }} />
+        <div style={{ margin: '20px 0' }} />
         {/* Table with Sorting */}
         <TableContainer component={Paper}>
           <Table>

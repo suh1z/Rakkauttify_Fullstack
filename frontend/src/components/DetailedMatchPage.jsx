@@ -26,7 +26,6 @@ const DetailedMatchPage = () => {
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
-  console.log(data)
   const columns = {
     performanceStats: ['kills', 'assists', 'deaths', 'kast', 'ADR','HS%', 'headshot_deaths', 'mvps', 'Faceit Elo', 'Rrating'],
     damageStats: [
@@ -38,7 +37,8 @@ const DetailedMatchPage = () => {
     ],
     ClutchStats: [
       'entry_count', 'entry_wins', 'clutch_v1_count', 'clutch_v1_wins',
-      'clutch_v3_count', 'clutch_v3_wins'
+      'clutch_v2_count', 'clutch_v2_wins', 'clutch_v3_count', 'clutch_v3_wins',
+      'clutch_v4_count', 'clutch_v4_wins', 'clutch_v5_count', 'clutch_v5_wins'    
     ],
     weaponStats: []
   };
