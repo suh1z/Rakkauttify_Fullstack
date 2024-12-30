@@ -3,7 +3,6 @@ import { Card, CardContent, Typography, Grid, Avatar } from '@mui/material';
 
 const TopPlayers = ({ data, metric = 'matches_played' }) => {
   if (!data || data.length === 0) return null;
-    console.log(data)
   const topPlayers = [...data]
     .sort((a, b) => b[metric] - a[metric])
     .slice(0, 3);

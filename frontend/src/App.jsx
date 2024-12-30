@@ -38,7 +38,7 @@ function App() {
                   }}
                 >
                   <Typography variant="h6" align="left">
-                    Rakkauden Kanaali Games
+                    Rakkauden Kanaali Inhouse Matches
                   </Typography>
                 </Box>
                 <Matches />

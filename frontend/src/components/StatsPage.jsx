@@ -15,7 +15,7 @@ const MonthSelector = () => {
   const [selectedYMetric, setSelectedYMetric] = useState('match_win_percent');
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('nickname');
-  const [dataLimit, setDataLimit] = useState(10);
+  const [dataLimit, setDataLimit] = useState([0, 10]);
 
   useEffect(() => {
     dispatch(initializeMonths());
@@ -85,11 +85,12 @@ const MonthSelector = () => {
         entry_win_percent: parseFloat(calculateEntryWinPercent(row.entry_count, row.entry_wins)),
         ud: parseFloat(calculateUD(row.he_damage_dealt, row.burn_damage_dealt)),
         ef: parseFloat(calculateEF(row.enemies_full_flashed, row.enemies_half_flashed)),
+        rrating: parseFloat(calculateRRating(row.rrating))
       };
       return updatedRow;
     });
   };
-
+  const calculateRRating = (rrating) => rrating.toFixed(2);
   const calculateKD = (kills, deaths) => deaths === 0 ? kills.toFixed(2) : (kills / deaths).toFixed(2);
   const calculateHSPercent = (headshotKills, kills) => kills > 0 ? Math.round((headshotKills / kills) * 100) : 0;
   const calculateKR = (kills, roundsPlayed) => roundsPlayed > 0 ? (kills / roundsPlayed).toFixed(2) : 0;
@@ -139,13 +140,14 @@ const MonthSelector = () => {
     { field: 'ef', headerName: 'EF', width: 100 },
     { field: 'total_clutches', headerName: 'Clutch Win %', width: 100 },
     { field: 'entry_win_percent', headerName: 'Entry Win %', width: 100 },
+    { field: 'rrating', headerName: 'R rating', width: 100 },
   ];
 
   if (loading) {
     return <CircularProgress />;
   }
 
-  const displayedData = filteredData.slice(0, dataLimit);
+  const displayedData = filteredData.slice(dataLimit[0], dataLimit[1]);
 
   return (
     <>
@@ -232,11 +234,13 @@ const MonthSelector = () => {
           <Slider
             value={dataLimit}
             onChange={(e, newValue) => setDataLimit(newValue)}
-            min={5}
+            min={0}
             max={filteredData.length}
             step={1}
             valueLabelDisplay="auto"
             valueLabelFormat={(value) => `${value} players`}
+            valueLabelStyle={{ fontSize: '0.8rem' }}
+            range
           />
         </div>
 

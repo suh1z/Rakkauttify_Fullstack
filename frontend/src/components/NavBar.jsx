@@ -79,7 +79,7 @@ const Navbar = (props) => {
           <>
             <Box sx={{ display: 'flex', ml: 'auto' }}>
               <Link to="/" className="link">
-                Rakkauttify
+                Loveetify
               </Link>
               <Link to="/playerdata" className="link">
                 Player Data
