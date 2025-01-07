@@ -1,6 +1,6 @@
 # Rakkauttify Fullstack
 
-This project runs on [https://rakkauttify-fullstack.onrender.com/](https://rakkauttify-fullstack.onrender.com/)
+This project runs on [https://lovecanal.onrender.com/](https://lovecanal.onrender.com/)
 
 ## Overview
 
