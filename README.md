@@ -1,11 +1,11 @@
 # Rakkauttify Fullstack
 
-This project runs on [https://rakkauttify-fullstack.onrender.com/](https://rakkauttify-fullstack.onrender.com/)
+This project runs on [https://rakkauttify-fullstack.onrender.com/](https://lovecanal.onrender.com/)
 
 ## Overview
 
 - **Database**: MongoDB for user data
-- **CS2 Data Source**: Zooze
+- **CS2 Data Source**: Azure @Zooze
 - **Local Development**: Use `npm run dev` in the root directory to test locally
 
 ## Local Installation
