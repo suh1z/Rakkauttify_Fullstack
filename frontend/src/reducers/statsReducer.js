@@ -1,154 +1,61 @@
 /* eslint-disable no-unused-vars */
 import { createSlice } from '@reduxjs/toolkit';
 import statsService from '../services/statsService';
-
-const excludedKeys = ['steamid64', 'name', 'team', 'matchid', 'mapnumber'];
-const summedKey = ['played'];
-const extendPlayerScores = (playerScores) =>
-  playerScores.map((player) => {
-    const faceitAvatar = player.faceit?.avatar || null;
-    const faceitElo = player.faceit?.elo || 0;
-    const Rrating = parseFloat(player.rrating);
-    const validRrating = isNaN(Rrating) ? 0 : Rrating.toFixed(2);
-    const newValues = {
-      'avatar': faceitAvatar,
-      nickname: player.nickname,
-      kills: player.adr,
-      deaths: player.deaths,
-      assists: player.assits,
-      KD: ((player.kills) / (player.deaths || 1)).toFixed(2),
-      'HS%': player.kills > 0 ? ((player.headshot_kills / player.kills) * 100).toFixed(1) + '%' : '0%',
-      UD: player.burn_damage_dealt + player.he_damage_dealt,
-      ADR: player.adr,
-      '2K': player.enemy_2k,
-      '3K': player.enemy_3k,
-      '4K': player.enemy_4k,
-      '5K': player.enemy_5k,
-      damage: player.damage_done,
-      'Faceit Elo':faceitElo,
-      'Rrating': validRrating,
-    };
-
-    const {headshot_kills, burn_damage_dealt, he_damage_dealt, damage_done, enemy_2k, enemy_3k, enemy_4k, enemy_5k, adr, ...rest } = player;
-
-    return {
-      ...newValues,
-      ...rest
-    };
-  });
-
+import { mapPlayerData, formattedMonths, formatPlayerData} from '../utils/scoreUtils';
 
 const cardSlice = createSlice({
   name: 'stats',
   initialState: {
     stats: [],
-    statistics: {},
     playerStats: [],
     matches: [],
     match: [],
     players: [],
-    months: []
+    months: [],
   },
   reducers: {
     setStats(state, action) {
       state.stats = action.payload;
     },
-    setMatches(state, action) {
-      const sortedByDate = action.payload.sort((a, b) => b.matchid - a.matchid);
-      state.matches = sortedByDate;
-
-      state.matches.forEach((match) => {
-        if (!match.url) {
-          console.error(`Match with ID ${match.matchid} has no URL.`);
-        }
-      });
+    fetchMatches(state, action) {
+      state.matches = action.payload;
     },
     setMatch(state, action) {
       const { matchId, matchData } = action.payload;
-      const match = state.matches.find((item) => item.matchid === matchId);
-      if (match) {
-        state.match = {
-          ...match,
-          matchData: {
-            ...matchData,
-            player_scores: extendPlayerScores(matchData.player_scores),
-            
-          },
-        };
-      } else {
-        state.match = null;
-      }
-    },
+      state.match = { matchId, ...matchData };
+    },    
     setStatistics(state, action) {
-      const { recentGamesCount } = action.payload;
-      const totalGames = state.stats.length;
-      const start = Math.max(0, totalGames - recentGamesCount * 10);
-      const recentStats = state.stats.slice(start);
-      const result = recentStats.reduce((acc, stat) => {
-        const key = stat.steamid64;
-
-        if (!acc[key]) {
-          acc[key] = { name: stat.name };
-        }
-
-        Object.entries(stat).forEach(([statKey, value]) => {
-          if (!excludedKeys.includes(statKey)) {
-            if (!acc[key][statKey]) {
-              acc[key][statKey] = 0;
-            }
-            if (summedKey.includes(statKey)) {
-              acc[key][statKey] = Math.max(acc[key][statKey], value);
-            } else {
-              acc[key][statKey] += parseInt(value, 10);
-            }
-          }
-        });
-
-        return acc;
-      }, {});
-
-      state.statistics = result;
+      state.statistics = action.payload;
     },
     setPlayerStats(state, action) {
-      const { playerName, playerData } = action.payload;
-      if (playerData) {
-        state.playerStats = playerData;
-      } else {
-        const normalizedPlayerName = typeof playerName === 'string' ? playerName.trim().toLowerCase() : '';
-        const filteredStats = state.stats.filter((item) => {
-          const nameInItem = typeof item.name === 'string' ? item.name.trim().toLowerCase() : '';
-          return nameInItem === normalizedPlayerName;
-        });
-        filteredStats.sort((a1, a2) => a1.matchid - a2.matchid);
-        state.playerStats = filteredStats.slice(-10);
-      }
+      state.playerStats = action.payload;
     },
     setPlayers(state, action) {
-      state.players = action.payload.sort((a, b) => a.nickname.localeCompare(b.nickname));
+      state.players = action.payload;
     },
     setMonths(state, action) {
-      state.months = action.payload
+      state.months = action.payload;
     },
   },
 });
 
-export const { setStats, setStatistics, setPlayerStats, setMatches, setMatch, setPlayers, setMonths } = cardSlice.actions;
+export const { setStats, setPlayerStats, fetchMatches, setMatch, setPlayers, setMonths } = cardSlice.actions;
 
 export const initializeStats = () => async (dispatch) => {
   try {
     const stats = await statsService.getStats();
     dispatch(setStats(stats));
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('Error fetching stats:', error);
   }
 };
 
 export const initializeMatches = () => async (dispatch) => {
   try {
     const matches = await statsService.getMatches();
-    dispatch(setMatches(matches));
+    dispatch(fetchMatches(matches));
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('Error fetching matches:', error);
   }
 };
 
@@ -159,33 +66,32 @@ export const initializeMatch = (matchId, url) => async (dispatch) => {
   }
   try {
     const matchData = await statsService.fetchMatchData(url);
-    dispatch(setMatch({matchData, matchId }));
+    const extendedPlayerScores = matchData.player_scores.map(mapPlayerData);
+    const extendedMatchData = {
+      player_scores: extendedPlayerScores,
+    };
+
+    dispatch(setMatch({ matchId, matchData: extendedMatchData }));
   } catch (error) {
     console.error('Error fetching match data:', error);
   }
 };
 
-export const initializeStatistics = (recentGamesCount) => (dispatch) => {
+export const initializePlayerStats = (nickname) => async (dispatch) => {
   try {
-    dispatch(setStatistics({ recentGamesCount }));
+    const formattedPlayerData = await statsService.fetchPlayerData(nickname, statsService);
+    dispatch(setPlayerStats(formatPlayerData(formattedPlayerData)));
   } catch (error) {
-    console.error('Error computing statistics:', error);
+    console.error('Error initializing player stats:', error);
   }
 };
 
-export const initializePlayerStats = (nickname) => async (dispatch) => {
-  try {
-    const playerData = await statsService.fetchPlayerData(nickname);
-    dispatch(setPlayerStats({ playerName: nickname, playerData }));
-  } catch (error) {
-    console.error('Error fetching player stats:', error);
-  }
-};
 
 export const initializePlayers = () => async (dispatch) => {
   try {
     const players = await statsService.fetchAllPlayers();
-    dispatch(setPlayers(players));
+    const sortedPlayers = players.sort((a, b) => (a.nickname > b.nickname ? 1 : -1));
+    dispatch(setPlayers(sortedPlayers));
   } catch (error) {
     console.error('Error fetching players:', error);
   }
@@ -194,9 +100,19 @@ export const initializePlayers = () => async (dispatch) => {
 export const initializeMonths = () => async (dispatch) => {
   try {
     const months = await statsService.getStats();
-    dispatch(setMonths(months));
+    const sortedMonths = months.sort((a, b) => (a.month < b.month ? 1 : -1));
+    const formattedMonthsData = sortedMonths.map((month) => {
+      if (Array.isArray(month.data)) {
+        return formattedMonths(month);
+      }
+      return month;
+    });
+    dispatch(setMonths(formattedMonthsData));
+
   } catch (error) {
     console.error('Error fetching months:', error);
   }
 };
+
+
 export default cardSlice.reducer;

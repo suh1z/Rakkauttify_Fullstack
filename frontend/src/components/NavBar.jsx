@@ -13,14 +13,11 @@ import {
 import MenuIcon from '@mui/icons-material/Menu'
 import { Link } from 'react-router-dom'
 import '../App.css'
-import { logoutUser } from '../reducers/userReducer'
-import { useDispatch } from 'react-redux'
 
-const Navbar = (props) => {
+const Navbar = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [anchorEl, setAnchorEl] = React.useState(null)
-  const dispatch = useDispatch()
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget)
@@ -28,10 +25,6 @@ const Navbar = (props) => {
 
   const handleMenuClose = () => {
     setAnchorEl(null)
-  }
-
-  const handleLogout = () => {
-    dispatch(logoutUser())
   }
 
   return (
@@ -57,22 +50,16 @@ const Navbar = (props) => {
                 </Link>
               </MenuItem>
               <MenuItem onClick={handleMenuClose}>
-                <Link to="/monthdata" className="link">
-                  Month Data
-                </Link>
-              </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
                 <Link to="/playerdata" className="link">
                   Player Data
                 </Link>
               </MenuItem>
-              {props.user && (
-                <MenuItem onClick={handleLogout}>
-                  <Link to="/" className="link">
-                    Logout
-                  </Link>
-                </MenuItem>
-              )}
+              <MenuItem onClick={handleMenuClose}>
+                <Link to="/statistics" className="link">
+                  Month Data
+                </Link>
+              </MenuItem>
+
             </Menu>
           </>
         ) : (
@@ -84,14 +71,9 @@ const Navbar = (props) => {
               <Link to="/playerdata" className="link">
                 Player Data
               </Link>
-              <Link to="/monthdata" className="link">
+              <Link to="/statistics" className="link">
                 Month Data
               </Link>
-              {props.user && (
-                <Link to="/" onClick={handleLogout} className="link">
-                  Logout
-                </Link>
-              )}
             </Box>
             <Box sx={{ display: 'flex', flexGrow: 8 }}></Box>
           </>
