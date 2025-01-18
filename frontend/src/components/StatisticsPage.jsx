@@ -20,7 +20,7 @@ const StatisticsPage = () => {
       const monthData = months.find((month) => month.month === selectedMonth);
       setSelectedMonthData(monthData);
     }
-    if (months && months.length > 0) {
+    else if(months && months.length > 0) {
       setSelectedMonth(months[1].month);
     }
     
