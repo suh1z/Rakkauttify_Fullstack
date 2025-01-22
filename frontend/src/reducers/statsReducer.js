@@ -53,7 +53,7 @@ export const initializeStats = () => async (dispatch) => {
 export const initializeMatches = () => async (dispatch) => {
   try {
     const matches = await statsService.getMatches();
-    const sorted_matches = matches.sort((a, b) => (a.date > b.date ? 1 : -1));
+    const sorted_matches = matches.sort((a, b) => (a.date < b.date ? 1 : -1));
     dispatch(fetchMatches(sorted_matches));
   } catch (error) {
     console.error('Error fetching matches:', error);
