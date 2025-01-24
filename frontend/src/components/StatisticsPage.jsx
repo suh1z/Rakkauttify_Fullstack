@@ -115,20 +115,21 @@ const StatisticsPage = () => {
               <TableRow key={index}>
                 <TableCell>{entry.nickname || 'Unknown'}</TableCell>
                 <TableCell>{entry.matchWins || 0}</TableCell>
-                <TableCell>{entry.matchWinPercent || '0.00%'}</TableCell>
+                <TableCell>{`${entry.matchWinPercent.toFixed(2)}%` || '0.00%'}</TableCell>
                 <TableCell>{entry.matchesPlayed || 0}</TableCell>
                 <TableCell>{entry.roundsPlayed || 0}</TableCell>
                 <TableCell>{entry.damageDone || 0}</TableCell>
                 <TableCell>{entry.kills || 0}</TableCell>
                 <TableCell>{entry.deaths || 0}</TableCell>
-                <TableCell>{entry.hsPercent || '0.00%'}</TableCell>
+                <TableCell>{`${entry.hsPercent.toFixed(2)}%` || '0.00%'}</TableCell>
                 <TableCell>{entry.kd || '0.00'}</TableCell> 
                 <TableCell>{entry.killsPerRound || '0.00'}</TableCell> 
-                <TableCell>{entry.entryWinPercent || '0.00%'}</TableCell>
+                <TableCell>{`${entry.entryWinPercent.toFixed(2)}%` || '0.00%'}</TableCell>
                 <TableCell>{entry.rrating || '0.00'}</TableCell>
               </TableRow>
             ))}
           </TableBody>
+
         </Table>
       </TableContainer>
 

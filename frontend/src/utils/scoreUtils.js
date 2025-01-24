@@ -30,33 +30,40 @@ export const mapPlayerData = (player) => {
     return {
       ...month,
       data: month.data.map((entry) => {
-        const hsPercent = entry.headshot_kills && entry.kills ? ((entry.headshot_kills / entry.kills) * 100).toFixed(2) : '0.00';
+        const hsPercent = entry.headshot_kills && entry.kills 
+          ? ((entry.headshot_kills / entry.kills) * 100).toFixed(2) 
+          : '0.00';
+  
         const kd = (entry.kills / (entry.deaths || 1)).toFixed(2);
         const ud = entry.he_damage_dealt + entry.burn_damage_dealt || 0;
         const killsPerRound = (entry.kills / (entry.rounds_played || 1)).toFixed(2);
-        const entryWinPercent = entry.entry_wins && entry.entry_count ? ((entry.entry_wins / entry.entry_count) * 100).toFixed(2) : '0.00';
-        const matchWinPercent = entry.matches_played ? ((entry.match_wins / entry.matches_played) * 100).toFixed(2) : '0.00';
+        const entryWinPercent = entry.entry_wins && entry.entry_count 
+          ? ((entry.entry_wins / entry.entry_count) * 100).toFixed(2) 
+          : '0.00';
+        const matchWinPercent = entry.matches_played 
+          ? ((entry.match_wins / entry.matches_played) * 100).toFixed(2) 
+          : '0.00';
   
         return {
           nickname: entry.nickname || 'Unknown',
           matchesPlayed: entry.matches_played || 0,
           matchWins: entry.match_wins || 0,
-          matchWinPercent: `${matchWinPercent}%`,
+          matchWinPercent: parseFloat(matchWinPercent),
           roundsPlayed: entry.rounds_played || 0,
           damageDone: entry.damage_done || 0,
           kills: entry.kills || 0,
           deaths: entry.deaths || 0,
-          hsPercent: `${hsPercent}%`,
-          kd: kd || '0.00',
-          killsPerRound: killsPerRound,
+          hsPercent: parseFloat(hsPercent), 
+          kd: parseFloat(kd), 
+          killsPerRound: parseFloat(killsPerRound), 
           ud: ud,
-          entryWinPercent: `${entryWinPercent}%`,
-          rrating: entry.rrating ? entry.rrating.toFixed(2) : '0.00',
+          entryWinPercent: parseFloat(entryWinPercent),
+          rrating: entry.rrating ? parseFloat(entry.rrating.toFixed(2)) : 0.00,
         };
       }),
     };
   };
-
+  
   export const formatPlayerData = (playerData) => {
     return {
       nickname: playerData.nickname || 'Unknown',
