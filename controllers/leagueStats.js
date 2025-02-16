@@ -1,14 +1,15 @@
+
 const express = require('express');
 const axios = require('axios');
 const dotenv = require('dotenv');
-dotenv.config();
-
 const leagueRouter = express.Router();
 
+dotenv.config();
 const matchesUrl = process.env.MATCHES_URL;
 const monthsUrl = process.env.MONTHS_URL;
 const playersUrl = process.env.PLAYERS_URL;
 const faceitApiKey = process.env.FACEIT_API_KEY;
+
 
 if (!matchesUrl || !monthsUrl || !playersUrl) {
   console.error('Error: Environment variables for URLs are not set.');

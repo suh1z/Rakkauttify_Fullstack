@@ -12,6 +12,7 @@ const mongoose = require("mongoose");
 const loginRouter = require("./controllers/login");
 const testingRouter = require("./controllers/testing");
 const leagueRouter = require("./controllers/leagueStats");
+const azureRouter = require("./controllers/testing");
 
 mongoose.set("strictQuery", false);
 
@@ -39,7 +40,10 @@ app.use("/api/months", leagueRouter);
 app.use("/api/fetch-match-data", leagueRouter);
 app.use("/api/players", leagueRouter);
 app.use("/api/faceit-profile", leagueRouter);
-
+app.use('/api/data', azureRouter);
+app.use("/api/player", azureRouter); 
+app.use("/api/matches", azureRouter);
+app.use("/api/pickbans", azureRouter);
 
 
 app.get('*', (req, res) => {
