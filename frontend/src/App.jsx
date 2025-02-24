@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container } from '@mui/material';
 import { Routes, Route, Navigate } from 'react-router-dom';
@@ -14,12 +14,21 @@ import LoginPage from './components/LoginPage';
 
 function App() {
   const dispatch = useDispatch();
-
   const user = useSelector((state) => state.user);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    dispatch(initializeStats());
-    dispatch(initializeUser());
+    const fetchData = async () => {
+      dispatch(initializeStats());
+      dispatch(initializeUser());
+      setLoading(false);
+    };
+    fetchData();
   }, [dispatch]);
+
+  if (loading || !user.user) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Container>

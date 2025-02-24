@@ -1,6 +1,17 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchTeams, fetchPlayer, fetchMatches, fetchPickBans } from "../reducers/pappaReducer";
+import React from 'react';
+import { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Typography
+} from '@mui/material';
+import { fetchTeams, fetchPlayer, fetchMatches, fetchPickBans } from '../reducers/pappaReducer';
 
 const Pappaliiga = () => {
     const dispatch = useDispatch();
@@ -9,39 +20,46 @@ const Pappaliiga = () => {
         (state) => state.pappa || {}
     );
 
-    const [selectedDivision, setSelectedDivision] = useState(12);
     const [selectedMatch, setSelectedMatch] = useState(null);
+    const [selectedDivision, setSelectedDivision] = useState(12);
+    const [selectedPlayerId, setSelectedPlayerId] = useState(null);
+    const [expandedPlayer, setExpandedPlayer] = useState(null);
+    const playerdata = player || {};
 
     useEffect(() => {
         dispatch(fetchTeams(selectedDivision, 10));
         dispatch(fetchMatches(selectedDivision, 10));
     }, [dispatch, selectedDivision]);
 
-    const handleDivisionChange = (e) => {
-        setSelectedDivision(e.target.value);
-    };
-
-    const handlePlayerClick = (playerId) => {
-        dispatch(fetchPlayer(playerId));
-    };
-
-    const handleMatchClick = (matchId) => {
-        const match = matches.find((m) => m.match_id === matchId);
-        if (match && match.status === "FINISHED") {
+    const handleMatchClick = (matchId) => (e) => {
+        e.preventDefault();
+        if (selectedMatch === matchId) {
+            setSelectedMatch(null);
+        } else {
             setSelectedMatch(matchId);
             dispatch(fetchPickBans(matchId));
         }
     };
 
+    const handlePlayerClick = (playerId) => {
+        setSelectedPlayerId(playerId);
+        dispatch(fetchPlayer(playerId));
+        setExpandedPlayer(expandedPlayer === playerId ? null : playerId);
+    };
+
+    const handleDivisionChange = (e) => {
+        setSelectedDivision(Number(e.target.value));
+    };
+
     if (loading) return <p>Loading data...</p>;
-    if (error) return <p>Error: {error}</p>;
 
     return (
-        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Left Content */}
-            <div className="md:col-span-2">
-                <h1 className="text-2xl font-bold mb-4">Pappaliiga</h1>
-
+        <div style={{ padding: '20px' }}>
+            <Typography variant="h4" style={{ marginBottom: '20px' }}>
+                Pappaliiga
+            </Typography>
+            <div style={{ padding: '20px' }}>
+                {/* Division Selection Dropdown */}
                 <div className="mb-4">
                     <label htmlFor="division" className="block mb-2">
                         Select Division
@@ -57,164 +75,247 @@ const Pappaliiga = () => {
                         <option value={20}>Division 20</option>
                     </select>
                 </div>
+            </div>
+            <Typography variant="h6" style={{ marginBottom: '10px' }}>Teams and Players</Typography>
+            <TableContainer component={Paper} style={{ marginBottom: '20px' }}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Team</TableCell>
+                            <TableCell>Player</TableCell>
+                            <TableCell>Level</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {teams.length > 0 ? (
+                            teams.map((team) =>
+                                team.roster.map((player) => (
+                                    <React.Fragment key={player.player_id}>
+                                        <TableRow
+                                            onClick={() => handlePlayerClick(player.player_id)}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            <TableCell>{team.name}</TableCell>
+                                            <TableCell>{player.nickname}</TableCell>
+                                            <TableCell>{player.game_skill_level}</TableCell>
+                                        </TableRow>
+                                        {expandedPlayer === player.player_id && player && (
+                                            <TableRow>
+                                                <TableCell colSpan={3}>
+                                                    <Paper style={{ padding: '20px', marginTop: '10px' }}>
+                                                        <Typography variant="h6">Player Details</Typography>
+                                                        <Table>
+                                                            <TableBody>
+                                                                {/* Overall Stats */}
+                                                                <TableRow>
+                                                                    <TableCell colSpan={10}><strong>Overall Stats</strong></TableCell>
+                                                                </TableRow>
+                                                                <TableRow>
+                                                                    <TableCell>Kills</TableCell>
+                                                                    <TableCell>Assists</TableCell>
+                                                                    <TableCell>Deaths</TableCell>
+                                                                    <TableCell>MVPs</TableCell>
+                                                                    <TableCell>Headshots</TableCell>
+                                                                    <TableCell>Rounds</TableCell>
+                                                                    <TableCell>2K</TableCell>
+                                                                    <TableCell>3K</TableCell>
+                                                                    <TableCell>4K</TableCell>
+                                                                    <TableCell>5K</TableCell>
+                                                                </TableRow>
+                                                                <TableRow>
+                                                                    <TableCell>{playerdata.stats?.Kills || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.stats?.Assists || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.stats?.Deaths || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.stats?.MVPs || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.stats?.Headshots || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.stats?.Rounds || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.stats?.Double_Kills || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.stats?.Triple_Kills || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.stats?.Quadro_Kills || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.stats?.Penta_Kills || 'N/A'}</TableCell>
+                                                                </TableRow>
 
-                {/* Teams Section */}
-                <div className="mb-6">
-                    <h2 className="text-xl font-semibold">Teams</h2>
-                    {teams.map((team) => (
-                        <div key={team.name} className="border p-4 rounded-lg shadow mb-4">
-                            <h3 className="text-lg font-semibold">{team.name}</h3>
-                            <ul className="mt-2">
-                                {team.roster.map((player) => (
-                                    <li
-                                        key={player.player_id}
-                                        className="flex justify-between py-1 border-b cursor-pointer"
-                                        onClick={() => handlePlayerClick(player.player_id)}
+                                                                {/* Tournament Stats */}
+                                                                <TableRow>
+                                                                    <TableCell colSpan={10}><strong>Tournament Stats</strong></TableCell>
+                                                                </TableRow>
+                                                                <TableRow>
+                                                                    <TableCell>Kills</TableCell>
+                                                                    <TableCell>Assists</TableCell>
+                                                                    <TableCell>Deaths</TableCell>
+                                                                    <TableCell>MVPs</TableCell>
+                                                                    <TableCell>Headshots</TableCell>
+                                                                    <TableCell>Rounds</TableCell>
+                                                                    <TableCell>2K</TableCell>
+                                                                    <TableCell>3K</TableCell>
+                                                                    <TableCell>4K</TableCell>
+                                                                    <TableCell>5K</TableCell>
+                                                                </TableRow>
+                                                                <TableRow>
+                                                                    <TableCell>{playerdata.tournament_stats?.Kills || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.tournament_stats?.Assists || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.tournament_stats?.Deaths || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.tournament_stats?.MVPs || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.tournament_stats?.Headshots || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.tournament_stats?.Rounds || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.tournament_stats?.Double_Kills || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.tournament_stats?.Triple_Kills || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.tournament_stats?.Quadro_Kills || 'N/A'}</TableCell>
+                                                                    <TableCell>{playerdata.tournament_stats?.Penta_Kills || 'N/A'}</TableCell>
+                                                                </TableRow>
+
+                                                                <TableRow>
+                                                                    <TableCell colSpan={5} style={{ padding: 0 }}>
+                                                                        <Table>
+                                                                            <TableBody>
+                                                                                <TableRow>
+                                                                                    <TableCell colSpan={3} style={{ width: '50%', verticalAlign: 'top' }}><strong>Map Stats (Tournament)</strong></TableCell>
+                                                                                </TableRow>
+                                                                                <TableRow>
+                                                                                    <TableCell>Map</TableCell>
+                                                                                    <TableCell>Played</TableCell>
+                                                                                </TableRow>
+                                                                                {Object.entries(playerdata.stats?.played_maps || {}).map(([map, count]) => (
+                                                                                    <TableRow key={`overall-${map}`}>
+                                                                                        <TableCell>{map}</TableCell>
+                                                                                        <TableCell>{count}</TableCell>
+                                                                                    </TableRow>
+                                                                                ))}
+                                                                            </TableBody>
+                                                                        </Table>
+                                                                    </TableCell>
+
+                                                                    <TableCell colSpan={5} style={{ padding: 0 }}>
+                                                                        <Table>
+                                                                            <TableBody>
+                                                                                <TableRow>
+                                                                                    <TableCell colSpan={3} style={{ width: '50%', verticalAlign: 'top' }}><strong>Map Stats (Tournament)</strong></TableCell>
+                                                                                </TableRow>
+                                                                                <TableRow>
+                                                                                    <TableCell>Map</TableCell>
+                                                                                    <TableCell>Played</TableCell>
+                                                                                </TableRow>
+                                                                                {Object.entries(playerdata.tournament_stats?.played_maps || {}).map(([map, count]) => (
+                                                                                    <TableRow key={`tournament-${map}`}>
+                                                                                        <TableCell>{map}</TableCell>
+                                                                                        <TableCell>{count}</TableCell>
+                                                                                    </TableRow>
+                                                                                ))}
+                                                                            </TableBody>
+                                                                        </Table>
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            </TableBody>
+                                                        </Table>
+                                                    </Paper>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </React.Fragment>
+                                ))
+                            )
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={9}>No teams found.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            <Typography variant="h6" style={{ marginBottom: '10px' }}>
+                Matches
+            </Typography>
+            <TableContainer component={Paper} style={{ marginBottom: '20px' }}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Match</TableCell>
+                            <TableCell>Scheduled</TableCell>
+                            <TableCell>Status</TableCell>
+                            <TableCell>View on Faceit</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {matches.length > 0 ? (
+                            matches.map((match) => (
+                                <React.Fragment key={match.match_id}>
+                                    <TableRow
+                                        onClick={handleMatchClick(match.match_id)}
+                                        style={{ cursor: 'pointer' }}
                                     >
-                                        <span>{player.nickname}</span>
-                                        <span className="text-gray-500">LVL: {player.game_skill_level}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-                </div>
+                                        <TableCell>
+                                            <strong>{match.faction1_name} vs {match.faction2_name}</strong>
+                                        </TableCell>
+                                        <TableCell>{match.scheduled_at}</TableCell>
+                                        <TableCell>{match.status}</TableCell>
+                                        <TableCell>
+                                            {match.faceit_url ? (
+                                                <a
+                                                    href={match.faceit_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                    }}
+                                                >
+                                                    View
+                                                </a>
+                                            ) : (
+                                                <span>N/A</span>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
 
-                {/* Matches Section */}
-                <div className="mb-6">
-                    <h2 className="text-xl font-semibold">Matches</h2>
-                    {matches.length > 0 ? (
-                        matches.map((match) => (
-                            <div
-                                key={match.match_id}
-                                className="border p-4 rounded-lg shadow mb-4 cursor-pointer hover:bg-gray-100"
-                                onClick={() => handleMatchClick(match.match_id)}
-                            >
-                                <p>
-                                    <strong>Match:</strong> {match.faction1_name} vs {match.faction2_name}
-                                </p>
-                                <p className="text-gray-500">Status: {match.status}</p>
-                                <p className="text-gray-500">Scheduled At: {match.scheduled_at}</p>
-                                <p className="text-blue-500">
-                                    <a href={match.faceit_url} target="_blank" rel="noopener noreferrer">
-                                        View on Faceit
-                                    </a>
-                                </p>
-                            </div>
-                        ))
-                    ) : (
-                        <p>No matches found.</p>
-                    )}
-                </div>
-            </div>
+                                    {selectedMatch === match.match_id && pickBans && !errorPlayer && (
+                                        <TableRow>
+                                            <TableCell colSpan={4}>
+                                                <div style={{ marginTop: '20px' }}>
+                                                    <Typography variant="h6">Pick & Bans </Typography>
+                                                    <TableContainer>
+                                                        <Table>
+                                                            <TableHead>
+                                                                <TableRow>
+                                                                    <TableCell>Team</TableCell>
+                                                                    <TableCell>Bans</TableCell>
+                                                                    <TableCell>Picks</TableCell>
+                                                                </TableRow>
+                                                            </TableHead>
+                                                            <TableBody>
+                                                                {Object.entries(pickBans).map(([team, data]) => (
+                                                                    <TableRow key={team}>
+                                                                        <TableCell>{team}</TableCell>
+                                                                        <TableCell>{data.bans.join(', ')}</TableCell>
+                                                                        <TableCell>{data.picks.join(', ')}</TableCell>
+                                                                    </TableRow>
+                                                                ))}
+                                                            </TableBody>
+                                                        </Table>
+                                                    </TableContainer>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
 
-            {/* Right Sidebar */}
-            <div className="md:col-span-1 space-y-6">
-                {/* Pick & Bans Section */}
-                {selectedMatch && pickBans && (
-                    <div className="border p-4 rounded-lg shadow">
-                        <h2 className="text-xl font-semibold">Pick & Bans for Match {selectedMatch}</h2>
-                        <table className="w-full mt-2 border-collapse border border-gray-300">
-                            <thead>
-                                <tr className="bg-gray-200">
-                                    <th className="border p-2">Team</th>
-                                    <th className="border p-2">Bans</th>
-                                    <th className="border p-2">Picks</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {Object.entries(pickBans).map(([team, data]) => (
-                                    <tr key={team} className="border">
-                                        <td className="border p-2">{team}</td>
-                                        <td className="border p-2">{data.bans.join(", ")}</td>
-                                        <td className="border p-2">{data.picks.join(", ")}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-
-                {/* Player Data Section */}
-                {errorPlayer && <p>Error: {errorPlayer}</p>}
-                {player && (
-    <div className="border p-4 rounded-lg shadow">
-        <h2 className="text-xl font-semibold">Player Data</h2>
-        <p className="font-semibold">{player.nickname} (Faceit Level {player.faceit_lvl})</p>
-
-        {/* General Stats */}
-        <table className="w-full mt-2 border-collapse border border-gray-300">
-            <thead>
-                <tr className="bg-gray-200">
-                    <th className="border p-2">Stat</th>
-                    <th className="border p-2">Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td className="border p-2">Matches Played</td><td className="border p-2">{player.stats.played_matches}</td></tr>
-                <tr><td className="border p-2">Kills</td><td className="border p-2">{player.stats.Kills}</td></tr>
-                <tr><td className="border p-2">Assists</td><td className="border p-2">{player.stats.Assists}</td></tr>
-                <tr><td className="border p-2">Deaths</td><td className="border p-2">{player.stats.Deaths}</td></tr>
-                <tr><td className="border p-2">MVPs</td><td className="border p-2">{player.stats.MVPs}</td></tr>
-                <tr><td className="border p-2">Headshots</td><td className="border p-2">{player.stats.Headshots}</td></tr>
-                <tr><td className="border p-2">Rounds Played</td><td className="border p-2">{player.stats.Rounds}</td></tr>
-            </tbody>
-        </table>
-
-        {/* Map Performance */}
-        <h3 className="text-lg font-semibold mt-4">Map Performance</h3>
-        <table className="w-full mt-2 border-collapse border border-gray-300">
-            <thead>
-                <tr className="bg-gray-200">
-                    <th className="border p-2">Map</th>
-                    <th className="border p-2">Played</th>
-                    <th className="border p-2">Wins</th>
-                    <th className="border p-2">Win %</th>
-                </tr>
-            </thead>
-            <tbody>
-                {Object.keys(player.stats.played_maps).map((map) => {
-                    if (!map.includes("_wins")) {
-                        const wins = player.stats.played_maps[`${map}_wins`] || 0;
-                        const played = player.stats.played_maps[map] || 0;
-                        const winRate = played > 0 ? ((wins / played) * 100).toFixed(1) : "0.0";
-                        return (
-                            <tr key={map}>
-                                <td className="border p-2">{map.replace("de_", "").toUpperCase()}</td>
-                                <td className="border p-2">{played}</td>
-                                <td className="border p-2">{wins}</td>
-                                <td className="border p-2">{winRate}%</td>
-                            </tr>
-                        );
-                    }
-                    return null;
-                })}
-            </tbody>
-        </table>
-
-        {/* Tournament Stats */}
-        <h3 className="text-lg font-semibold mt-4">Tournament Stats</h3>
-        <table className="w-full mt-2 border-collapse border border-gray-300">
-            <thead>
-                <tr className="bg-gray-200">
-                    <th className="border p-2">Stat</th>
-                    <th className="border p-2">Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td className="border p-2">Matches Played</td><td className="border p-2">{player.tournament_stats.played_matches}</td></tr>
-                <tr><td className="border p-2">Kills</td><td className="border p-2">{player.tournament_stats.Kills}</td></tr>
-                <tr><td className="border p-2">Assists</td><td className="border p-2">{player.tournament_stats.Assists}</td></tr>
-                <tr><td className="border p-2">Deaths</td><td className="border p-2">{player.tournament_stats.Deaths}</td></tr>
-                <tr><td className="border p-2">MVPs</td><td className="border p-2">{player.tournament_stats.MVPs}</td></tr>
-                <tr><td className="border p-2">Headshots</td><td className="border p-2">{player.tournament_stats.Headshots}</td></tr>
-                <tr><td className="border p-2">Rounds Played</td><td className="border p-2">{player.tournament_stats.Rounds}</td></tr>
-            </tbody>
-        </table>
-    </div>
-)}
-
-            </div>
+                                    {selectedMatch === match.match_id && errorPlayer && (
+                                        <TableRow>
+                                            <TableCell colSpan={4}>
+                                                <Paper className="p-4 mb-6" style={{ backgroundColor: '#f9f9f9', padding: '10px' }}>
+                                                    <Typography color="error">Error loading Pick & Bans: {errorPlayer}</Typography>
+                                                </Paper>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </React.Fragment>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={4}>No matches found.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </div>
     );
 };
