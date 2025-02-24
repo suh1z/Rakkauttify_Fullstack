@@ -23,10 +23,11 @@ function App() {
       dispatch(initializeUser());
       setLoading(false);
     };
+
     fetchData();
   }, [dispatch]);
 
-  if (loading || !user.user) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
