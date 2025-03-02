@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     Table,
@@ -16,14 +15,14 @@ import { fetchTeams, fetchPlayer, fetchMatches, fetchPickBans } from '../reducer
 const Pappaliiga = () => {
     const dispatch = useDispatch();
 
-    const { teams, loading, error, player, matches, pickBans, error: errorPlayer } = useSelector(
+    const { teams, loading, player, matches, pickBans = {}, error: errorPlayer } = useSelector(
         (state) => state.pappa || {}
     );
 
     const [selectedMatch, setSelectedMatch] = useState(null);
-    const [selectedDivision, setSelectedDivision] = useState(12);
-    const [selectedPlayerId, setSelectedPlayerId] = useState(null);
+    const [selectedDivision, setSelectedDivision] = useState(7);
     const [expandedPlayer, setExpandedPlayer] = useState(null);
+    const [matchFilter, setMatchFilter] = useState('FINISHED'); 
     const playerdata = player || {};
 
     useEffect(() => {
@@ -31,27 +30,40 @@ const Pappaliiga = () => {
         dispatch(fetchMatches(selectedDivision, 10));
     }, [dispatch, selectedDivision]);
 
-    const handleMatchClick = (matchId) => (e) => {
+    const handleMatchClick = (round, matchId) => (e) => {
         e.preventDefault();
         if (selectedMatch === matchId) {
             setSelectedMatch(null);
         } else {
             setSelectedMatch(matchId);
-            dispatch(fetchPickBans(matchId));
+            dispatch(fetchPickBans(matchId, round));
         }
     };
 
     const handlePlayerClick = (playerId) => {
-        setSelectedPlayerId(playerId);
         dispatch(fetchPlayer(playerId));
         setExpandedPlayer(expandedPlayer === playerId ? null : playerId);
     };
 
     const handleDivisionChange = (e) => {
-        setSelectedDivision(Number(e.target.value));
+        const newDivision = Number(e.target.value);
+        setSelectedDivision(newDivision);
+    };
+
+    const handleMatchFilterChange = (e) => {
+        setMatchFilter(e.target.value);
     };
 
     if (loading) return <p>Loading data...</p>;
+
+    const filteredMatches = matches.filter(match => {
+        if (matchFilter === 'SCHEDULED') {
+            return match.status === 'SCHEDULED';
+        } else if (matchFilter === 'FINISHED') {
+            return match.status === 'FINISHED';
+        }
+        return true;
+    });
 
     return (
         <div style={{ padding: '20px' }}>
@@ -59,7 +71,6 @@ const Pappaliiga = () => {
                 Pappaliiga
             </Typography>
             <div style={{ padding: '20px' }}>
-                {/* Division Selection Dropdown */}
                 <div className="mb-4">
                     <label htmlFor="division" className="block mb-2">
                         Select Division
@@ -222,7 +233,21 @@ const Pappaliiga = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-
+            <div className="mb-4">
+                    <label htmlFor="matchFilter" className="block mb-2">
+                        Filter Matches
+                    </label>
+                    <select
+                        id="matchFilter"
+                        value={matchFilter}
+                        onChange={handleMatchFilterChange}
+                        className="border p-2 rounded"
+                    >
+                        <option value="All">All</option>
+                        <option value="SCHEDULED">Scheduled</option>
+                        <option value="FINISHED">Finished</option>
+                    </select>
+                </div>
             <Typography variant="h6" style={{ marginBottom: '10px' }}>
                 Matches
             </Typography>
@@ -231,21 +256,25 @@ const Pappaliiga = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell>Match</TableCell>
+                            <TableCell>Result</TableCell>
                             <TableCell>Scheduled</TableCell>
                             <TableCell>Status</TableCell>
                             <TableCell>View on Faceit</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {matches.length > 0 ? (
-                            matches.map((match) => (
+                        {filteredMatches.length > 0 ? (
+                            filteredMatches.map((match) => (
                                 <React.Fragment key={match.match_id}>
                                     <TableRow
-                                        onClick={handleMatchClick(match.match_id)}
+                                        onClick={handleMatchClick(match.round, match.match_id)}
                                         style={{ cursor: 'pointer' }}
                                     >
                                         <TableCell>
                                             <strong>{match.faction1_name} vs {match.faction2_name}</strong>
+                                        </TableCell>
+                                        <TableCell>
+                                            <strong>{match.faction1_score}</strong> - <strong>{match.faction2_score}</strong>
                                         </TableCell>
                                         <TableCell>{match.scheduled_at}</TableCell>
                                         <TableCell>{match.status}</TableCell>
@@ -266,12 +295,11 @@ const Pappaliiga = () => {
                                             )}
                                         </TableCell>
                                     </TableRow>
-
                                     {selectedMatch === match.match_id && pickBans && !errorPlayer && (
                                         <TableRow>
-                                            <TableCell colSpan={4}>
+                                            <TableCell colSpan={5}>
                                                 <div style={{ marginTop: '20px' }}>
-                                                    <Typography variant="h6">Pick & Bans </Typography>
+                                                    <Typography variant="h6">Pick & Bans</Typography>
                                                     <TableContainer>
                                                         <Table>
                                                             <TableHead>
@@ -282,13 +310,15 @@ const Pappaliiga = () => {
                                                                 </TableRow>
                                                             </TableHead>
                                                             <TableBody>
-                                                                {Object.entries(pickBans).map(([team, data]) => (
-                                                                    <TableRow key={team}>
-                                                                        <TableCell>{team}</TableCell>
-                                                                        <TableCell>{data.bans.join(', ')}</TableCell>
-                                                                        <TableCell>{data.picks.join(', ')}</TableCell>
-                                                                    </TableRow>
-                                                                ))}
+                                                                {Object.entries(pickBans).map(([team, data]) => {
+                                                                    return (
+                                                                        <TableRow key={team}>
+                                                                            <TableCell>{team}</TableCell>
+                                                                            <TableCell>{data.bans ? data.bans.join(', ') : 'No bans'}</TableCell>
+                                                                            <TableCell>{data.picks ? data.picks.join(', ') : 'No picks'}</TableCell>
+                                                                        </TableRow>
+                                                                    );
+                                                                })}
                                                             </TableBody>
                                                         </Table>
                                                     </TableContainer>
@@ -299,7 +329,7 @@ const Pappaliiga = () => {
 
                                     {selectedMatch === match.match_id && errorPlayer && (
                                         <TableRow>
-                                            <TableCell colSpan={4}>
+                                            <TableCell colSpan={5}>
                                                 <Paper className="p-4 mb-6" style={{ backgroundColor: '#f9f9f9', padding: '10px' }}>
                                                     <Typography color="error">Error loading Pick & Bans: {errorPlayer}</Typography>
                                                 </Paper>
@@ -310,7 +340,7 @@ const Pappaliiga = () => {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={4}>No matches found.</TableCell>
+                                <TableCell colSpan={5}>No matches found.</TableCell>
                             </TableRow>
                         )}
                     </TableBody>

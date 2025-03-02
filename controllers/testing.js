@@ -90,28 +90,27 @@ azureRouter.get('/player/:playerId', async (req, res) => {
 
 azureRouter.get('/matches', async (req, res) => {
   try {
-    if (!lastDivision || !lastSeason) {
-      return res.status(400).json({ error: "Division and season not set. Call /data first." });
+    const { division, season } = req.query;
+    if (!division || !season) {
+      return res.status(400).json({ error: "Missing division or season parameters" });
     }
-
-    const matches = await fetchDataFromAzure(lastDivision, lastSeason, "matches.json");
+    const matches = await fetchDataFromAzure(division, season, "matches.json");
     res.json(matches);
   } catch (error) {
     res.status(500).json({ error: "Error fetching match data from Azure" });
   }
 });
 
-azureRouter.get('/pickbans/:matchId', async (req, res) => {
-  try {
-    const { matchId } = req.params;
 
+azureRouter.get('/pickbans/:round/:matchId', async (req, res) => {
+  try {
+    const { round, matchId } = req.params;
+    
     if (!lastDivision || !lastSeason) {
       return res.status(400).json({ error: "Division and season not set. Call /data first." });
     }
-
-    const filePath = `1/pickbans_${matchId}.json`;
+    const filePath = `${round}/pickbans_${matchId}.json`;
     const pickBansData = await fetchDataFromAzure(lastDivision, lastSeason, filePath);
-
     res.json(pickBansData);
   } catch (error) {
     res.status(500).json({ error: "Error fetching pick & bans data from Azure" });

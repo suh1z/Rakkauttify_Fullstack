@@ -9,7 +9,7 @@ const pappaSlice = createSlice({
     teams: [],
     player: null,
     matches: [],
-    pickBans: null,
+    pickBans: {},
     error: null,
   },
   reducers: {
@@ -70,13 +70,14 @@ export const fetchMatches = (division, season) => async (dispatch) => {
   }
 };
 
-export const fetchPickBans = (matchId) => async (dispatch) => {
+export const fetchPickBans = (round, matchId) => async (dispatch) => {
   try {
-    const pickBans = await pappaService.fetchPickBans(matchId);
-    dispatch(fetchPickBansSuccess(pickBans));
+    const response = await pappaService.fetchPickBans(matchId, round);  
+    dispatch(fetchPickBansSuccess(response));
   } catch (error) {
     dispatch(fetchFailure("Error fetching pick & bans: " + error.message));
   }
 };
+
 
 export default pappaSlice.reducer;

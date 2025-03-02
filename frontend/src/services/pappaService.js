@@ -32,9 +32,11 @@ const fetchMatches = async (division, season) => {
   }
 };
 
-const fetchPickBans = async (matchId) => {
+const fetchPickBans = async (round, matchId) => {
   try {
-    const response = await axios.get(`${baseUrl}/pickbans/${matchId}`);
+    const url = `${String(baseUrl)}/pickbans/${String(round)}/${String(matchId)}`;
+    const response = await axios.get(url);
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching pick & ban data:", error);
