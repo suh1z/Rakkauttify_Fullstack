@@ -9,6 +9,7 @@ const pappaSlice = createSlice({
     teams: [],
     player: null,
     matches: [],
+    allmatches: [],
     pickBans: {},
     error: null,
   },
@@ -23,6 +24,10 @@ const pappaSlice = createSlice({
     },
     fetchMatchesSuccess(state, action) {
       state.matches = action.payload;
+      state.error = null; 
+    },
+    fetchAllMatchesSuccess(state, action) {
+      state.allmatches = action.payload;
       state.error = null; 
     },
     fetchPickBansSuccess(state, action) {
@@ -40,6 +45,7 @@ export const {
   fetchPlayerSuccess,
   fetchMatchesSuccess,
   fetchPickBansSuccess,
+  fetchAllMatchesSuccess,
   fetchFailure,
 } = pappaSlice.actions;
 
@@ -65,6 +71,15 @@ export const fetchMatches = (division, season) => async (dispatch) => {
   try {
     const matches = await pappaService.fetchMatches(division, season);
     dispatch(fetchMatchesSuccess(matches));
+  } catch (error) {
+    dispatch(fetchFailure("Error fetching matches: " + error.message));
+  }
+};
+
+export const fetchAllMatches = (division, season) => async (dispatch) => {
+  try {
+    const allmatches = await pappaService.fetchAllMatches(division, season);
+    dispatch(fetchAllMatchesSuccess(allmatches));
   } catch (error) {
     dispatch(fetchFailure("Error fetching matches: " + error.message));
   }

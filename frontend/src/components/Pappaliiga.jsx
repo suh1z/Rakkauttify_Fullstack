@@ -10,12 +10,13 @@ import {
     Paper,
     Typography
 } from '@mui/material';
-import { fetchTeams, fetchPlayer, fetchMatches, fetchPickBans } from '../reducers/pappaReducer';
+import { fetchTeams, fetchPlayer, fetchMatches, fetchPickBans, fetchAllMatches } from '../reducers/pappaReducer';
+
 
 const Pappaliiga = () => {
     const dispatch = useDispatch();
 
-    const { teams, loading, player, matches, pickBans = {}, error: errorPlayer } = useSelector(
+    const { teams, loading, player, matches, allmatches, pickBans = {}, error: errorPlayer } = useSelector(
         (state) => state.pappa || {}
     );
 
@@ -23,11 +24,14 @@ const Pappaliiga = () => {
     const [selectedDivision, setSelectedDivision] = useState(7);
     const [expandedPlayer, setExpandedPlayer] = useState(null);
     const [matchFilter, setMatchFilter] = useState('FINISHED'); 
+    const [sortBy, setSortBy] = useState('score');
+    const [sortOrder, setSortOrder] = useState('desc');
     const playerdata = player || {};
 
     useEffect(() => {
         dispatch(fetchTeams(selectedDivision, 10));
         dispatch(fetchMatches(selectedDivision, 10));
+        dispatch(fetchAllMatches(selectedDivision, 10));
     }, [dispatch, selectedDivision]);
 
     const handleMatchClick = (round, matchId) => (e) => {
@@ -37,6 +41,15 @@ const Pappaliiga = () => {
         } else {
             setSelectedMatch(matchId);
             dispatch(fetchPickBans(matchId, round));
+        }
+    };
+
+    const handleSort = (column) => {
+        if (sortBy === column) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(column);
+            setSortOrder('desc');
         }
     };
 
@@ -54,16 +67,18 @@ const Pappaliiga = () => {
         setMatchFilter(e.target.value);
     };
 
-    if (loading) return <p>Loading data...</p>;
+        const filteredMatches = Array.isArray(matches)
+        ? matches.filter((match) => {
+            if (matchFilter === 'SCHEDULED') {
+                return match.status === 'SCHEDULED';
+            } else if (matchFilter === 'FINISHED') {
+                return match.status === 'FINISHED';
+            }
+            return true;
+        })
+        : []; 
 
-    const filteredMatches = matches.filter(match => {
-        if (matchFilter === 'SCHEDULED') {
-            return match.status === 'SCHEDULED';
-        } else if (matchFilter === 'FINISHED') {
-            return match.status === 'FINISHED';
-        }
-        return true;
-    });
+    if (loading) return <p>Loading data...</p>;
 
     return (
         <div style={{ padding: '20px' }}>
@@ -87,6 +102,66 @@ const Pappaliiga = () => {
                     </select>
                 </div>
             </div>
+            <TableContainer component={Paper} style={{ marginBottom: '20px' }}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Team</TableCell>
+                            <TableCell>Bans</TableCell>
+                            <TableCell>Picks</TableCell>
+                            <TableCell 
+                                onClick={() => handleSort('score')}
+                                style={{ cursor: 'pointer', fontWeight: 'bold' }}
+                            >
+                                Score {sortBy === 'score' && (sortOrder === 'asc' ? '↑' : '↓')}
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {allmatches?.aggregatedResults ? (
+                            Object.entries(allmatches.aggregatedResults)
+                                .sort((a, b) => {
+                                    const scoreA = a[1].score;
+                                    const scoreB = b[1].score;
+                                    if (sortOrder === 'asc') {
+                                        return scoreA - scoreB;
+                                    }
+                                    return scoreB - scoreA;
+                                })
+                                .map(([teamName, teamData]) => (
+                                    <TableRow key={teamName}>
+                                        <TableCell><strong>{teamName}</strong></TableCell>
+                                        <TableCell>
+                                            {Object.entries(teamData.bans)
+                                                .sort((a, b) => b[1] - a[1])
+                                                .map(([map, count]) => (
+                                                    <div key={`${teamName}-ban-${map}`}>
+                                                        {map.replace('de_', '')} ({count})
+                                                    </div>
+                                                ))}
+                                            {Object.keys(teamData.bans).length === 0 && 'No bans'}
+                                        </TableCell>
+                                        <TableCell>
+                                            {Object.entries(teamData.picks)
+                                                .sort((a, b) => b[1] - a[1])
+                                                .map(([map, count]) => (
+                                                    <div key={`${teamName}-pick-${map}`}>
+                                                        {map.replace('de_', '')} ({count})
+                                                    </div>
+                                                ))}
+                                            {Object.keys(teamData.picks).length === 0 && 'No picks'}
+                                        </TableCell>
+                                        <TableCell><strong>{teamData.score}</strong></TableCell>
+                                    </TableRow>
+                                ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={4}>No aggregated results available</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
             <Typography variant="h6" style={{ marginBottom: '10px' }}>Teams and Players</Typography>
             <TableContainer component={Paper} style={{ marginBottom: '20px' }}>
                 <Table>

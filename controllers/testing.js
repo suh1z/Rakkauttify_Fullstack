@@ -101,6 +101,66 @@ azureRouter.get('/matches', async (req, res) => {
   }
 });
 
+azureRouter.get('/allmatches', async (req, res) => {
+  try {
+    const { division, season } = req.query;
+    if (!division || !season) {
+      return res.status(400).json({ error: "Missing division or season parameters" });
+    }
+    const matchData = await fetchDataFromAzure(division, season, "matches.json");
+
+    const teamPickBanStats = {};
+
+    matchData.forEach(match => {
+      if (match.pickbans) {
+        Object.entries(match.pickbans).forEach(([team, pickban]) => {
+          if (!teamPickBanStats[team]) {
+            teamPickBanStats[team] = { picks: {}, bans: {}, score: 0 };
+          }
+
+          pickban.picks.forEach(pick => {
+            teamPickBanStats[team].picks[pick] = (teamPickBanStats[team].picks[pick] || 0) + 1;
+          });
+
+          pickban.bans.forEach(ban => {
+            teamPickBanStats[team].bans[ban] = (teamPickBanStats[team].bans[ban] || 0) + 1;
+          });
+        });
+      }
+
+      if (match.faction1_score && match.faction2_score) {
+        if (!teamPickBanStats[match.faction1_name]) {
+          teamPickBanStats[match.faction1_name] = { picks: {}, bans: {}, score: 0 };
+        }
+        if (!teamPickBanStats[match.faction2_name]) {
+          teamPickBanStats[match.faction2_name] = { picks: {}, bans: {}, score: 0 };
+        }
+        teamPickBanStats[match.faction1_name].score += match.faction1_score;
+        teamPickBanStats[match.faction2_name].score += match.faction2_score;
+      }
+        });
+
+    const aggregatedResults = Object.fromEntries(
+      Object.entries(teamPickBanStats).map(([team, data]) => [
+        team,
+        {
+          picks: Object.fromEntries(
+            Object.entries(data.picks).sort((a, b) => b[1] - a[1])
+          ),
+          bans: Object.fromEntries(
+            Object.entries(data.bans).sort((a, b) => b[1] - a[1])
+          ),
+          score: data.score,
+        },
+      ])
+    );
+
+    res.json({ aggregatedResults });
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching match data from Azure" });
+  }
+});
+
 
 azureRouter.get('/pickbans/:round/:matchId', async (req, res) => {
   try {
