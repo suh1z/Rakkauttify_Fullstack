@@ -35,6 +35,7 @@ app.use(middleware.requestLogger);
 app.use("/api/login", loginRouter);
 app.use("/api/users", usersRouter );
 app.use("/api/inhouse", inhouseRouter);
+app.use("/api/matches", leagueRouter);
 app.use("/api/months", leagueRouter);
 app.use("/api/fetch-match-data", leagueRouter);
 app.use("/api/players", leagueRouter);
@@ -44,6 +45,7 @@ app.use("/api/player", azureRouter);
 app.use("/api/matches", azureRouter);
 app.use("/api/allmatches", azureRouter);
 app.use("/api/pickbans", azureRouter);
+
 
 
 app.get('*', (req, res) => {
