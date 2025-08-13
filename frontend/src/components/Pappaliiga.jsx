@@ -29,9 +29,9 @@ const Pappaliiga = () => {
     const playerdata = player || {};
 
     useEffect(() => {
-        dispatch(fetchTeams(selectedDivision, 10));
-        dispatch(fetchMatches(selectedDivision, 10));
-        dispatch(fetchAllMatches(selectedDivision, 10));
+        dispatch(fetchTeams(selectedDivision, 11));
+        dispatch(fetchMatches(selectedDivision, 11));
+        dispatch(fetchAllMatches(selectedDivision, 11));
     }, [dispatch, selectedDivision]);
 
     const handleMatchClick = (round, matchId) => (e) => {
@@ -96,9 +96,9 @@ const Pappaliiga = () => {
                         onChange={handleDivisionChange}
                         className="border p-2 rounded"
                     >
-                        <option value={7}>Division 7</option>
-                        <option value={12}>Division 12</option>
-                        <option value={20}>Division 20</option>
+                        <option value={3}>Division 3</option>
+                        <option value={6}>Division 6</option>
+                        <option value={17}>Division 17</option>
                     </select>
                 </div>
             </div>
