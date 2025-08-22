@@ -96,7 +96,7 @@ const Pappaliiga = () => {
                         onChange={handleDivisionChange}
                         className="border p-2 rounded"
                     >
-                        <option value={3}>Division 3</option>
+                        <option value={2}>Division 2</option>
                         <option value={6}>Division 6</option>
                         <option value={17}>Division 17</option>
                     </select>
