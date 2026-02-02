@@ -24,8 +24,8 @@ const PappaliigaNextMatch = () => {
     (state) => state.pappa || {}
   );
 
-  const [selectedDivision, setSelectedDivision] = useState(17);
-  const [homeTeam, setHomeTeam] = useState('');
+  const [selectedDivision, setSelectedDivision] = useState(12);
+  const [homeTeam, setHomeTeam] = useState('Rakkauden Kanaali');
   const [opponentTeam, setOpponentTeam] = useState('');
   const [nextMatch, setNextMatch] = useState(null);
   const [expandedTeam, setExpandedTeam] = useState(null);

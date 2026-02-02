@@ -33,7 +33,7 @@ const TeamPlayersTable = ({
   handleTeamClick,
   expandedTeam,
 }) => {
-  const [selectedTeam, setSelectedTeam] = useState("");
+  const [selectedTeam, setSelectedTeam] = useState("Rakkauden Kanaali");
 
   const handleTeamSelect = (e) => {
     const teamName = e.target.value;
