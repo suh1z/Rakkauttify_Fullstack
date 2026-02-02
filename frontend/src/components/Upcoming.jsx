@@ -35,9 +35,9 @@ const PappaliigaNextMatch = () => {
 
   // Fetch teams and matches for the division
   useEffect(() => {
-    dispatch(fetchTeams(selectedDivision, 11));
-    dispatch(fetchMatches(selectedDivision, 11));
-    dispatch(fetchAllMatches(selectedDivision, 11));
+    dispatch(fetchTeams(selectedDivision, 12));
+    dispatch(fetchMatches(selectedDivision, 12));
+    dispatch(fetchAllMatches(selectedDivision, 12));
   }, [dispatch, selectedDivision]);
 
   // Update playerStatsById when a player is fetched
@@ -157,9 +157,9 @@ const PappaliigaNextMatch = () => {
             onChange={handleDivisionChange}
             label="Division"
           >
-            <MenuItem value={2}>Division 2</MenuItem>
             <MenuItem value={6}>Division 6</MenuItem>
-            <MenuItem value={17}>Division 17</MenuItem>
+            <MenuItem value={12}>Division 12</MenuItem>
+            <MenuItem value={16}>Division 16</MenuItem>
           </Select>
         </FormControl>
 

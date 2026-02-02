@@ -14,7 +14,7 @@ const Pappaliiga = () => {
     (state) => state.pappa || {}
   );
 
-  const [selectedDivision, setSelectedDivision] = useState(17);
+  const [selectedDivision, setSelectedDivision] = useState(12);
   const [expandedTeam, setExpandedTeam] = useState(null);
   const [sortBy, setSortBy] = useState('score');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -22,9 +22,9 @@ const Pappaliiga = () => {
   const [showAllStats, setShowAllStats] = useState(false); // NEW: control visibility of full stats
 
   useEffect(() => {
-    dispatch(fetchTeams(selectedDivision, 11));
-    dispatch(fetchMatches(selectedDivision, 11));
-    dispatch(fetchAllMatches(selectedDivision, 11));
+    dispatch(fetchTeams(selectedDivision, 12));
+    dispatch(fetchMatches(selectedDivision, 12));
+    dispatch(fetchAllMatches(selectedDivision, 12));
   }, [dispatch, selectedDivision]);
 
   useEffect(() => {
@@ -93,9 +93,9 @@ const Pappaliiga = () => {
               onChange={handleDivisionChange}
               className="border p-2 rounded"
             >
-              <option value={2}>Division 2</option>
               <option value={6}>Division 6</option>
-              <option value={17}>Division 17</option>
+              <option value={12}>Division 12</option>
+              <option value={16}>Division 16</option>
             </select>
           </div>
 
