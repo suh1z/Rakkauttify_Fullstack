@@ -107,8 +107,19 @@ app.use(middleware.tokenExtractor);
 // Public routes (no auth required)
 app.use("/api/login", loginLimiter, loginRouter);
 
+// User routes with conditional auth
+// POST /api/users (registration) - public, protected by admin secret in controller
+// Other /api/users routes - require auth token
+app.use("/api/users", (req, res, next) => {
+  if (req.method === 'POST') {
+    // Skip auth for registration - admin secret checked in controller
+    return next();
+  }
+  // All other methods require authentication
+  middleware.userExtractor(req, res, next);
+}, usersRouter);
+
 // Protected routes (auth required)
-app.use("/api/users", middleware.userExtractor, usersRouter);
 app.use("/api/inhouse", middleware.userExtractor, inhouseRouter);
 
 // Public data routes (read-only, no sensitive data)

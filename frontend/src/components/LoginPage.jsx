@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { loginUser } from '../reducers/userReducer'
 
 const LoginPage = () => {
@@ -55,6 +55,10 @@ const LoginPage = () => {
         </div>
         <button type="submit">Login</button>
       </form>
+      <p style={{ marginTop: '1rem', color: '#888' }}>
+        Don&apos;t have an account?{' '}
+        <Link to="/register" style={{ color: '#de6c2c' }}>Register here</Link>
+      </p>
     </div>
   )
 }

@@ -13,6 +13,8 @@ const StatisticsPage = lazy(() => import('./components/StatisticsPage'));
 const PlayerData = lazy(() => import('./components/PlayerData'));
 const Pappaliiga = lazy(() => import('./components/Pappaliiga'));
 const LoginPage = lazy(() => import('./components/LoginPage'));
+const RegisterPage = lazy(() => import('./components/RegisterPage'));
+const MyStats = lazy(() => import('./components/MyStats'));
 
 // CS2 themed loading spinner
 const PageLoader = () => (
@@ -53,9 +55,14 @@ function App() {
           <Route path="/playerdata" element={<PlayerData />} />
           <Route path="/statistics" element={<StatisticsPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route
             path="/pappaliiga"
             element={user.user ? <Pappaliiga /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/mystats"
+            element={user.user ? <MyStats /> : <Navigate to="/login" />}
           />
         </Routes>
       </Suspense>

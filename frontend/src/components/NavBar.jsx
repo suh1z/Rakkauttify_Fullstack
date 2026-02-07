@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
+import { useSelector } from 'react-redux'
 import {
   AppBar,
   Toolbar,
@@ -9,9 +10,11 @@ import {
   Box,
   useMediaQuery,
   useTheme,
-  Typography
+  Typography,
+  Chip,
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
+import PersonIcon from '@mui/icons-material/Person'
 import { Link } from 'react-router-dom'
 import '../App.css'
 
@@ -29,6 +32,7 @@ const Navbar = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [anchorEl, setAnchorEl] = React.useState(null)
+  const user = useSelector(state => state.user.user)
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget)
@@ -89,6 +93,13 @@ const Navbar = () => {
                   Scouting
                 </Link>
               </MenuItem>
+              {user && (
+                <MenuItem onClick={handleMenuClose} sx={{ '&:hover': { bgcolor: cs2.bgDark } }}>
+                  <Link to="/mystats" className="link" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <PersonIcon fontSize="small" /> My Stats
+                  </Link>
+                </MenuItem>
+              )}
             </Menu>
           </>
         ) : (
@@ -106,8 +117,25 @@ const Navbar = () => {
               <Link to="/pappaliiga" className="link">
                 Scouting
               </Link>
+              {user && (
+                <Link to="/mystats" className="link" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <PersonIcon fontSize="small" /> My Stats
+                </Link>
+              )}
             </Box>
             <Box sx={{ flexGrow: 1 }} />
+            {user && (
+              <Chip 
+                icon={<PersonIcon sx={{ fontSize: 16 }} />}
+                label={user.username}
+                size="small"
+                sx={{ 
+                  bgcolor: `${cs2.accent}20`, 
+                  color: cs2.accent,
+                  '& .MuiChip-icon': { color: cs2.accent },
+                }}
+              />
+            )}
           </>
         )}
       </Toolbar>
