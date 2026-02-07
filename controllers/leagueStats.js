@@ -91,6 +91,39 @@ leagueRouter.get("/players/:nickname", async (req, res) => {
   }
 });
 
+// Live Faceit API lookup by nickname - returns elo, avatar, level
+leagueRouter.get("/faceit-profile/:nickname", async (req, res) => {
+  const { nickname } = req.params;
+
+  try {
+    const playerProfileResponse = await axios.get(
+      `https://open.faceit.com/data/v4/players?nickname=${encodeURIComponent(nickname)}`,
+      {
+        headers: { Authorization: `Bearer ${faceitApiKey}` },
+      }
+    );
+
+    const data = playerProfileResponse.data;
+    const csGame = data.games?.cs2 || data.games?.csgo || {};
+    
+    res.json({
+      player_id: data.player_id,
+      nickname: data.nickname,
+      avatar: data.avatar,
+      elo: csGame.faceit_elo || 0,
+      level: csGame.skill_level || 0,
+      country: data.country,
+    });
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      console.warn(`No Faceit profile found for nickname: ${nickname}`);
+      return res.status(404).json({ nickname, elo: 0, level: 0, avatar: null });
+    }
+    console.error(`Error fetching Faceit data for ${nickname}:`, error.message);
+    res.status(500).json({ message: `Error fetching Faceit data for ${nickname}` });
+  }
+});
+
 leagueRouter.get("/fetch-match-data", async (req, res) => {
   const { url } = req.query;
 

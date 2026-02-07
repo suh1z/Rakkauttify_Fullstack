@@ -1,11 +1,35 @@
+/* CS2 Theme Variables */
+:root {
+  --cs2-bg-dark: #0d0d0d;
+  --cs2-bg-card: #1a1a1a;
+  --cs2-bg-hover: #252525;
+  --cs2-accent: #de6c2c;
+  --cs2-accent-hover: #ff7c3c;
+  --cs2-text-primary: #e5e5e5;
+  --cs2-text-secondary: #888888;
+  --cs2-border: rgba(255,255,255,0.08);
+  --cs2-green: #4ade80;
+  --cs2-red: #ef4444;
+}
+
+body {
+  background-color: var(--cs2-bg-dark);
+  color: var(--cs2-text-primary);
+}
+
 .link {
-  color: #ffc107;
+  color: var(--cs2-accent);
   text-decoration: none;
-  padding: 10px;
+  padding: 12px 16px;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  transition: color 0.2s;
 }
 
 .link:hover {
-  color: #ff9800;
+  color: var(--cs2-accent-hover);
 }
 
 .InfiniteScroll {
@@ -14,10 +38,73 @@
 
 .Card {
   margin-bottom: 20px;
-  background-color: #1e1e1e;
-  color: #ffffff;
+  background-color: var(--cs2-bg-card);
+  color: var(--cs2-text-primary);
+  border: 1px solid var(--cs2-border);
 }
 
 .CardContent {
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--cs2-bg-card);
+}
+
+/* Login Page Styling */
+.login-container {
+  max-width: 400px;
+  margin: 100px auto;
+  padding: 40px;
+  background-color: var(--cs2-bg-card);
+  border: 1px solid var(--cs2-border);
+}
+
+.login-container h1 {
+  color: var(--cs2-accent);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 1.5rem;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.login-container form div {
+  margin-bottom: 20px;
+}
+
+.login-container label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--cs2-text-secondary);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+
+.login-container input {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--cs2-bg-dark);
+  border: 1px solid var(--cs2-border);
+  color: var(--cs2-text-primary);
+  font-size: 1rem;
+}
+
+.login-container input:focus {
+  outline: none;
+  border-color: var(--cs2-accent);
+}
+
+.login-container button {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--cs2-accent);
+  color: white;
+  border: none;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.login-container button:hover {
+  background-color: var(--cs2-accent-hover);
 }

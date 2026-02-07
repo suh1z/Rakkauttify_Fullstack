@@ -16,7 +16,7 @@ const azureRouter = require("./controllers/testing");
 
 mongoose.set("strictQuery", false);
 
-logger.info("connecting to", config.MONGODB_URI);
+logger.info("Attempting to connect to MongoDB...");
 
 mongoose
   .connect(config.MONGODB_URI)
@@ -26,6 +26,14 @@ mongoose
   .catch((error) => {
     logger.error("error connection to MongoDB:", error.message);
   });
+
+mongoose.connection.on('disconnected', () => {
+    logger.info('MongoDB disconnected!');
+});
+
+mongoose.connection.on('error', (err) => {
+    logger.error('MongoDB connection error:', err);
+});
 
 app.use(cors());
 app.use(express.static("dist"));

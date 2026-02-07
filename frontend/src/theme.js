@@ -1,142 +1,188 @@
 import { createTheme } from '@mui/material/styles';
-import { blueGrey, amber } from '@mui/material/colors';
+
+// CS2 Color Palette
+const cs2 = {
+  bgDark: '#0d0d0d',
+  bgCard: '#1a1a1a',
+  bgHover: '#252525',
+  accent: '#de6c2c',
+  accentHover: '#ff7c3c',
+  textPrimary: '#e5e5e5',
+  textSecondary: '#888888',
+  border: 'rgba(255,255,255,0.08)',
+  green: '#4ade80',
+  red: '#ef4444'
+};
 
 const theme = createTheme({
   palette: {
     mode: 'dark',
     background: {
-      default: '#121212', // Dark background
-      paper: '#1e1e1e',   // Slightly lighter background for paper elements
+      default: cs2.bgDark,
+      paper: cs2.bgCard,
     },
     primary: {
-      main: blueGrey[500], // Dark blue-grey for primary elements
+      main: cs2.accent,
+      dark: '#b85a24',
+      light: cs2.accentHover,
     },
     secondary: {
-      main: amber[600],    // Amber for secondary elements
+      main: cs2.green,
+    },
+    error: {
+      main: cs2.red,
+    },
+    success: {
+      main: cs2.green,
     },
     text: {
-      primary: '#ffffff',  // White text for primary text
-      secondary: blueGrey[300], // Light grey text for secondary text
+      primary: cs2.textPrimary,
+      secondary: cs2.textSecondary,
     },
-    grey: {
-      400: blueGrey[400],
-      600: blueGrey[600],
-      700: blueGrey[700],
-      800: blueGrey[800],
-    },
-    link: {
-      main: amber[200],    // Amber color for links
-    },
+    divider: cs2.border,
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h1: { fontWeight: 800 },
+    h2: { fontWeight: 700 },
+    h3: { fontWeight: 700 },
+    h4: { fontWeight: 600 },
+    h5: { fontWeight: 600 },
+    h6: { fontWeight: 600 },
+  },
+  shape: {
+    borderRadius: 0, // Sharp edges for CS2 aesthetic
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: cs2.bgDark,
+          scrollbarColor: `${cs2.accent} ${cs2.bgDark}`,
+          '&::-webkit-scrollbar, & *::-webkit-scrollbar': {
+            backgroundColor: cs2.bgDark,
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb': {
+            borderRadius: 0,
+            backgroundColor: cs2.accent,
+            minHeight: 24,
+            border: `2px solid ${cs2.bgDark}`,
+          },
+        },
+      },
+    },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          marginBottom: '16px',
-          backgroundColor: blueGrey[800], // Darker background for AppBar
-          width: '100%',
-          borderRadius: '0 0 16px 16px',
-          overflowX: 'auto',
+          backgroundColor: cs2.bgCard,
+          backgroundImage: 'none',
+          boxShadow: 'none',
+          borderBottom: `1px solid ${cs2.border}`,
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          borderRadius: 0,
         },
       },
     },
     MuiButton: {
       styleOverrides: {
         root: {
-          color: amber[500], // Amber color for buttons
+          textTransform: 'uppercase',
+          fontWeight: 600,
+          borderRadius: 0,
+          letterSpacing: 1,
+        },
+        contained: {
+          backgroundColor: cs2.accent,
+          '&:hover': {
+            backgroundColor: cs2.accentHover,
+          },
         },
       },
     },
-    MuiTypography: {
+    MuiCard: {
       styleOverrides: {
         root: {
-          flexGrow: 1,
-          color: amber[200], // Amber color for typography text
+          borderRadius: 0,
+          border: `1px solid ${cs2.border}`,
         },
-        h1: {
-          color: blueGrey[50], // Light blue-grey for h1
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 0,
         },
-        h6: {
-          color: amber[400], // Amber color for h6
+      },
+    },
+    MuiDataGrid: {
+        styleOverrides: {
+            root: {
+                border: 'none',
+                '& .MuiDataGrid-cell': {
+                    borderBottom: `1px solid ${cs2.border}`,
+                },
+                '& .MuiDataGrid-columnHeaders': {
+                    backgroundColor: cs2.bgDark,
+                    borderBottom: `1px solid ${cs2.border}`,
+                    textTransform: 'uppercase',
+                    fontSize: '0.7rem',
+                    letterSpacing: 1.5,
+                },
+                '& .MuiDataGrid-row:hover': {
+                    backgroundColor: cs2.bgHover,
+                },
+            }
+        }
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          borderBottom: `1px solid ${cs2.border}`,
+        },
+        head: {
+          backgroundColor: cs2.bgDark,
+          textTransform: 'uppercase',
+          fontSize: '0.75rem',
+          letterSpacing: 1,
+          fontWeight: 600,
+          color: cs2.textSecondary,
         },
       },
     },
     MuiTableRow: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1e1e1e',
-          '&:hover': { backgroundColor: blueGrey[600] }, // Hover effect for table rows
-          width: '100%',
-        },
-      },
-    },
-    MuiTableCell: {
-      styleOverrides: {
-        root: {
-          padding: '4px 6px', // Minimal padding for table cells
-          borderBottom: "none"
-          
-        },
-        head: {
-          backgroundColor: blueGrey[700], // Dark blue-grey for table headers
-          color: '#ffffff', // White text for headers
-          fontWeight: 'bold',
-        },
-        body: {
-          color: '#ffffff', // White text for table body
-        },
-      },
-    },
-    MuiTableContainer: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#1e1e1e',
-          padding: '8px',
-          borderRadius: '4px',
-          width: '100%',
-          overflowX: 'auto',
-        },
-      },
-    },
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          color: amber[500], // Amber color for icon buttons
-        },
-      },
-    },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiInputBase-input': {
-            color: '#ffffff', // White text input
-          },
-          '& .MuiOutlinedInput-root': {
-            backgroundColor: blueGrey[800], // Dark background for input fields
-            fontSize: '0.875rem',
-            padding: '0 8px',
-            height: '40px',
-            width: '200px',
+          '&:hover': {
+            backgroundColor: `${cs2.bgHover} !important`,
           },
         },
       },
     },
-    MuiDataGrid: {
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: cs2.bgCard,
+          border: `1px solid ${cs2.border}`,
+        },
+      },
+    },
+    MuiToggleButton: {
       styleOverrides: {
         root: {
-          '& .MuiDataGrid-cell': {
-            fontSize: '0.875rem',
-            padding: '4px',
-          },
-          '& .MuiDataGrid-columnHeader': {
-            fontSize: '1rem',
-            padding: '4px',
-            backgroundColor: blueGrey[700], // Dark blue-grey column header background
-            color: '#ffffff', // White text for column header
-            fontWeight: 'bold',
-          },
-          '& .MuiDataGrid-row': {
-            borderBottom: '1px solid rgba(224, 224, 224, 1)',
+          borderRadius: 0,
+          '&.Mui-selected': {
+            backgroundColor: cs2.accent,
+            color: '#fff',
+            '&:hover': {
+              backgroundColor: cs2.accentHover,
+            },
           },
         },
       },

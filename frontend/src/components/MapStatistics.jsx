@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React from "react";
+import { memo } from 'react';
 import {
   BarChart,
   Bar,
@@ -9,15 +9,26 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Paper, Typography, Box, useTheme, alpha } from "@mui/material";
+import { Paper, Typography, Box } from "@mui/material";
 
-const MapBarChart = ({ allmatches }) => {
-  const theme = useTheme();
+// CS2 Colors
+const cs2 = {
+  bgDark: '#0d0d0d',
+  bgCard: '#1a1a1a',
+  bgHover: '#252525',
+  accent: '#de6c2c',
+  textPrimary: '#e5e5e5',
+  textSecondary: '#888888',
+  border: 'rgba(255,255,255,0.08)',
+  green: '#4ade80',
+  red: '#ef4444',
+};
 
+const MapStatistics = ({ allmatches }) => {
   if (!allmatches?.aggregatedResults) {
     return (
-      <Paper sx={{ p: 4, textAlign: 'center', bgcolor: alpha(theme.palette.background.paper, 0.8) }}>
-        <Typography variant="h6" color="text.secondary">
+      <Paper sx={{ p: 4, textAlign: 'center', bgcolor: cs2.bgCard, border: `1px solid ${cs2.border}` }}>
+        <Typography variant="h6" sx={{ color: cs2.textSecondary }}>
           No aggregated results available
         </Typography>
       </Paper>
@@ -49,15 +60,15 @@ const MapBarChart = ({ allmatches }) => {
       bans: m.bans,
       total: m.picks + m.bans,
     }))
-    .filter((m) => m.total > 0) // Only include maps with data
+    .filter((m) => m.total > 0)
     .sort((a, b) => b.total - a.total);
 
   const hasData = data.length > 0;
 
   if (!hasData) {
     return (
-      <Paper sx={{ p: 4, textAlign: 'center', bgcolor: alpha(theme.palette.background.paper, 0.8) }}>
-        <Typography variant="h6" color="text.secondary">
+      <Paper sx={{ p: 4, textAlign: 'center', bgcolor: cs2.bgCard, border: `1px solid ${cs2.border}` }}>
+        <Typography variant="h6" sx={{ color: cs2.textSecondary }}>
           No pick or ban data available
         </Typography>
       </Paper>
@@ -68,15 +79,14 @@ const MapBarChart = ({ allmatches }) => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <Paper
+        <Box
           sx={{
             p: 2,
-            bgcolor: alpha(theme.palette.background.paper, 0.95),
-            border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-            boxShadow: theme.shadows[3],
+            bgcolor: cs2.bgCard,
+            border: `1px solid ${cs2.border}`,
           }}
         >
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', color: cs2.textPrimary }}>
             {label}
           </Typography>
           {payload.map((entry, index) => (
@@ -86,18 +96,17 @@ const MapBarChart = ({ allmatches }) => {
                   width: 12,
                   height: 12,
                   backgroundColor: entry.color,
-                  borderRadius: '2px',
                 }}
               />
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ color: cs2.textPrimary }}>
                 {entry.name}: <strong>{entry.value}</strong>
               </Typography>
             </Box>
           ))}
-          <Typography variant="body2" sx={{ mt: 1, fontWeight: 'bold' }}>
+          <Typography variant="body2" sx={{ mt: 1, fontWeight: 'bold', color: cs2.accent }}>
             Total: <strong>{payload.reduce((sum, entry) => sum + entry.value, 0)}</strong>
           </Typography>
-        </Paper>
+        </Box>
       );
     }
     return null;
@@ -115,10 +124,9 @@ const MapBarChart = ({ allmatches }) => {
                 width: 16,
                 height: 16,
                 backgroundColor: entry.color,
-                borderRadius: '3px',
               }}
             />
-            <Typography variant="body2" sx={{ fontWeight: '500' }}>
+            <Typography variant="body2" sx={{ fontWeight: '500', color: cs2.textPrimary }}>
               {entry.value}
             </Typography>
           </Box>
@@ -132,25 +140,36 @@ const MapBarChart = ({ allmatches }) => {
       sx={{
         p: 3,
         height: 500,
-        bgcolor: alpha(theme.palette.background.paper, 0.8),
-        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-        borderRadius: 2,
-        boxShadow: theme.shadows[1],
+        bgcolor: cs2.bgCard,
+        border: `1px solid ${cs2.border}`,
       }}
     >
+      <Typography
+        variant="overline"
+        sx={{
+          mb: 1,
+          display: 'block',
+          textAlign: 'center',
+          fontWeight: 'bold',
+          color: cs2.accent,
+          letterSpacing: 2,
+        }}
+      >
+        MAP ANALYTICS
+      </Typography>
       <Typography
         variant="h6"
         sx={{
           mb: 3,
           textAlign: 'center',
           fontWeight: '600',
-          color: theme.palette.text.primary,
+          color: cs2.textPrimary,
         }}
       >
-        Pick Bans
+        Pick / Ban Statistics
       </Typography>
 
-      <ResponsiveContainer width="100%" height="90%">
+      <ResponsiveContainer width="100%" height="85%">
         <BarChart
           data={data}
           layout="vertical"
@@ -158,14 +177,14 @@ const MapBarChart = ({ allmatches }) => {
         >
           <XAxis
             type="number"
-            tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
+            tick={{ fill: cs2.textSecondary, fontSize: 12 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             type="category"
             dataKey="map"
-            tick={{ fill: theme.palette.text.primary, fontSize: 12, fontWeight: 500 }}
+            tick={{ fill: cs2.textPrimary, fontSize: 12, fontWeight: 500 }}
             width={80}
             axisLine={false}
             tickLine={false}
@@ -175,14 +194,14 @@ const MapBarChart = ({ allmatches }) => {
           <Bar
             dataKey="picks"
             name="Picks"
-            fill={theme.palette.success.main}
+            fill={cs2.green}
             radius={[0, 4, 4, 0]}
             barSize={35}
           />
           <Bar
             dataKey="bans"
             name="Bans"
-            fill={theme.palette.error.main}
+            fill={cs2.red}
             radius={[0, 4, 4, 0]}
             barSize={35}
           />
@@ -192,4 +211,4 @@ const MapBarChart = ({ allmatches }) => {
   );
 };
 
-export default MapBarChart;
+export default memo(MapStatistics);

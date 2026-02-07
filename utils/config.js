@@ -9,6 +9,10 @@ const MONGODB_URI =
       ? process.env.DEV_MONGODB_URI
       : process.env.MONGODB_URI;
 
+if (!MONGODB_URI) {
+  console.error("ERROR: MONGODB_URI is undefined. Check your .env file.");
+}
+
 module.exports = {
   MONGODB_URI,
   PORT,

@@ -9,10 +9,21 @@ import {
   Box,
   useMediaQuery,
   useTheme,
+  Typography
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import { Link } from 'react-router-dom'
 import '../App.css'
+
+// CS2 Colors
+const cs2 = {
+  bgDark: '#0d0d0d',
+  bgCard: '#1a1a1a',
+  accent: '#de6c2c',
+  textPrimary: '#e5e5e5',
+  textSecondary: '#888888',
+  border: 'rgba(255,255,255,0.08)',
+};
 
 const Navbar = () => {
   const theme = useTheme()
@@ -28,14 +39,21 @@ const Navbar = () => {
   }
 
   return (
-    <AppBar position="sticky">
+    <AppBar position="sticky" sx={{ bgcolor: cs2.bgCard, borderBottom: `1px solid ${cs2.border}` }}>
       <Toolbar>
+        {/* Logo/Brand */}
+        <Typography variant="h6" sx={{ color: cs2.accent, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', mr: 4 }}>
+          RK
+        </Typography>
+        
         {isMobile ? (
           <>
+            <Box sx={{ flexGrow: 1 }} />
             <IconButton
-              edge="start"
+              edge="end"
               aria-label="menu"
               onClick={handleMenuClick}
+              sx={{ color: cs2.textPrimary }}
             >
               <MenuIcon />
             </IconButton>
@@ -43,30 +61,41 @@ const Navbar = () => {
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
+              PaperProps={{
+                sx: {
+                  bgcolor: cs2.bgCard,
+                  border: `1px solid ${cs2.border}`,
+                  borderRadius: 0,
+                }
+              }}
             >
-              <MenuItem onClick={handleMenuClose}>
+              <MenuItem onClick={handleMenuClose} sx={{ '&:hover': { bgcolor: cs2.bgDark } }}>
                 <Link to="/" className="link">
                   Home
                 </Link>
               </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
+              <MenuItem onClick={handleMenuClose} sx={{ '&:hover': { bgcolor: cs2.bgDark } }}>
                 <Link to="/playerdata" className="link">
                   Player Data
                 </Link>
               </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
+              <MenuItem onClick={handleMenuClose} sx={{ '&:hover': { bgcolor: cs2.bgDark } }}>
                 <Link to="/statistics" className="link">
                   Month Data
                 </Link>
               </MenuItem>
-
+              <MenuItem onClick={handleMenuClose} sx={{ '&:hover': { bgcolor: cs2.bgDark } }}>
+                <Link to="/pappaliiga" className="link">
+                  Scouting
+                </Link>
+              </MenuItem>
             </Menu>
           </>
         ) : (
           <>
-            <Box sx={{ display: 'flex', ml: 'auto' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Link to="/" className="link">
-                LoveCanal
+                Home
               </Link>
               <Link to="/playerdata" className="link">
                 Player Data
@@ -74,8 +103,11 @@ const Navbar = () => {
               <Link to="/statistics" className="link">
                 Month Data
               </Link>
+              <Link to="/pappaliiga" className="link">
+                Scouting
+              </Link>
             </Box>
-            <Box sx={{ display: 'flex', flexGrow: 8 }}></Box>
+            <Box sx={{ flexGrow: 1 }} />
           </>
         )}
       </Toolbar>
