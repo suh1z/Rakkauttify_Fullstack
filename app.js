@@ -4,6 +4,8 @@ const app = express();
 const path = require('path');
 require("express-async-errors");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const usersRouter = require("./controllers/users");
 const inhouseRouter = require("./controllers/inhouse");
 const middleware = require("./utils/middleware");
@@ -13,6 +15,12 @@ const loginRouter = require("./controllers/login");
 const testingRouter = require("./controllers/testing");
 const leagueRouter = require("./controllers/leagueStats");
 const azureRouter = require("./controllers/testing");
+
+// Validate critical environment variables at startup
+if (!process.env.SECRET) {
+  logger.error("CRITICAL: JWT SECRET is not defined. Exiting...");
+  process.exit(1);
+}
 
 mongoose.set("strictQuery", false);
 
@@ -35,14 +43,73 @@ mongoose.connection.on('error', (err) => {
     logger.error('MongoDB connection error:', err);
 });
 
-app.use(cors());
+// Security: Helmet for HTTP headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      scriptSrc: ["'self'"],
+      connectSrc: ["'self'", "https://api.faceit.com", "https://open.faceit.com"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Security: CORS - restrict to allowed origins
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3003',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
+
+// Security: Rate limiting
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per window
+  message: { error: 'Too many requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 login attempts per window
+  message: { error: 'Too many login attempts, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(generalLimiter);
+
 app.use(express.static("dist"));
 app.use(express.json());
+app.use(middleware.sanitizeBody);
 app.use(middleware.requestLogger);
+app.use(middleware.tokenExtractor);
 
-app.use("/api/login", loginRouter);
-app.use("/api/users", usersRouter );
-app.use("/api/inhouse", inhouseRouter);
+// Public routes (no auth required)
+app.use("/api/login", loginLimiter, loginRouter);
+
+// Protected routes (auth required)
+app.use("/api/users", middleware.userExtractor, usersRouter);
+app.use("/api/inhouse", middleware.userExtractor, inhouseRouter);
+
+// Public data routes (read-only, no sensitive data)
 app.use("/api/matches", leagueRouter);
 app.use("/api/months", leagueRouter);
 app.use("/api/fetch-match-data", leagueRouter);
@@ -50,7 +117,6 @@ app.use("/api/players", leagueRouter);
 app.use("/api/faceit-profile", leagueRouter);
 app.use('/api/data', azureRouter);
 app.use("/api/player", azureRouter); 
-app.use("/api/matches", azureRouter);
 app.use("/api/allmatches", azureRouter);
 app.use("/api/pickbans", azureRouter);
 

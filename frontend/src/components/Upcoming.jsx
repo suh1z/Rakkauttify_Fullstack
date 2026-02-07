@@ -1,4 +1,5 @@
 import { useState, useEffect, memo, useMemo, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import {
   Typography,
   Box,
@@ -19,6 +20,7 @@ import Grid3x3Icon from '@mui/icons-material/Grid3x3';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { DataGrid } from '@mui/x-data-grid';
+import { fetchPlayer } from '../reducers/pappaReducer';
 
 // Helper component for team stats card
 // eslint-disable-next-line react/prop-types
@@ -99,6 +101,8 @@ const TeamStatCard = memo(({ teamName, isHome, players }) => {
 // Main Component
 // eslint-disable-next-line react/prop-types
 const Upcoming = ({ teams, matches, playerStatsById, defaultTeam = null }) => {
+  const dispatch = useDispatch();
+  
   // CS2 Color Palette
   const cs2 = {
     bgDark: '#0d0d0d',
@@ -158,19 +162,71 @@ const Upcoming = ({ teams, matches, playerStatsById, defaultTeam = null }) => {
   const homeTeamData = teams.find(t => t.name === homeTeam);
   const opponentTeamData = teams.find(t => t.name === opponentTeam);
 
+  // Fetch player stats for both teams when they're selected
+  useEffect(() => {
+    if (homeTeamData?.roster) {
+      homeTeamData.roster.forEach(p => {
+        if (!playerStatsById[p.player_id]) {
+          dispatch(fetchPlayer(p.player_id));
+        }
+      });
+    }
+  }, [homeTeamData, playerStatsById, dispatch]);
+
+  useEffect(() => {
+    if (opponentTeamData?.roster) {
+      opponentTeamData.roster.forEach(p => {
+        if (!playerStatsById[p.player_id]) {
+          dispatch(fetchPlayer(p.player_id));
+        }
+      });
+    }
+  }, [opponentTeamData, playerStatsById, dispatch]);
+
   // Flatten player data for the DataGrid
   const getRosterRows = (teamData) => {
       if (!teamData || !teamData.roster) return [];
       return teamData.roster.map(p => {
-          const stats = playerStatsById[p.player_id] || {};
+          const detailedPlayer = playerStatsById[p.player_id] || {};
+          const stats = detailedPlayer.stats || {};
+          const playedMaps = stats.played_maps || {};
+          
+          // Calculate K/D from stats
+          const kills = stats.Kills || stats.kills || 0;
+          const deaths = stats.Deaths || stats.deaths || 1;
+          const kd = deaths > 0 ? (kills / deaths).toFixed(2) : '-';
+          
+          // Calculate Matches from played_maps or stats
+          let matches = stats.played_matches || stats.Matches || stats.matches || 0;
+          if (!matches && Object.keys(playedMaps).length > 0) {
+              Object.entries(playedMaps).forEach(([key, val]) => {
+                  if (!key.endsWith('_wins')) {
+                      matches += val;
+                  }
+              });
+          }
+          
+          // Calculate Wins
+          let wins = stats.Wins || stats.wins || 0;
+          if (!wins && Object.keys(playedMaps).length > 0) {
+              Object.entries(playedMaps).forEach(([key, val]) => {
+                  if (key.endsWith('_wins')) {
+                      wins += val;
+                  }
+              });
+          }
+          
+          // Calculate Win Rate
+          const winRate = matches > 0 ? ((wins / matches) * 100).toFixed(0) + '%' : '-';
+          
           return {
               id: p.player_id,
               nickname: p.nickname,
               avatar: p.avatar || '',
               elo: p.game_skill_level || 0, 
-              kd: stats.kd ? parseFloat(stats.kd).toFixed(2) : '-',
-              matches: stats.matches || 0,
-              winRate: stats.win_rate || '-'
+              kd: kd,
+              matches: matches || '-',
+              winRate: winRate
           };
       });
   };
@@ -190,6 +246,7 @@ const Upcoming = ({ teams, matches, playerStatsById, defaultTeam = null }) => {
       { field: 'elo', headerName: 'Level', width: 70, align: 'center', headerAlign: 'center' },
       { field: 'kd', headerName: 'K/D', width: 70, align: 'center', headerAlign: 'center' },
       { field: 'matches', headerName: 'Games', width: 70, align: 'center', headerAlign: 'center' },
+      { field: 'winRate', headerName: 'Win%', width: 70, align: 'center', headerAlign: 'center' },
   ];
 
   if (!nextMatch) {

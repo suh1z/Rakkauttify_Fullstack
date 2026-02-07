@@ -150,7 +150,7 @@ const Dashboard = () => {
           <DialogTitle sx={{ color: cs2.accent, textTransform: 'uppercase', letterSpacing: 2 }}>Match Details</DialogTitle>
           <DialogContent>
             {selectedMatch ? (
-              <MatchStats match={selectedMatch} />
+              <MatchStats matchId={selectedMatch.matchId} url={selectedMatch.url} />
             ) : (
               <Typography variant="body1" sx={{ color: cs2.textSecondary }}>Loading match details...</Typography>
             )}

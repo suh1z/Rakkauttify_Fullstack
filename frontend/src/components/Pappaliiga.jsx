@@ -43,10 +43,6 @@ const Pappaliiga = () => {
     (state) => state.pappa || {}
   );
   const globalPlayers = useSelector((state) => state.stats.players);
-  const user = useSelector((state) => state.user.user);
-
-  // Default team for specific users
-  const defaultTeam = user?.username === 'Zooze' && 12 ? 'Rakkauden Kanaali' : null;
 
   const [selectedDivision, setSelectedDivision] = useState(12);
   const [activeTab, setActiveTab] = useState(0);
@@ -176,7 +172,6 @@ const Pappaliiga = () => {
                 matches={matches}
                 playerStatsById={playerStatsById}
                 loading={loading}
-                defaultTeam={selectedDivision === 12 ? defaultTeam : null}
               />
             )}
 
@@ -187,7 +182,6 @@ const Pappaliiga = () => {
                   handleTeamClick={handleTeamClick}
                   globalPlayers={globalPlayers}
                   expandedTeam={expandedTeam}
-                  defaultTeam={selectedDivision === 12 ? defaultTeam : null}
                />
             )}
 

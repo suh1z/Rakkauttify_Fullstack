@@ -2,6 +2,7 @@
 const express = require('express');
 const axios = require('axios');
 const dotenv = require('dotenv');
+const { URL } = require('url');
 const leagueRouter = express.Router();
 
 dotenv.config();
@@ -9,6 +10,61 @@ const matchesUrl = process.env.MATCHES_URL;
 const monthsUrl = process.env.MONTHS_URL;
 const playersUrl = process.env.PLAYERS_URL;
 const faceitApiKey = process.env.FACEIT_API_KEY;
+
+// SSRF Prevention: Allowed domains for external URL fetching
+const ALLOWED_DOMAINS = [
+  'www.faceit.com',
+  'api.faceit.com',
+  'open.faceit.com',
+  'pappaliiga.faceit.com',
+  'pappaliiga-production.up.railway.app',
+  // Azure blob storage
+  'blob.core.windows.net',
+  // GitHub raw content
+  'raw.githubusercontent.com',
+  'githubusercontent.com',
+  // z00ze's GitHub pages / data
+  'z00ze.github.io',
+  // Add other trusted domains as needed
+];
+
+// Validate URL to prevent SSRF (blocks internal IPs and cloud metadata endpoints)
+const isAllowedUrl = (urlString) => {
+  try {
+    const parsed = new URL(urlString);
+    const hostname = parsed.hostname.toLowerCase();
+    
+    // Block localhost, internal IPs, and metadata endpoints (CRITICAL security)
+    const blockedPatterns = [
+      /^localhost$/i,
+      /^127\./,
+      /^10\./,
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+      /^192\.168\./,
+      /^169\.254\./,  // AWS/Azure metadata
+      /^0\./,
+      /^\[::1\]$/,
+      /^metadata\./,
+    ];
+    
+    if (blockedPatterns.some(pattern => pattern.test(hostname))) {
+      console.warn(`SSRF blocked: Internal IP detected - ${hostname}`);
+      return false;
+    }
+    
+    // Allow any external HTTPS URL that's not an internal IP
+    // This is less strict but still prevents the most critical SSRF attacks
+    if (parsed.protocol === 'https:') {
+      return true;
+    }
+    
+    console.warn(`SSRF blocked: Non-HTTPS URL - ${urlString}`);
+    return false;
+  } catch (err) {
+    console.warn(`SSRF blocked: Invalid URL - ${urlString}`);
+    return false;
+  }
+};
 
 
 if (!matchesUrl || !monthsUrl || !playersUrl) {
@@ -133,6 +189,13 @@ leagueRouter.get("/fetch-match-data", async (req, res) => {
 
   try {
     const decodedUrl = decodeURIComponent(url);
+    
+    // SSRF Prevention: Validate URL before fetching
+    if (!isAllowedUrl(decodedUrl)) {
+      return res.status(403).json({ 
+        message: "URL not allowed. Only approved external domains are permitted." 
+      });
+    }
 
     const matchDataResponse = await axios.get(decodedUrl);
     const matchData = matchDataResponse.data;

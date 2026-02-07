@@ -2,6 +2,7 @@ const express = require('express');
 const inhouseRouter = express.Router();
 const Queue = require('../models/queue');
 const User = require('../models/user');
+const mongoSanitize = require('mongo-sanitize');
 
 inhouseRouter.get('/', async (req, res) => {
   try {
@@ -28,7 +29,9 @@ inhouseRouter.post("/", async (req, res) => {
   }
   
   try {
-    const user = await User.findOne(id);
+    // Sanitize input before query
+    const sanitizedId = mongoSanitize(id);
+    const user = await User.findOne({ id: sanitizedId });
 
     if (!user) {
       return res.status(400).json({ error: "User does not exist" });
@@ -49,7 +52,12 @@ inhouseRouter.post("/", async (req, res) => {
 inhouseRouter.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await User.findOne({ id: id });
+    // Sanitize input before query
+    const sanitizedId = mongoSanitize(id);
+    const user = await User.findOne({ id: sanitizedId });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
     console.log(`Found user: ${user._id}`);
     const result = await Queue.deleteOne({ user: user._id });
     if (result.deletedCount === 0) {
