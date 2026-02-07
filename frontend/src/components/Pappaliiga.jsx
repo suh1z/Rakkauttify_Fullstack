@@ -17,10 +17,12 @@ import MapStatistics from "../components/MapStatistics";
 import TeamPlayers from "../components/TeamPlayers";
 import MatchCalendar from "../components/MatchCalendar"; 
 import Upcoming from "../components/Upcoming";
+import PlayerAnalytics from "../components/PlayerAnalytics";
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import GroupsIcon from '@mui/icons-material/Groups';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import RadarIcon from '@mui/icons-material/Radar';
 
 // CS2 Color Palette - defined outside component to prevent recreation
 const cs2Colors = {
@@ -156,6 +158,7 @@ const Pappaliiga = () => {
           >
             <Tab icon={<DashboardIcon fontSize="small"/>} iconPosition="start" label="Head-to-Head" />
             <Tab icon={<GroupsIcon fontSize="small"/>} iconPosition="start" label="Teams & Players" />
+            <Tab icon={<RadarIcon fontSize="small"/>} iconPosition="start" label="Deep Dive" />
             <Tab icon={<AnalyticsIcon fontSize="small"/>} iconPosition="start" label="Map Stats" />
             <Tab icon={<CalendarMonthIcon fontSize="small"/>} iconPosition="start" label="Schedule" />
           </Tabs>
@@ -186,10 +189,18 @@ const Pappaliiga = () => {
             )}
 
             {activeTab === 2 && (
-               <MapStatistics allmatches={allmatches} />
+               <PlayerAnalytics
+                  teams={teams}
+                  playerStatsById={playerStatsById}
+                  handleTeamClick={handleTeamClick}
+               />
             )}
 
             {activeTab === 3 && (
+               <MapStatistics allmatches={allmatches} />
+            )}
+
+            {activeTab === 4 && (
                <MatchCalendar matches={matches} />
             )}
           </Box>

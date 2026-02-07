@@ -109,16 +109,20 @@ const TeamPlayersTable = ({
     [teams, validSelectedTeam]
   );
 
-  /** 🔹 Aggregate map-level stats specifically from tournament data */
+  /** 🔹 Aggregate map-level stats from player data (checks both stats and tournament_stats) */
   const mapStats = useMemo(() => {
     if (!currentTeam) return [];
     
     const mapTotals = {};
     currentTeam.roster.forEach((player) => {
-      const tournamentMaps =
-        playerStatsById[player.player_id]?.tournament_stats?.played_maps || {};
+      const playerData = playerStatsById[player.player_id] || {};
+      // Check both stats.played_maps and tournament_stats.played_maps for map data
+      const statsMaps = playerData.stats?.played_maps || {};
+      const tournamentMaps = playerData.tournament_stats?.played_maps || {};
+      // Merge both sources (prefer tournament_stats if both exist for same key)
+      const allMaps = { ...statsMaps, ...tournamentMaps };
 
-      Object.entries(tournamentMaps).forEach(([mapKey, value]) => {
+      Object.entries(allMaps).forEach(([mapKey, value]) => {
         const isWin = mapKey.endsWith("_wins");
         const map = isWin ? mapKey.replace("_wins", "") : mapKey;
 
