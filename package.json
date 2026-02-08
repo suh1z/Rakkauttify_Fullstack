@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "start:test": "NODE_ENV=test node index.js",
     "build:ui": "rm -rf ./dist && cd ./frontend && npm run build && mv ./dist ../",
-    "deploy:full": "npm run build:ui && git add . && git commit -m 'uibuild' && git push"
+    "build:ui:win": "powershell -Command \"Remove-Item -Recurse -Force ./dist -ErrorAction SilentlyContinue; Push-Location ./frontend; npm run build; Pop-Location; Move-Item -Force ./frontend/dist ./\"",
+    "deploy:full": "npm run build:ui:win && git add . && git commit -m 'uibuild' && git push"
   },
   "author": "",
   "license": "ISC",
