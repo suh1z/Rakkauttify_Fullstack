@@ -26,6 +26,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  TextField,
 } from '@mui/material';
 import {
   EmojiEvents as TrophyIcon,
@@ -57,8 +58,8 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import { initializePlayers, initializePlayerStats, initializeMatches, initializeMatch } from '../reducers/statsReducer';
-import { fetchLikedMatches, likeMatch, unlikeMatch } from '../reducers/userReducer';
+import { initializePlayers, initializePlayerStats, initializePlayerStatsBySteamId, initializeMatches, initializeMatch } from '../reducers/statsReducer';
+import { fetchLikedMatches, likeMatch, unlikeMatch, fetchMyProfile, updateMyProfile } from '../reducers/userReducer';
 import MatchStats from './MatchStats';
 
 // CS2 Color Palette
@@ -249,7 +250,14 @@ function MyStats() {
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
-  // Get the player nickname for the logged-in user (check alias mapping first)
+  // Steam ID linking state
+  const [steamIdInput, setSteamIdInput] = useState('');
+  const [steamIdSaving, setSteamIdSaving] = useState(false);
+
+  // Get user profile which contains steamId
+  const profile = useSelector(state => state.user.profile);
+
+  // Get the player nickname for the logged-in user (fallback when no steamId)
   const playerNickname = useMemo(() => {
     if (!user?.username) return null;
     const username = user.username.toLowerCase();
@@ -269,11 +277,14 @@ function MyStats() {
     return Array.isArray(playerStats?.details) ? [...playerStats.details] : [];
   }, [playerStats]);
 
-  // Fetch players list on mount
+  // Fetch players list and user profile on mount
   useEffect(() => {
     dispatch(initializePlayers());
     dispatch(initializeMatches());
-  }, [dispatch]);
+    if (user) {
+      dispatch(fetchMyProfile());
+    }
+  }, [dispatch, user]);
 
   // Fetch liked matches when user logs in
   useEffect(() => {
@@ -282,12 +293,37 @@ function MyStats() {
     }
   }, [dispatch, user?.username]);
 
-  // Auto-fetch stats for the logged-in user
+  // Auto-fetch stats - prefer steamId, fall back to nickname
   useEffect(() => {
-    if (playerNickname) {
+    if (profile?.steamId) {
+      // Use Steam ID for reliable matching
+      dispatch(initializePlayerStatsBySteamId(profile.steamId));
+    } else if (playerNickname) {
+      // Fall back to nickname matching
       dispatch(initializePlayerStats(playerNickname));
     }
-  }, [playerNickname, dispatch]);
+  }, [profile?.steamId, playerNickname, dispatch]);
+
+  // Initialize steam ID input from profile
+  useEffect(() => {
+    if (profile?.steamId) {
+      setSteamIdInput(profile.steamId);
+    }
+  }, [profile?.steamId]);
+
+  // Handle saving Steam ID
+  const handleSaveSteamId = async () => {
+    if (!steamIdInput.trim()) return;
+    setSteamIdSaving(true);
+    try {
+      await dispatch(updateMyProfile({ steamId: steamIdInput.trim() }));
+    } catch (error) {
+      console.error('Failed to save Steam ID:', error);
+    } finally {
+      setSteamIdSaving(false);
+    }
+  };
+
 
   // Calculate aggregate stats
   const stats = useMemo(() => {
@@ -578,6 +614,53 @@ function MyStats() {
                   </Box>
                 </Grid>
               </Grid>
+
+              {/* Steam ID Linking */}
+              <Box sx={{ mt: 3, pt: 2, borderTop: `1px solid ${cs2Colors.border}` }}>
+                <Typography variant="body2" sx={{ color: cs2Colors.textSecondary, mb: 1 }}>
+                  Link Steam ID
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <TextField
+                    size="small"
+                    placeholder="Your Steam64 ID"
+                    value={steamIdInput}
+                    onChange={(e) => setSteamIdInput(e.target.value)}
+                    sx={{
+                      flex: 1,
+                      '& .MuiOutlinedInput-root': {
+                        bgcolor: cs2Colors.bgHover,
+                        color: cs2Colors.textPrimary,
+                        '& fieldset': { borderColor: cs2Colors.border },
+                        '&:hover fieldset': { borderColor: cs2Colors.accent },
+                        '&.Mui-focused fieldset': { borderColor: cs2Colors.accent },
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        fontSize: '0.875rem',
+                        '&::placeholder': { color: cs2Colors.textSecondary, opacity: 1 },
+                      },
+                    }}
+                  />
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={handleSaveSteamId}
+                    disabled={steamIdSaving || !steamIdInput.trim() || steamIdInput === profile?.steamId}
+                    sx={{
+                      bgcolor: cs2Colors.accent,
+                      '&:hover': { bgcolor: cs2Colors.accentHover },
+                      '&.Mui-disabled': { bgcolor: cs2Colors.border, color: cs2Colors.textSecondary },
+                    }}
+                  >
+                    {steamIdSaving ? <CircularProgress size={18} /> : 'Save'}
+                  </Button>
+                </Box>
+                {profile?.steamId && (
+                  <Typography variant="caption" sx={{ color: cs2Colors.green, mt: 0.5, display: 'block' }}>
+                    ✓ Steam ID linked
+                  </Typography>
+                )}
+              </Box>
             </Paper>
           </Grid>
 

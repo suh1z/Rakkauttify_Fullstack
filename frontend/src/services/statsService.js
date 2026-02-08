@@ -81,6 +81,22 @@ const fetchPlayerData = async (nickname) => {
   }
 };
 
+// Fetch player data by Steam ID
+const fetchPlayerDataBySteamId = async (steamId) => {
+  const cacheKey = `playerdata-steam-${steamId}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const response = await axios.get(`${baseUrl}/players/players/steam/${steamId}`);
+    setCache(cacheKey, response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching player data by Steam ID:', error);
+    throw error;
+  }
+};
+
 const fetchAllPlayers = async () => {
   const cacheKey = 'allplayers';
   const cached = getCached(cacheKey);
@@ -121,4 +137,4 @@ const fetchFaceitProfile = async (nickname) => {
 // Clear cache (useful for forced refresh)
 const clearCache = () => cache.clear();
 
-export default { getStats, getMatches, fetchMatchData, fetchPlayerData, fetchAllPlayers, fetchFaceitProfile, clearCache };
+export default { getStats, getMatches, fetchMatchData, fetchPlayerData, fetchPlayerDataBySteamId, fetchAllPlayers, fetchFaceitProfile, clearCache };

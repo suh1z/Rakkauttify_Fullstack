@@ -147,6 +147,45 @@ leagueRouter.get("/players/:nickname", async (req, res) => {
   }
 });
 
+// Fetch player by Steam ID (steamid64)
+leagueRouter.get("/players/steam/:steamId", async (req, res) => {
+  const { steamId } = req.params;
+
+  try {
+    // First try to find in players list
+    const playersResponse = await axios.get(playersUrl);
+    const players = playersResponse.data;
+
+    // Try to find by checking each player's stats for matching steamid64
+    for (const player of players) {
+      try {
+        const playerStatsResponse = await axios.get(player.url);
+        const stats = playerStatsResponse.data;
+        
+        // Check if any stats entry matches the steamId
+        if (Array.isArray(stats) && stats.length > 0) {
+          const hasMatchingSteamId = stats.some(s => s.steamid64 === steamId);
+          if (hasMatchingSteamId) {
+            return res.json({
+              ...player,
+              steamId: steamId,
+              details: stats
+            });
+          }
+        }
+      } catch (err) {
+        // Continue to next player if this one fails
+        console.warn(`Could not fetch stats for ${player.nickname}`);
+      }
+    }
+
+    return res.status(404).json({ message: `Player with Steam ID ${steamId} not found.` });
+  } catch (error) {
+    console.error(`Error fetching data for Steam ID ${steamId}:`, error.message);
+    res.status(500).json({ message: `Error fetching data for Steam ID ${steamId}`, error: error.message });
+  }
+});
+
 // Live Faceit API lookup by nickname - returns elo, avatar, level
 leagueRouter.get("/faceit-profile/:nickname", async (req, res) => {
   const { nickname } = req.params;

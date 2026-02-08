@@ -87,6 +87,16 @@ export const initializePlayerStats = (nickname) => async (dispatch) => {
   }
 };
 
+// Initialize player stats by Steam ID
+export const initializePlayerStatsBySteamId = (steamId) => async (dispatch) => {
+  try {
+    const formattedPlayerData = await statsService.fetchPlayerDataBySteamId(steamId);
+    dispatch(setPlayerStats(formatPlayerData(formattedPlayerData)));
+  } catch (error) {
+    console.error('Error initializing player stats by Steam ID:', error);
+  }
+};
+
 
 export const initializePlayers = () => async (dispatch) => {
   try {

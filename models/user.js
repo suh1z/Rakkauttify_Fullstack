@@ -33,6 +33,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  // Steam ID for matching with game stats
+  steamId: {
+    type: String,
+    default: null,
+  },
   teamName: {
     type: String,
     default: null,

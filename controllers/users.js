@@ -143,7 +143,7 @@ usersRouter.put('/me/profile', async (request, response) => {
     return response.status(401).json({ error: 'Authentication required' });
   }
   
-  const { faceitNickname, faceitPlayerId, teamName, division, preferences } = request.body;
+  const { faceitNickname, faceitPlayerId, teamName, division, preferences, steamId } = request.body;
   
   const updateData = {};
   if (faceitNickname !== undefined) updateData.faceitNickname = faceitNickname;
@@ -151,6 +151,7 @@ usersRouter.put('/me/profile', async (request, response) => {
   if (teamName !== undefined) updateData.teamName = teamName;
   if (division !== undefined) updateData.division = division;
   if (preferences !== undefined) updateData.preferences = preferences;
+  if (steamId !== undefined) updateData.steamId = steamId;
   
   const user = await User.findByIdAndUpdate(
     request.user.id,

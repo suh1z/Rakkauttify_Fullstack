@@ -164,48 +164,20 @@ const PlayerRadarChart = memo(function PlayerRadarChart({ playerData, playerName
     </Box>
   );
 });
-
 // ==========================================
 // 2. FORM & MOMENTUM TRACKER
 // ==========================================
 const FormTracker = memo(function FormTracker({ playerData }) {
-  // Generate simulated form data from stats (since we don't have per-match history)
-  // In reality, you'd want actual match-by-match data
+  // Since we don't have match history, hide chart and show message
   const formData = useMemo(() => {
     if (!playerData?.stats) return [];
-    
-    const stats = playerData.stats;
-    const baseKD = (stats.Kills || 0) / (stats.Deaths || 1);
-    const baseKR = (stats.Kills || 0) / (stats.Rounds || 1);
-    const matchCount = stats.played_matches || 5;
-    
-    // Simulate last 10 matches with variance around the player's average
-    const simulatedMatches = [];
-    for (let i = 0; i < Math.min(matchCount, 10); i++) {
-      const variance = (Math.random() - 0.5) * 0.6; // ±30% variance
-      const kdVariance = baseKD * (1 + variance);
-      const krVariance = baseKR * (1 + (Math.random() - 0.5) * 0.4);
-      
-      simulatedMatches.push({
-        match: `M${10 - i}`,
-        kd: parseFloat(kdVariance.toFixed(2)),
-        kr: parseFloat(krVariance.toFixed(2)),
-        rating: parseFloat((0.5 + kdVariance * 0.3 + krVariance * 0.7).toFixed(2))
-      });
-    }
-    
-    return simulatedMatches.reverse();
+    // If playerData.stats has no match history array, return empty
+    // If you add match history in the future, update this check
+    return [];
   }, [playerData]);
 
-  // Calculate trend
-  const trend = useMemo(() => {
-    if (formData.length < 3) return 'neutral';
-    const recent = formData.slice(-3).reduce((acc, m) => acc + m.kd, 0) / 3;
-    const earlier = formData.slice(0, 3).reduce((acc, m) => acc + m.kd, 0) / 3;
-    if (recent > earlier * 1.1) return 'hot';
-    if (recent < earlier * 0.9) return 'cold';
-    return 'neutral';
-  }, [formData]);
+  // No trend calculation if no history
+  const trend = 'neutral';
 
   const TrendIcon = trend === 'hot' ? WhatshotIcon : trend === 'cold' ? AcUnitIcon : TrendingFlatIcon;
   const trendColor = trend === 'hot' ? cs2.green : trend === 'cold' ? cs2.red : cs2.yellow;
@@ -213,96 +185,14 @@ const FormTracker = memo(function FormTracker({ playerData }) {
   if (formData.length === 0) {
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography sx={{ color: cs2.textSecondary }}>No form data available</Typography>
+        <Typography sx={{ color: cs2.textSecondary, fontWeight: 600, fontSize: '1.1rem' }}>
+          No match history available for form tracking.
+        </Typography>
       </Box>
     );
   }
 
-  return (
-    <Box>
-      {/* Trend Indicator */}
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-        <TrendIcon sx={{ color: trendColor, fontSize: 28 }} />
-        <Typography sx={{ color: trendColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
-          {trend === 'hot' ? 'On Fire!' : trend === 'cold' ? 'Cold Streak' : 'Steady Form'}
-        </Typography>
-      </Stack>
-
-      {/* Form Chart */}
-      <Box sx={{ height: 250, width: '100%' }}>
-        <ResponsiveContainer>
-          <AreaChart data={formData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="kdGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={cs2.accent} stopOpacity={0.8}/>
-                <stop offset="95%" stopColor={cs2.accent} stopOpacity={0.1}/>
-              </linearGradient>
-            </defs>
-            <XAxis 
-              dataKey="match" 
-              stroke={cs2.textSecondary} 
-              tick={{ fill: cs2.textSecondary, fontSize: 11 }}
-              axisLine={{ stroke: cs2.border }}
-            />
-            <YAxis 
-              stroke={cs2.textSecondary}
-              tick={{ fill: cs2.textSecondary, fontSize: 11 }}
-              axisLine={{ stroke: cs2.border }}
-              domain={[0, 'auto']}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Area 
-              type="monotone" 
-              dataKey="kd" 
-              name="K/D"
-              stroke={cs2.accent} 
-              fill="url(#kdGradient)"
-              strokeWidth={3}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="kr" 
-              name="K/R"
-              stroke={cs2.green} 
-              strokeWidth={2}
-              dot={{ fill: cs2.green, r: 4 }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </Box>
-
-      {/* Match Win/Loss Streak Visual */}
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="caption" sx={{ color: cs2.textSecondary, letterSpacing: 1, mb: 1, display: 'block' }}>
-          RECENT PERFORMANCE
-        </Typography>
-        <Stack direction="row" spacing={0.5}>
-          {formData.slice(-10).map((match, i) => (
-            <MuiTooltip key={i} title={`K/D: ${match.kd}`} arrow>
-              <Box
-                sx={{
-                  width: 28,
-                  height: 28,
-                  bgcolor: match.kd >= 1.0 ? cs2.green : cs2.red,
-                  opacity: 0.3 + (match.kd / 2) * 0.7,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s',
-                  '&:hover': { transform: 'scale(1.2)' }
-                }}
-              >
-                <Typography sx={{ fontSize: 10, fontWeight: 700, color: '#fff' }}>
-                  {match.kd >= 1.0 ? 'W' : 'L'}
-                </Typography>
-              </Box>
-            </MuiTooltip>
-          ))}
-        </Stack>
-      </Box>
-    </Box>
-  );
+  // ...existing code...
 });
 
 // ==========================================
