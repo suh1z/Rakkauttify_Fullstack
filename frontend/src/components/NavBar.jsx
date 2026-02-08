@@ -46,9 +46,16 @@ const Navbar = () => {
     <AppBar position="sticky" sx={{ bgcolor: cs2.bgCard, borderBottom: `1px solid ${cs2.border}` }}>
       <Toolbar>
         {/* Logo/Brand */}
-        <Typography variant="h6" sx={{ color: cs2.accent, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', mr: 4 }}>
-          RK
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mr: 4 }}>
+          <img 
+            src="/7edf72ad-a449-453d-8a85-aab3545e817d.jpeg" 
+            alt="RK" 
+            style={{ width: 32, height: 32, borderRadius: 4, marginRight: 8 }} 
+          />
+          <Typography variant="h6" sx={{ color: cs2.accent, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase' }}>
+            RK
+          </Typography>
+        </Box>
         
         {isMobile ? (
           <>
