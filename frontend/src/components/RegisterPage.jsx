@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   Box,
   Paper,
@@ -8,9 +9,12 @@ import {
   Button,
   Alert,
   CircularProgress,
+  Autocomplete,
+  Chip,
 } from '@mui/material'
-import { PersonAdd as RegisterIcon } from '@mui/icons-material'
+import { PersonAdd as RegisterIcon, SportsEsports as GameIcon } from '@mui/icons-material'
 import userService from '../services/userService'
+import { initializePlayers } from '../reducers/statsReducer'
 
 // CS2 Color Palette
 const cs2Colors = {
@@ -27,6 +31,10 @@ const cs2Colors = {
 
 const RegisterPage = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  
+  // Get players from Redux store
+  const players = useSelector((state) => state.stats.players)
 
   const [username, setUsername] = useState('')
   const [name, setName] = useState('')
@@ -36,6 +44,24 @@ const RegisterPage = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Fetch players on mount
+  useEffect(() => {
+    dispatch(initializePlayers())
+  }, [dispatch])
+
+  // Handle player selection from dropdown
+  const handlePlayerSelect = (event, newValue) => {
+    if (newValue) {
+      setUsername(newValue.nickname)
+      // Auto-fill display name if empty
+      if (!name) {
+        setName(newValue.nickname)
+      }
+    } else {
+      setUsername('')
+    }
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -119,8 +145,21 @@ const RegisterPage = () => {
             Create Account
           </Typography>
           <Typography variant="body2" sx={{ color: cs2Colors.textSecondary, mt: 1 }}>
-            Enter your invite code to register
+            Select your inhouse nickname to register
           </Typography>
+          <Chip 
+            icon={<GameIcon sx={{ color: cs2Colors.accent }} />}
+            label="Must have played at least 1 match"
+            size="small"
+            sx={{ 
+              mt: 1, 
+              bgcolor: `${cs2Colors.accent}15`, 
+              color: cs2Colors.accent,
+              borderColor: cs2Colors.accent,
+              '& .MuiChip-icon': { color: cs2Colors.accent }
+            }}
+            variant="outlined"
+          />
         </Box>
 
         {error && (
@@ -155,23 +194,53 @@ const RegisterPage = () => {
             required
           />
 
-          <TextField
+          <Autocomplete
             fullWidth
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            options={players || []}
+            getOptionLabel={(option) => option.nickname || ''}
+            value={players?.find(p => p.nickname === username) || null}
+            onChange={handlePlayerSelect}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Inhouse Nickname"
+                placeholder="Search your nickname..."
+                required
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    color: cs2Colors.textPrimary,
+                    '& fieldset': { borderColor: cs2Colors.border },
+                    '&:hover fieldset': { borderColor: cs2Colors.accent },
+                    '&.Mui-focused fieldset': { borderColor: cs2Colors.accent },
+                  },
+                  '& .MuiInputLabel-root': { color: cs2Colors.textSecondary },
+                  '& .MuiInputLabel-root.Mui-focused': { color: cs2Colors.accent },
+                }}
+              />
+            )}
             sx={{
               mb: 2,
-              '& .MuiOutlinedInput-root': {
-                color: cs2Colors.textPrimary,
-                '& fieldset': { borderColor: cs2Colors.border },
-                '&:hover fieldset': { borderColor: cs2Colors.accent },
-                '&.Mui-focused fieldset': { borderColor: cs2Colors.accent },
-              },
-              '& .MuiInputLabel-root': { color: cs2Colors.textSecondary },
-              '& .MuiInputLabel-root.Mui-focused': { color: cs2Colors.accent },
+              '& .MuiAutocomplete-popupIndicator': { color: cs2Colors.textSecondary },
+              '& .MuiAutocomplete-clearIndicator': { color: cs2Colors.textSecondary },
             }}
-            required
+            slotProps={{
+              paper: {
+                sx: {
+                  bgcolor: cs2Colors.bgCard,
+                  border: `1px solid ${cs2Colors.border}`,
+                  '& .MuiAutocomplete-option': {
+                    color: cs2Colors.textPrimary,
+                    '&:hover': { bgcolor: `${cs2Colors.accent}20` },
+                    '&[aria-selected="true"]': { bgcolor: `${cs2Colors.accent}30` },
+                  },
+                },
+              },
+            }}
+            noOptionsText={
+              <Typography sx={{ color: cs2Colors.textSecondary }}>
+                No players found (play a match first!)
+              </Typography>
+            }
           />
 
           <TextField
