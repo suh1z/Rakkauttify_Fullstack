@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useMemo, memo } from 'react';
+import { useEffect, useMemo, memo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
@@ -14,6 +14,18 @@ import {
   Chip,
   LinearProgress,
   Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from '@mui/material';
 import {
   EmojiEvents as TrophyIcon,
@@ -26,6 +38,8 @@ import {
   MilitaryTech as MedalIcon,
   Whatshot as WhatshotIcon,
   Check as CheckIcon,
+  Favorite as HeartIcon,
+  FavoriteBorder as HeartOutlineIcon,
 } from '@mui/icons-material';
 import {
   RadarChart,
@@ -43,7 +57,9 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import { initializePlayers, initializePlayerStats } from '../reducers/statsReducer';
+import { initializePlayers, initializePlayerStats, initializeMatches, initializeMatch } from '../reducers/statsReducer';
+import { fetchLikedMatches, likeMatch, unlikeMatch } from '../reducers/userReducer';
+import MatchStats from './MatchStats';
 
 // CS2 Color Palette
 const cs2Colors = {
@@ -226,6 +242,12 @@ function MyStats() {
   const user = useSelector(state => state.user.user);
   const players = useSelector(state => state.stats.players);
   const playerStats = useSelector(state => state.stats.playerStats);
+  const allMatches = useSelector(state => state.stats.matches);
+  const likedMatches = useSelector(state => state.user.likedMatches);
+  
+  // Dialog state for viewing match details
+  const [selectedMatch, setSelectedMatch] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
   // Get the player nickname for the logged-in user (check alias mapping first)
   const playerNickname = useMemo(() => {
@@ -250,7 +272,15 @@ function MyStats() {
   // Fetch players list on mount
   useEffect(() => {
     dispatch(initializePlayers());
+    dispatch(initializeMatches());
   }, [dispatch]);
+
+  // Fetch liked matches when user logs in
+  useEffect(() => {
+    if (user?.username) {
+      dispatch(fetchLikedMatches());
+    }
+  }, [dispatch, user?.username]);
 
   // Auto-fetch stats for the logged-in user
   useEffect(() => {
@@ -381,6 +411,47 @@ function MyStats() {
       .sort((a, b) => b.matches - a.matches)
       .slice(0, 6);
   }, [matches]);
+
+  // Favorite matches - filter all matches by liked IDs
+  const favoriteMatches = useMemo(() => {
+    if (!allMatches.length || !likedMatches.length) return [];
+    return allMatches.filter(match => likedMatches.includes(String(match.matchid)));
+  }, [allMatches, likedMatches]);
+
+  // Extract team names from URL
+  const extractTeams = (url) => {
+    if (!url) return 'Unknown Teams';
+    const regex = /team_(.*?)_vs_team_(.*?)(?=\.)/;
+    const match = url.match(regex);
+    if (match) {
+      return `${match[1]} vs ${match[2]}`;
+    }
+    return 'Unknown Teams';
+  };
+
+  // Handle favorite toggle
+  const handleFavoriteToggle = (e, matchId) => {
+    e.stopPropagation(); // Prevent row click
+    const id = String(matchId);
+    if (likedMatches.includes(id)) {
+      dispatch(unlikeMatch(id));
+    } else {
+      dispatch(likeMatch(id));
+    }
+  };
+
+  // Handle match row click to open details
+  const handleMatchClick = (match) => {
+    setSelectedMatch(match);
+    dispatch(initializeMatch(match.matchid, match.url));
+    setOpenDialog(true);
+  };
+
+  // Handle dialog close
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedMatch(null);
+  };
 
   // Loading state
   if (!user) {
@@ -651,8 +722,106 @@ function MyStats() {
               </Grid>
             </Paper>
           </Grid>
+
+          {/* Favorite Matches */}
+          <Grid item xs={12}>
+            <Paper sx={{
+              bgcolor: cs2Colors.bgCard,
+              border: `1px solid ${cs2Colors.border}`,
+              borderRadius: 2,
+              p: 3,
+            }}>
+              <Typography variant="h6" sx={{ color: cs2Colors.textPrimary, mb: 3 }}>
+                <HeartIcon sx={{ mr: 1, verticalAlign: 'middle', color: '#ef4444' }} />
+                Favorite Matches ({favoriteMatches.length})
+              </Typography>
+              {favoriteMatches.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <HeartOutlineIcon sx={{ fontSize: 48, color: cs2Colors.textSecondary, mb: 2 }} />
+                  <Typography sx={{ color: cs2Colors.textSecondary }}>
+                    No favorites yet. Click the heart icon on matches to save them here!
+                  </Typography>
+                </Box>
+              ) : (
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ color: cs2Colors.textSecondary, borderColor: cs2Colors.border }}>Date</TableCell>
+                        <TableCell sx={{ color: cs2Colors.textSecondary, borderColor: cs2Colors.border }}>Teams</TableCell>
+                        <TableCell sx={{ color: cs2Colors.textSecondary, borderColor: cs2Colors.border }}>Map</TableCell>
+                        <TableCell sx={{ color: cs2Colors.textSecondary, borderColor: cs2Colors.border }} align="center">Remove</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {favoriteMatches.map(match => (
+                        <TableRow 
+                          key={match.matchid}
+                          onClick={() => handleMatchClick(match)}
+                          sx={{ 
+                            cursor: 'pointer',
+                            '&:hover': { bgcolor: cs2Colors.bgHover },
+                            borderBottom: `1px solid ${cs2Colors.border}`,
+                          }}
+                        >
+                          <TableCell sx={{ color: cs2Colors.textPrimary, borderColor: cs2Colors.border }}>
+                            {match.date}
+                          </TableCell>
+                          <TableCell sx={{ color: cs2Colors.textPrimary, fontWeight: 600, borderColor: cs2Colors.border }}>
+                            {extractTeams(match.url)}
+                          </TableCell>
+                          <TableCell sx={{ borderColor: cs2Colors.border }}>
+                            <Typography sx={{ color: cs2Colors.accent, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+                              {match.map?.replace('de_', '').replace('cs_', '')}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center" sx={{ borderColor: cs2Colors.border }}>
+                            <Tooltip title="Remove from favorites">
+                              <IconButton
+                                onClick={(e) => handleFavoriteToggle(e, match.matchid)}
+                                size="small"
+                                sx={{ 
+                                  color: '#ef4444',
+                                  '&:hover': { bgcolor: 'rgba(239,68,68,0.2)' }
+                                }}
+                              >
+                                <HeartIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </Paper>
+          </Grid>
         </Grid>
       )}
+
+      {/* Match Details Dialog */}
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: { bgcolor: cs2Colors.bgCard, border: `1px solid ${cs2Colors.border}` }
+        }}
+      >
+        <DialogTitle sx={{ color: cs2Colors.accent, textTransform: 'uppercase', letterSpacing: 2 }}>Match Details</DialogTitle>
+        <DialogContent>
+          {selectedMatch ? (
+            <MatchStats matchId={selectedMatch.matchid} url={selectedMatch.url} />
+          ) : (
+            <Typography variant="body1" sx={{ color: cs2Colors.textSecondary }}>Loading match details...</Typography>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ borderTop: `1px solid ${cs2Colors.border}` }}>
+          <Button onClick={handleCloseDialog} sx={{ color: cs2Colors.accent }}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

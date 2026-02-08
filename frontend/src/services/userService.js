@@ -51,6 +51,30 @@ const updatePersonalBests = async (bests) => {
   return response.data
 }
 
+// Like a match
+const likeMatch = async (matchId) => {
+  const response = await axios.post(`${baseUrl}/me/likes/${matchId}`, {}, getConfig())
+  return response.data
+}
+
+// Unlike a match
+const unlikeMatch = async (matchId) => {
+  const response = await axios.delete(`${baseUrl}/me/likes/${matchId}`, getConfig())
+  return response.data
+}
+
+// Get user's liked matches
+const getLikedMatches = async () => {
+  const response = await axios.get(`${baseUrl}/me/likes`, getConfig())
+  return response.data
+}
+
+// Get like counts for multiple matches (public - no auth needed)
+const getMatchLikeCounts = async (matchIds) => {
+  const response = await axios.post(`${baseUrl}/likes/counts`, { matchIds })
+  return response.data
+}
+
 export default { 
   getAllUsers, 
   createUser, 
@@ -58,5 +82,9 @@ export default {
   getMyProfile, 
   updateMyProfile, 
   unlockAchievement, 
-  updatePersonalBests 
+  updatePersonalBests,
+  likeMatch,
+  unlikeMatch,
+  getLikedMatches,
+  getMatchLikeCounts
 }

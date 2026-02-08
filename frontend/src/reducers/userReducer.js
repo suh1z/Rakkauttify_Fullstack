@@ -7,6 +7,7 @@ const initialState = {
   profile: null,
   profileLoading: false,
   profileError: null,
+  likedMatches: [], // Store liked match IDs for quick access
 }
 
 const userSlice = createSlice({
@@ -15,15 +16,24 @@ const userSlice = createSlice({
   reducers: {
     setUser(state, action) {
       state.user = action.payload
+      // Initialize likedMatches from user data if available
+      if (action.payload?.likedMatches) {
+        state.likedMatches = action.payload.likedMatches
+      }
     },
     clearUser(state) {
       state.user = null
       state.profile = null
+      state.likedMatches = []
     },
     setProfile(state, action) {
       state.profile = action.payload
       state.profileLoading = false
       state.profileError = null
+      // Also update likedMatches from profile
+      if (action.payload?.likedMatches) {
+        state.likedMatches = action.payload.likedMatches
+      }
     },
     setProfileLoading(state) {
       state.profileLoading = true
@@ -43,6 +53,20 @@ const userSlice = createSlice({
         state.profile.personalBests = action.payload
       }
     },
+    // Like actions for instant UI update
+    addLikedMatch(state, action) {
+      const matchId = String(action.payload)
+      if (!state.likedMatches.includes(matchId)) {
+        state.likedMatches.push(matchId)
+      }
+    },
+    removeLikedMatch(state, action) {
+      const matchId = String(action.payload)
+      state.likedMatches = state.likedMatches.filter(id => id !== matchId)
+    },
+    setLikedMatches(state, action) {
+      state.likedMatches = action.payload || []
+    },
   },
 })
 
@@ -54,6 +78,9 @@ export const {
   setProfileError,
   updateProfileAchievements,
   updateProfilePersonalBests,
+  addLikedMatch,
+  removeLikedMatch,
+  setLikedMatches,
 } = userSlice.actions
 
 export const loginUser = (credentials) => {
@@ -130,6 +157,50 @@ export const updatePersonalBests = (bests) => {
       dispatch(updateProfilePersonalBests(updatedBests))
     } catch (error) {
       console.error('Failed to update personal bests:', error)
+    }
+  }
+}
+
+// Like a match - optimistic update for instant UI feedback
+export const likeMatch = (matchId) => {
+  return async (dispatch) => {
+    const id = String(matchId)
+    // Optimistic update - add immediately
+    dispatch(addLikedMatch(id))
+    try {
+      await userService.likeMatch(id)
+    } catch (error) {
+      // Rollback on error
+      console.error('Failed to like match:', error)
+      dispatch(removeLikedMatch(id))
+    }
+  }
+}
+
+// Unlike a match - optimistic update for instant UI feedback
+export const unlikeMatch = (matchId) => {
+  return async (dispatch) => {
+    const id = String(matchId)
+    // Optimistic update - remove immediately
+    dispatch(removeLikedMatch(id))
+    try {
+      await userService.unlikeMatch(id)
+    } catch (error) {
+      // Rollback on error
+      console.error('Failed to unlike match:', error)
+      dispatch(addLikedMatch(id))
+    }
+  }
+}
+
+// Fetch user's liked matches
+export const fetchLikedMatches = () => {
+  return async (dispatch) => {
+    try {
+      const data = await userService.getLikedMatches()
+      dispatch(setLikedMatches(data.likedMatches))
+    } catch (error) {
+      console.error('Failed to fetch liked matches:', error)
     }
   }
 }

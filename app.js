@@ -109,13 +109,18 @@ app.use("/api/login", loginLimiter, loginRouter);
 
 // User routes with conditional auth
 // POST /api/users (registration) - public, protected by admin secret in controller
+// POST /api/users/likes/counts - public (get like counts)
 // Other /api/users routes - require auth token
 app.use("/api/users", (req, res, next) => {
-  if (req.method === 'POST') {
-    // Skip auth for registration - admin secret checked in controller
+  // Allow registration (POST to root)
+  if (req.method === 'POST' && req.path === '/') {
     return next();
   }
-  // All other methods require authentication
+  // Allow public like counts endpoint
+  if (req.method === 'POST' && req.path === '/likes/counts') {
+    return next();
+  }
+  // All other routes require authentication
   middleware.userExtractor(req, res, next);
 }, usersRouter);
 

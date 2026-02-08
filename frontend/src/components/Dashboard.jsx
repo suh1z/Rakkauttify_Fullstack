@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Grid, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogActions, DialogContent, DialogTitle, Button, Box, Container } from '@mui/material';
+import { Grid, Card, CardContent, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogActions, DialogContent, DialogTitle, Button, Box, Container, IconButton, Tooltip, Chip } from '@mui/material';
+import { Favorite as HeartIcon, FavoriteBorder as HeartOutlineIcon } from '@mui/icons-material';
 import { initializeMatches, initializePlayers, initializeMonths, initializeMatch } from '../reducers/statsReducer';
+import { likeMatch, unlikeMatch, fetchLikedMatches } from '../reducers/userReducer';
+import userService from '../services/userService';
 import MatchStats from './MatchStats';
 
 // CS2 Colors
@@ -40,10 +43,14 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [likeCounts, setLikeCounts] = useState({});
+  const isLiking = useRef(false);
 
   const matches = useSelector((state) => state.stats.matches);
   const players = useSelector((state) => state.stats.players);
   const months = useSelector((state) => state.stats.months);
+  const user = useSelector((state) => state.user.user);
+  const likedMatches = useSelector((state) => state.user.likedMatches);
 
   useEffect(() => {
     dispatch(initializeMatches());
@@ -51,9 +58,69 @@ const Dashboard = () => {
     dispatch(initializeMonths());
   }, [dispatch]);
 
+  // Fetch like counts for all matches (public)
+  useEffect(() => {
+    const fetchLikeCounts = async () => {
+      if (matches.length > 0) {
+        try {
+          const matchIds = matches.map(m => String(m.matchid));
+          const counts = await userService.getMatchLikeCounts(matchIds);
+          setLikeCounts(counts);
+        } catch (error) {
+          console.error('Failed to fetch like counts:', error);
+        }
+      }
+    };
+    fetchLikeCounts();
+  }, [matches.length]);
+
+  // Fetch user's liked matches on login (only when username changes)
+  useEffect(() => {
+    if (user?.username && !isLiking.current) {
+      dispatch(fetchLikedMatches());
+    }
+  }, [dispatch, user?.username]);
+
+  const handleLikeClick = async (e, matchId) => {
+    e.stopPropagation();
+    if (!user) return;
+    
+    const id = String(matchId);
+    const hasLiked = likedMatches.includes(id);
+    
+    isLiking.current = true;
+    
+    if (hasLiked) {
+      dispatch(unlikeMatch(id));
+      // Update local count
+      setLikeCounts(prev => ({
+        ...prev,
+        [id]: {
+          count: Math.max((prev[id]?.count || 1) - 1, 0),
+          users: (prev[id]?.users || []).filter(u => u.username !== user.username),
+        }
+      }));
+    } else {
+      dispatch(likeMatch(id));
+      // Update local count
+      setLikeCounts(prev => ({
+        ...prev,
+        [id]: {
+          count: (prev[id]?.count || 0) + 1,
+          users: [...(prev[id]?.users || []), { username: user.username, name: user.name }],
+        }
+      }));
+    }
+    
+    // Reset flag after a short delay
+    setTimeout(() => {
+      isLiking.current = false;
+    }, 500);
+  };
+
   const handleRowClick = (match) => {
     setSelectedMatch(match);
-    dispatch(initializeMatch(match.matchId, match.url));
+    dispatch(initializeMatch(match.matchid, match.url));
     setOpenDialog(true);
   };
 
@@ -128,15 +195,19 @@ const Dashboard = () => {
                 <TableCell sx={{ color: cs2.textSecondary }}>Date</TableCell>
                 <TableCell sx={{ color: cs2.textSecondary }}>Teams</TableCell>
                 <TableCell sx={{ color: cs2.textSecondary }}>Map</TableCell>
+                <TableCell sx={{ color: cs2.textSecondary }}>Favorite</TableCell>
                 <TableCell sx={{ color: cs2.textSecondary }}>Demo</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {matches.map((match) => {
                 const mapImg = getMapImage(match.map);
+                const matchId = String(match.matchid);
+                const hasLiked = likedMatches.includes(matchId);
+                const likes = likeCounts[matchId] || { count: 0, users: [] };
                 return (
                 <TableRow
-                  key={match.matchId}
+                  key={match.matchid}
                   onClick={() => handleRowClick(match)}
                   sx={{ 
                     cursor: 'pointer', 
@@ -165,6 +236,47 @@ const Dashboard = () => {
                     <Typography sx={{ color: cs2.accent, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
                       {match.map?.replace('de_', '').replace('cs_', '')}
                     </Typography>
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Tooltip title={user ? (hasLiked ? 'Remove from favorites' : 'Add to favorites') : 'Login to save favorites'}>
+                        <span>
+                          <IconButton
+                            onClick={(e) => handleLikeClick(e, matchId)}
+                            disabled={!user}
+                            size="small"
+                            sx={{ 
+                              color: hasLiked ? '#ef4444' : cs2.textSecondary,
+                              bgcolor: hasLiked ? 'rgba(239,68,68,0.15)' : 'transparent',
+                              '&:hover': { 
+                                color: '#ef4444',
+                                bgcolor: 'rgba(239,68,68,0.2)',
+                              },
+                            }}
+                          >
+                            {hasLiked ? <HeartIcon /> : <HeartOutlineIcon />}
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                      {likes.count > 0 && (
+                        <Tooltip 
+                          title={likes.users.map(u => u.name || u.username).join(', ')}
+                          arrow
+                        >
+                          <Chip
+                            size="small"
+                            label={likes.count}
+                            sx={{ 
+                              bgcolor: hasLiked ? 'rgba(239,68,68,0.2)' : `${cs2.accent}20`, 
+                              color: hasLiked ? '#ef4444' : cs2.accent,
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              minWidth: 28,
+                            }}
+                          />
+                        </Tooltip>
+                      )}
+                    </Box>
                   </TableCell>
                   <TableCell>
                     <Button
@@ -197,7 +309,7 @@ const Dashboard = () => {
           <DialogTitle sx={{ color: cs2.accent, textTransform: 'uppercase', letterSpacing: 2 }}>Match Details</DialogTitle>
           <DialogContent>
             {selectedMatch ? (
-              <MatchStats matchId={selectedMatch.matchId} url={selectedMatch.url} />
+              <MatchStats matchId={selectedMatch.matchid} url={selectedMatch.url} />
             ) : (
               <Typography variant="body1" sx={{ color: cs2.textSecondary }}>Loading match details...</Typography>
             )}

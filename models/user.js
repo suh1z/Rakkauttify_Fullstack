@@ -57,6 +57,10 @@ const userSchema = new mongoose.Schema({
     theme: { type: String, default: 'dark' },
     favoriteMap: { type: String, default: null },
   },
+  // Liked/favorited matches (stored as match IDs)
+  likedMatches: [{
+    type: String,
+  }],
   createdAt: {
     type: Date,
     default: Date.now,

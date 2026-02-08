@@ -31,6 +31,43 @@ usersRouter.get("/", async (request, response) => {
   response.json(users);
 });
 
+// GET like counts for matches (public endpoint)
+usersRouter.post('/likes/counts', async (request, response) => {
+  try {
+    const { matchIds } = request.body;
+    if (!matchIds || !Array.isArray(matchIds)) {
+      return response.status(400).json({ error: 'matchIds array required' });
+    }
+    
+    // Aggregate likes from all users
+    const users = await User.find({ likedMatches: { $in: matchIds } })
+      .select('username name likedMatches');
+    
+    // Build counts map with user info
+    const likesMap = {};
+    matchIds.forEach(id => {
+      likesMap[id] = { count: 0, users: [] };
+    });
+    
+    users.forEach(user => {
+      user.likedMatches.forEach(matchId => {
+        if (likesMap[matchId]) {
+          likesMap[matchId].count++;
+          likesMap[matchId].users.push({
+            username: user.username,
+            name: user.name,
+          });
+        }
+      });
+    });
+    
+    response.json(likesMap);
+  } catch (error) {
+    console.error('Error getting like counts:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 usersRouter.post('/', async (request, response) => {
   const { username, name, password, inviteCode } = request.body
 
@@ -201,6 +238,67 @@ usersRouter.put('/me/personal-bests', async (request, response) => {
   
   await user.save();
   response.json(user.personalBests);
+});
+
+// Like a match (add to likedMatches)
+usersRouter.post('/me/likes/:matchId', async (request, response) => {
+  if (!request.user) {
+    return response.status(401).json({ error: 'Authentication required' });
+  }
+  
+  const { matchId } = request.params;
+  
+  const user = await User.findById(request.user.id);
+  if (!user) {
+    return response.status(404).json({ error: 'User not found' });
+  }
+  
+  // Initialize likedMatches array if it doesn't exist
+  if (!user.likedMatches) {
+    user.likedMatches = [];
+  }
+  
+  // Add if not already liked
+  if (!user.likedMatches.includes(matchId)) {
+    user.likedMatches.push(matchId);
+    await user.save();
+  }
+  
+  response.json({ likedMatches: user.likedMatches });
+});
+
+// Unlike a match (remove from likedMatches)
+usersRouter.delete('/me/likes/:matchId', async (request, response) => {
+  if (!request.user) {
+    return response.status(401).json({ error: 'Authentication required' });
+  }
+  
+  const { matchId } = request.params;
+  
+  const user = await User.findById(request.user.id);
+  if (!user) {
+    return response.status(404).json({ error: 'User not found' });
+  }
+  
+  // Remove from likedMatches
+  user.likedMatches = user.likedMatches.filter(id => id !== matchId);
+  await user.save();
+  
+  response.json({ likedMatches: user.likedMatches });
+});
+
+// Get current user's liked matches
+usersRouter.get('/me/likes', async (request, response) => {
+  if (!request.user) {
+    return response.status(401).json({ error: 'Authentication required' });
+  }
+  
+  const user = await User.findById(request.user.id);
+  if (!user) {
+    return response.status(404).json({ error: 'User not found' });
+  }
+  
+  response.json({ likedMatches: user.likedMatches || [] });
 });
 
 // ====== /:id routes AFTER /me routes ======
