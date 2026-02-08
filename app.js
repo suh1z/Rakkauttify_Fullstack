@@ -133,6 +133,16 @@ app.use("/api/player", azureRouter);
 app.use("/api/allmatches", azureRouter);
 app.use("/api/pickbans", azureRouter);
 
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+  const healthcheck = {
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  };
+  res.status(200).json(healthcheck);
+});
 
 
 app.get('*', (req, res) => {

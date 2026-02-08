@@ -1,0 +1,56 @@
+name: Build and Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Lint backend
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Lint frontend
+        run: cd frontend && npm run lint
+        continue-on-error: true
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+          mv dist ../
+
+      - name: Verify build
+        run: |
+          if [ -d "dist" ]; then
+            echo "✅ Build successful - dist folder exists"
+            ls -la dist
+          else
+            echo "❌ Build failed - dist folder missing"
+            exit 1
+          fi
+
+      - name: Deploy to Render
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+          echo "🚀 Deploy triggered on Render"
