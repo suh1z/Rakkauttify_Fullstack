@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState, useMemo, useEffect, memo } from 'react';
+import { useState, useMemo, useEffect, memo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   Box,
@@ -102,10 +102,11 @@ const PlayerRadarChart = memo(function PlayerRadarChart({ playerData, playerName
     const rounds = stats.Rounds || stats.rounds || 1;
     const assists = stats.Assists || stats.assists || 0;
     const mvps = stats.MVPs || stats.mvps || 0;
-    const doubleKills = stats.Double_Kills || 0;
-    const tripleKills = stats.Triple_Kills || 0;
-    const quadroKills = stats.Quadro_Kills || 0;
-    const pentaKills = stats.Penta_Kills || 0;
+    // Check multiple possible field names for multi-kills
+    const doubleKills = stats.Double_Kills || stats['2k'] || stats.double_kills || stats.enemy2k || 0;
+    const tripleKills = stats.Triple_Kills || stats['3k'] || stats.triple_kills || stats.enemy3k || 0;
+    const quadroKills = stats.Quadro_Kills || stats['4k'] || stats.quadro_kills || stats.enemy4k || 0;
+    const pentaKills = stats.Penta_Kills || stats['5k'] || stats.penta_kills || stats.enemy5k || 0;
     const matches = stats.played_matches || stats.Matches || 1;
 
     // Calculate metrics
@@ -1033,6 +1034,9 @@ const PlayerAnalytics = ({ teams, playerStatsById, handleTeamClick }) => {
   const [selectedTeam, setSelectedTeam] = useState('');
   const [selectedOpponent, setSelectedOpponent] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  
+  // Track which players we've already requested to prevent duplicate API calls
+  const requestedPlayersRef = useRef(new Set());
 
   // Initialize with first team
   useEffect(() => {
@@ -1054,11 +1058,13 @@ const PlayerAnalytics = ({ teams, playerStatsById, handleTeamClick }) => {
     [teams, selectedOpponent]
   );
 
-  // Fetch player stats when team changes
+  // Fetch player stats when team changes - uses ref to prevent re-fetching
   useEffect(() => {
     if (currentTeam?.roster) {
       currentTeam.roster.forEach(p => {
-        if (!playerStatsById[p.player_id]) {
+        // Only fetch if not already requested AND not in Redux store
+        if (!requestedPlayersRef.current.has(p.player_id) && !playerStatsById[p.player_id]) {
+          requestedPlayersRef.current.add(p.player_id);
           dispatch(fetchPlayer(p.player_id));
         }
       });
@@ -1067,18 +1073,22 @@ const PlayerAnalytics = ({ teams, playerStatsById, handleTeamClick }) => {
         setSelectedPlayer(currentTeam.roster[0]);
       }
     }
-  }, [currentTeam, playerStatsById, dispatch, selectedPlayer]);
+    // Intentionally exclude playerStatsById from deps to prevent cascade
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTeam, dispatch, selectedPlayer]);
 
-  // Fetch opponent stats too
+  // Fetch opponent stats - uses ref to prevent re-fetching
   useEffect(() => {
     if (opponentTeam?.roster) {
       opponentTeam.roster.forEach(p => {
-        if (!playerStatsById[p.player_id]) {
+        if (!requestedPlayersRef.current.has(p.player_id) && !playerStatsById[p.player_id]) {
+          requestedPlayersRef.current.add(p.player_id);
           dispatch(fetchPlayer(p.player_id));
         }
       });
     }
-  }, [opponentTeam, playerStatsById, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opponentTeam, dispatch]);
 
   const handleTeamChange = (e) => {
     const teamName = e.target.value;

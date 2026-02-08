@@ -1,4 +1,4 @@
-import { useState, useEffect, memo, useMemo, useCallback } from 'react';
+import { useState, useEffect, memo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   Typography,
@@ -103,6 +103,9 @@ const TeamStatCard = memo(({ teamName, isHome, players }) => {
 const Upcoming = ({ teams, matches, playerStatsById, defaultTeam = null }) => {
   const dispatch = useDispatch();
   
+  // Track which players we've already requested to prevent duplicate API calls
+  const requestedPlayersRef = useRef(new Set());
+  
   // CS2 Color Palette
   const cs2 = {
     bgDark: '#0d0d0d',
@@ -162,26 +165,31 @@ const Upcoming = ({ teams, matches, playerStatsById, defaultTeam = null }) => {
   const homeTeamData = teams.find(t => t.name === homeTeam);
   const opponentTeamData = teams.find(t => t.name === opponentTeam);
 
-  // Fetch player stats for both teams when they're selected
+  // Fetch player stats for home team - uses ref to prevent re-fetching
   useEffect(() => {
     if (homeTeamData?.roster) {
       homeTeamData.roster.forEach(p => {
-        if (!playerStatsById[p.player_id]) {
+        if (!requestedPlayersRef.current.has(p.player_id) && !playerStatsById[p.player_id]) {
+          requestedPlayersRef.current.add(p.player_id);
           dispatch(fetchPlayer(p.player_id));
         }
       });
     }
-  }, [homeTeamData, playerStatsById, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [homeTeamData, dispatch]);
 
+  // Fetch player stats for opponent team - uses ref to prevent re-fetching
   useEffect(() => {
     if (opponentTeamData?.roster) {
       opponentTeamData.roster.forEach(p => {
-        if (!playerStatsById[p.player_id]) {
+        if (!requestedPlayersRef.current.has(p.player_id) && !playerStatsById[p.player_id]) {
+          requestedPlayersRef.current.add(p.player_id);
           dispatch(fetchPlayer(p.player_id));
         }
       });
     }
-  }, [opponentTeamData, playerStatsById, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opponentTeamData, dispatch]);
 
   // Flatten player data for the DataGrid
   const getRosterRows = (teamData) => {

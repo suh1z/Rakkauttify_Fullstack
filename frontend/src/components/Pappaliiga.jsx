@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { 
   Typography, 
@@ -50,6 +50,9 @@ const Pappaliiga = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [expandedTeam, setExpandedTeam] = useState(null);
   const [playerStatsById, setPlayerStatsById] = useState({});
+  
+  // Track which players we've already requested to prevent duplicate API calls
+  const requestedPlayersRef = useRef(new Set());
 
   useEffect(() => {
     dispatch(fetchTeams(selectedDivision, 12));
@@ -66,10 +69,13 @@ const Pappaliiga = () => {
     }
   }, [player]);
 
-  // Memoized callback to prevent re-renders in child components
+  // Memoized callback - only fetches players not already requested
   const handleTeamClick = useCallback((team) => {
     team.roster.forEach(p => {
-      dispatch(fetchPlayer(p.player_id));
+      if (!requestedPlayersRef.current.has(p.player_id)) {
+        requestedPlayersRef.current.add(p.player_id);
+        dispatch(fetchPlayer(p.player_id));
+      }
     });
     setExpandedTeam(prev => prev === team.name ? null : team.name);
   }, [dispatch]);
@@ -82,6 +88,8 @@ const Pappaliiga = () => {
     setSelectedDivision(Number(e.target.value));
     setExpandedTeam(null);
     setPlayerStatsById({});
+    // Clear the requested players ref when division changes
+    requestedPlayersRef.current.clear();
   }, []);
 
   return (
