@@ -29,6 +29,11 @@ const cs2 = {
 };
 
 const Navbar = () => {
+    // Logout handler: clear token and reload
+    const handleLogout = () => {
+      window.localStorage.removeItem('loggedInUser');
+      window.location.reload();
+    };
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -101,11 +106,16 @@ const Navbar = () => {
                 </Link>
               </MenuItem>
               {user && (
-                <MenuItem onClick={handleMenuClose} sx={{ '&:hover': { bgcolor: cs2.bgDark } }}>
-                  <Link to="/mystats" className="link" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <PersonIcon fontSize="small" /> My Stats
-                  </Link>
-                </MenuItem>
+                <>
+                  <MenuItem onClick={handleMenuClose} sx={{ '&:hover': { bgcolor: cs2.bgDark } }}>
+                    <Link to="/mystats" className="link" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <PersonIcon fontSize="small" /> My Stats
+                    </Link>
+                  </MenuItem>
+                  <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }} sx={{ '&:hover': { bgcolor: cs2.bgDark }, color: cs2.red, fontWeight: 700 }}>
+                    Logout
+                  </MenuItem>
+                </>
               )}
             </Menu>
           </>
@@ -132,16 +142,37 @@ const Navbar = () => {
             </Box>
             <Box sx={{ flexGrow: 1 }} />
             {user && (
-              <Chip 
-                icon={<PersonIcon sx={{ fontSize: 16 }} />}
-                label={user.username}
-                size="small"
-                sx={{ 
-                  bgcolor: `${cs2.accent}20`, 
-                  color: cs2.accent,
-                  '& .MuiChip-icon': { color: cs2.accent },
-                }}
-              />
+              <>
+                <Chip 
+                  icon={<PersonIcon sx={{ fontSize: 16 }} />}
+                  label={user.username}
+                  size="small"
+                  sx={{ 
+                    bgcolor: `${cs2.accent}20`, 
+                    color: cs2.accent,
+                    mr: 2,
+                    '& .MuiChip-icon': { color: cs2.accent },
+                  }}
+                />
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    background: cs2.accent,
+                    color: cs2.bgDark,
+                    border: 'none',
+                    borderRadius: 4,
+                    padding: '6px 16px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    transition: 'background 0.2s',
+                  }}
+                  onMouseOver={e => e.currentTarget.style.background = cs2.accentHover}
+                  onMouseOut={e => e.currentTarget.style.background = cs2.accent}
+                >
+                  Logout
+                </button>
+              </>
             )}
           </>
         )}
