@@ -15,6 +15,27 @@ const cs2 = {
   border: 'rgba(255,255,255,0.08)',
 };
 
+// Map background images (add images to public/maps/)
+const mapImages = {
+  de_dust2: '/maps/dust2.png',
+  de_mirage: '/maps/mirage.png',
+  de_inferno: '/maps/inferno.png',
+  de_nuke: '/maps/nuke.png',
+  de_overpass: '/maps/overpass.png',
+  de_ancient: '/maps/ancient.png',
+  de_anubis: '/maps/anubis.png',
+  de_vertigo: '/maps/vertigo.png',
+  cs_office: '/maps/office.png',
+  de_train: '/maps/train.png',
+  de_cache: '/maps/cache.png',
+};
+
+const getMapImage = (mapName) => {
+  if (!mapName) return null;
+  const key = mapName.toLowerCase().replace(/\s/g, '_');
+  return mapImages[key] || mapImages[`de_${key}`] || null;
+};
+
 const Dashboard = () => {
   const dispatch = useDispatch();
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -111,15 +132,40 @@ const Dashboard = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {matches.map((match) => (
+              {matches.map((match) => {
+                const mapImg = getMapImage(match.map);
+                return (
                 <TableRow
                   key={match.matchId}
                   onClick={() => handleRowClick(match)}
-                  sx={{ cursor: 'pointer', '&:hover': { bgcolor: cs2.bgHover } }}
+                  sx={{ 
+                    cursor: 'pointer', 
+                    position: 'relative',
+                    height: 80,
+                    backgroundImage: mapImg 
+                      ? `linear-gradient(to right, rgba(13,13,13,0.95) 0%, rgba(13,13,13,0.85) 40%, rgba(26,26,26,0.6) 100%), url(${mapImg})` 
+                      : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    '&:hover': { 
+                      backgroundImage: mapImg 
+                        ? `linear-gradient(to right, rgba(37,37,37,0.9) 0%, rgba(37,37,37,0.7) 40%, rgba(37,37,37,0.4) 100%), url(${mapImg})` 
+                        : 'none',
+                      bgcolor: mapImg ? 'transparent' : cs2.bgHover,
+                      transform: 'scale(1.01)',
+                    },
+                    transition: 'all 0.3s ease',
+                    borderBottom: `1px solid ${cs2.border}`,
+                  }}
                 >
                   <TableCell sx={{ color: cs2.textPrimary }}>{match.date}</TableCell>
                   <TableCell sx={{ color: cs2.textPrimary, fontWeight: 600 }}>{extractTeams(match.url)}</TableCell>
-                  <TableCell sx={{ color: cs2.textSecondary }}>{match.map}</TableCell>
+                  <TableCell>
+                    <Typography sx={{ color: cs2.accent, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+                      {match.map?.replace('de_', '').replace('cs_', '')}
+                    </Typography>
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant="contained"
@@ -133,7 +179,8 @@ const Dashboard = () => {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
