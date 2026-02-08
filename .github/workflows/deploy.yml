@@ -36,6 +36,7 @@ jobs:
 
       - name: Build frontend
         run: |
+          rm -rf dist
           cd frontend
           npm run build
           mv dist ../
